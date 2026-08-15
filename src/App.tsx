@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, Place, PuzzleSpot, ScreenId } from './types';
 import { getScenario } from './data/scenarios';
 import { getStreet } from './data/streets';
@@ -36,6 +36,8 @@ export function App() {
   const [streetId, setStreetId] = useState<string | null>(null);
   /** メインメニュー・メニュー画面を「とじる」で戻る先 */
   const [returnTo, setReturnTo] = useState<ScreenId>('main');
+  /** 街並みごとの 立ち位置。会話に入って戻っても そのつづきから 歩けるように覚えておく */
+  const streetPos = useRef<Record<string, number>>({});
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -50,9 +52,10 @@ export function App() {
     return () => clearInterval(id);
   }, [booting]);
 
-  /** マップから 街並みへ入る */
+  /** マップから 街並みへ入る。入りなおしたときは 道の入口から。 */
   const enterPlace = useCallback((place: Place) => {
     setState((s) => ({ ...s, placeId: place.id }));
+    delete streetPos.current[place.streetId];
     setStreetId(place.streetId);
     setScreen('street');
   }, []);
@@ -127,8 +130,13 @@ export function App() {
 
         {screen === 'street' && street && (
           <StreetScreen
+            key={street.id}
             street={street}
             state={state}
+            initialX={streetPos.current[street.id] ?? street.startX}
+            onMove={(x) => {
+              streetPos.current[street.id] = x;
+            }}
             onTalk={talkTo}
             onBackToMap={() => {
               setStreetId(null);

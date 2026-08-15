@@ -21,6 +21,10 @@ const MAX_X = 0.97;
 interface Props {
   street: Street;
   state: GameState;
+  /** 入ってきたときの 立ち位置（会話から戻ったときは そのつづきから） */
+  initialX: number;
+  /** 歩くたびに 立ち位置を 知らせる */
+  onMove: (x: number) => void;
   /** 人に話しかけた */
   onTalk: (scenarioId: string) => void;
   /** マップへ戻る */
@@ -38,21 +42,35 @@ interface Props {
 export function StreetScreen({
   street,
   state,
+  initialX,
+  onMove,
   onTalk,
   onBackToMap,
   onOpenMenu,
   onOpenMainMenu,
 }: Props) {
-  const [x, setX] = useState(street.startX);
+  const [x, setX] = useState(initialX);
   const [facing, setFacing] = useState<1 | -1>(1);
   /** 歩いていく目的地。null なら 手動操作 */
   const [target, setTarget] = useState<{ x: number; npcId: string } | null>(null);
   /** ← → で押されている向き */
   const held = useRef(0);
-  const xRef = useRef(x);
-  xRef.current = x;
+  /** 立ち位置の 正本。毎フレーム 使うので ref で持つ */
+  const xRef = useRef(initialX);
   const targetRef = useRef(target);
   targetRef.current = target;
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
+
+  /** 道の はしを こえないように 動かし、外にも 知らせる */
+  const moveTo = (next: number) => {
+    const clamped = Math.min(MAX_X, Math.max(MIN_X, next));
+    xRef.current = clamped;
+    setX(clamped);
+    onMoveRef.current(clamped);
+  };
+  const moveRef = useRef(moveTo);
+  moveRef.current = moveTo;
 
   const place = getPlace(street.placeId);
 
@@ -98,14 +116,12 @@ export function StreetScreen({
         } else {
           const dir = dx > 0 ? 1 : -1;
           setFacing(dir);
-          setX((p) =>
-            Math.min(MAX_X, Math.max(MIN_X, p + dir * Math.min(WALK_SPEED * dt, dist))),
-          );
+          moveRef.current(xRef.current + dir * Math.min(WALK_SPEED * dt, dist));
         }
       } else if (held.current !== 0) {
         const dir = held.current as 1 | -1;
         setFacing(dir);
-        setX((p) => Math.min(MAX_X, Math.max(MIN_X, p + dir * WALK_SPEED * dt)));
+        moveRef.current(xRef.current + dir * WALK_SPEED * dt);
       }
 
       raf = requestAnimationFrame(step);

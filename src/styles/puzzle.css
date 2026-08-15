@@ -45,13 +45,14 @@
   margin: 0 10px;
   padding: 10px 12px 14px;
   overflow-y: auto;
-  /* 下に つづきがあることが わかるよう、すその色を 少し 落とす */
+  /* 下に つづきがあることが わかるよう、すその色を 少し 落とす。
+     background の一括指定を あとに書くと この指定が 消えるので注意。 */
+  background-color: var(--cream);
   background-image: linear-gradient(
     transparent calc(100% - 22px),
     rgba(122, 90, 46, 0.14)
   );
   background-attachment: local;
-  background: var(--cream);
   border: 3px solid var(--wood-dark);
   border-radius: 12px;
 }
