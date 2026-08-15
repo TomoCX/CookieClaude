@@ -1,0 +1,414 @@
+/* ---- ナゾ解き画面（マップの時計から入る） ---- */
+
+.puzzle {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.05) 0 3px,
+      transparent 3px 11px
+    );
+  background-color: var(--wood);
+}
+
+.puzzle__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.puzzle__no {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--cream);
+}
+
+.puzzle__picarat {
+  padding: 4px 11px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--gold);
+  border: 2px solid var(--orange-deep);
+  border-radius: 999px;
+}
+
+.puzzle__body {
+  flex: 1;
+  min-height: 0;
+  margin: 0 10px;
+  padding: 10px 12px 14px;
+  overflow-y: auto;
+  /* 下に つづきがあることが わかるよう、すその色を 少し 落とす */
+  background-image: linear-gradient(
+    transparent calc(100% - 22px),
+    rgba(122, 90, 46, 0.14)
+  );
+  background-attachment: local;
+  background: var(--cream);
+  border: 3px solid var(--wood-dark);
+  border-radius: 12px;
+}
+
+.puzzle__title {
+  margin: 0 0 8px;
+  padding-bottom: 5px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--orange-deep);
+  border-bottom: 2px dotted var(--line);
+}
+
+/* 図。せまい画面でも 問題と こたえ欄が 入るよう 高さを おさえる。 */
+.figure {
+  margin: 0 0 10px;
+  padding: 6px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+}
+
+.figure__svg {
+  display: block;
+  width: 100%;
+  height: 62px;
+}
+
+.puzzle__question {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  line-height: 1.65;
+  white-space: pre-line;
+  color: var(--ink);
+}
+
+/* ヒント */
+.hintlist {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.hintlist li {
+  padding: 8px 10px;
+  font-size: 0.7rem;
+  line-height: 1.6;
+  background: rgba(217, 164, 40, 0.16);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+}
+
+.hintlist__no {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--orange-deep);
+}
+
+/* こたえの入力 */
+.answer {
+  padding: 10px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  transition: transform 0.1s ease;
+}
+
+.answer--wrong {
+  animation: answer-shake 0.4s ease;
+  border-color: #c2551e;
+}
+
+@keyframes answer-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer--wrong {
+    animation: none;
+  }
+}
+
+.answer__num {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.answer__label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.answer__num input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-align: right;
+  color: var(--orange-deep);
+  background: #fff;
+  border: 2px solid var(--wood);
+  border-radius: 8px;
+}
+
+.answer__num input:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+}
+
+.answer__unit {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* 短い せんたくしは 2 列に 並べて、せまい画面でも 収まるようにする */
+.answer__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 6px;
+}
+
+.choice {
+  padding: 9px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: left;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+}
+
+.choice:hover {
+  border-color: var(--orange);
+}
+
+.choice--on {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.puzzle__wrong {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #c2551e;
+}
+
+.puzzle__misses {
+  margin: 10px 0 0;
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+}
+
+/* 下のボタン */
+.puzzle__footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 9px 10px;
+}
+
+.puzzle__hint,
+.puzzle__submit {
+  padding: 10px 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  border-radius: 11px;
+  box-shadow: var(--shadow-soft);
+}
+
+.puzzle__hint {
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid var(--wood-dark);
+}
+
+.puzzle__submit {
+  color: #fff;
+  background: var(--orange);
+  border: 2px solid var(--orange-deep);
+}
+
+.puzzle__hint:active:not(:disabled),
+.puzzle__submit:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.puzzle__hint:disabled,
+.puzzle__submit:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+/* 正解の画面 */
+.puzzle--clear {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(240, 200, 106, 0.35), transparent 62%),
+    var(--wood);
+}
+
+.clear {
+  width: min(100%, 320px);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 18px;
+  text-align: center;
+  background: var(--cream);
+  border: 3px solid var(--wood-dark);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.clear__head {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--orange);
+}
+
+.clear__title {
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.clear__picarat {
+  margin: 0 0 12px;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--orange-deep);
+}
+
+.clear__picarat em {
+  margin-left: 5px;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.clear__again {
+  margin: 0 0 12px;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+.clear__explain {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  text-align: left;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.clear__explain h3 {
+  margin: 0 0 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--orange-deep);
+}
+
+.clear__explain p {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.65;
+}
+
+/* マップに置かれた「時計のような物体」 */
+.clockspot {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
+  animation: clockspot-tick 2.4s ease-in-out infinite;
+}
+
+.clockspot > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.clockspot:hover {
+  scale: 1.14;
+}
+
+.clockspot__tag {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 6px;
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border: 1.5px solid #fff;
+  border-radius: 999px;
+}
+
+.clockspot--solved {
+  animation: none;
+  opacity: 0.72;
+}
+
+.clockspot--solved .clockspot__tag {
+  background: #5d8a4a;
+}
+
+@keyframes clockspot-tick {
+  0%,
+  88%,
+  100% {
+    rotate: 0deg;
+  }
+  92% {
+    rotate: -9deg;
+  }
+  96% {
+    rotate: 9deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clockspot {
+    animation: none;
+  }
+}

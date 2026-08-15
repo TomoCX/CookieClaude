@@ -120,7 +120,7 @@ export function ScenarioScreen({ scenario, onFinish, onQuit }: Props) {
       {/* 上部の情報 */}
       <div className="scenario__topbar">
         <span className="scenario__chapter">
-          ナゾ {String(scenario.no).padStart(3, '0')}・{scenario.title}
+          {scenario.kind === 'main' ? '本筋' : '立ち話'}・{scenario.title}
         </span>
         <button
           type="button"

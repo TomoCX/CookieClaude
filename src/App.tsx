@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { GameState, Place, ScreenId } from './types';
+import type { GameState, Place, PuzzleSpot, ScreenId } from './types';
 import { getScenario } from './data/scenarios';
+import { getStreet } from './data/streets';
+import { getPuzzle } from './data/puzzles';
 import { MainScreen } from './screens/MainScreen';
+import { StreetScreen } from './screens/StreetScreen';
 import { ScenarioScreen } from './screens/ScenarioScreen';
+import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MenuScreen } from './screens/MenuScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
 import {
+  applyHintUse,
+  applyPuzzleFound,
+  applyPuzzleMiss,
+  applyPuzzleSolved,
   applyScenarioClear,
   createInitialState,
   hasSave,
@@ -15,21 +23,25 @@ import {
 /** シナリオを読み終えたときに出す結果表示 */
 interface Result {
   title: string;
-  picarat: number;
   coin: number;
-  unlocked: string[];
+  unlocked: boolean;
+  note?: string;
+  charm?: string;
 }
 
 export function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [screen, setScreen] = useState<ScreenId>('main');
-  /** メインメニューを「とじる」で戻る先 */
+  /** 街並みに戻れるように、いま入っている街並みを覚えておく */
+  const [streetId, setStreetId] = useState<string | null>(null);
+  /** メインメニュー・メニュー画面を「とじる」で戻る先 */
   const [returnTo, setReturnTo] = useState<ScreenId>('main');
   const [scenarioId, setScenarioId] = useState<string | null>(null);
+  const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [booting, setBooting] = useState(true);
 
-  // プレイ時間を数える（会話中・探索中のみ）
+  // プレイ時間を数える
   useEffect(() => {
     if (booting) return;
     const id = setInterval(() => {
@@ -38,42 +50,67 @@ export function App() {
     return () => clearInterval(id);
   }, [booting]);
 
-  const openPlace = useCallback((place: Place) => {
+  /** マップから 街並みへ入る */
+  const enterPlace = useCallback((place: Place) => {
     setState((s) => ({ ...s, placeId: place.id }));
-    setScenarioId(place.scenarioId);
+    setStreetId(place.streetId);
+    setScreen('street');
+  }, []);
+
+  /** 街並みで 人に話しかけた */
+  const talkTo = useCallback((id: string) => {
+    setScenarioId(id);
     setScreen('scenario');
   }, []);
 
-  const finishScenario = useCallback(() => {
-    const sc = scenarioId ? getScenario(scenarioId) : null;
-    if (sc) {
-      const first = !state.clearedScenarios.includes(sc.id);
-      setState((s) => applyScenarioClear(s, sc));
-      if (first) {
-        setResult({
-          title: sc.title,
-          picarat: sc.reward.picarat,
-          coin: sc.reward.coin,
-          unlocked: sc.unlocks ?? [],
-        });
+  /** 会話を読み終えた／やめた。どちらも街並みへ戻る。 */
+  const endScenario = useCallback(
+    (finished: boolean) => {
+      const sc = scenarioId ? getScenario(scenarioId) : null;
+      if (finished && sc) {
+        const first = !state.clearedScenarios.includes(sc.id);
+        setState((s) => applyScenarioClear(s, sc));
+        if (first) {
+          setResult({
+            title: sc.title,
+            coin: sc.coin,
+            unlocked: (sc.unlocks?.length ?? 0) > 0,
+            note: sc.note?.title,
+            charm: sc.charm?.name,
+          });
+        }
       }
-    }
-    setScenarioId(null);
-    setScreen('main');
-  }, [scenarioId, state.clearedScenarios]);
+      setScenarioId(null);
+      setScreen(streetId ? 'street' : 'main');
+    },
+    [scenarioId, state.clearedScenarios, streetId],
+  );
 
-  const quitScenario = useCallback(() => {
-    setScenarioId(null);
-    setScreen('main');
+  /** マップの時計を押した */
+  const openPuzzle = useCallback((spot: PuzzleSpot) => {
+    setState((s) => applyPuzzleFound(s, spot.puzzleId));
+    setPuzzleId(spot.puzzleId);
+    setScreen('puzzle');
   }, []);
 
-  /** メインメニューを開く（戻り先を覚えておく） */
-  const openMainMenu = useCallback(() => {
-    setReturnTo((prev) => (screen === 'mainMenu' ? prev : screen));
-    setScreen('mainMenu');
-  }, [screen]);
+  /** メニュー画面・メインメニューを開く（戻り先を覚えておく） */
+  const openOverlayScreen = useCallback(
+    (next: 'menu' | 'mainMenu') => {
+      setReturnTo((prev) =>
+        screen === 'menu' || screen === 'mainMenu' ? prev : screen,
+      );
+      setScreen(next);
+    },
+    [screen],
+  );
+
+  const backFromOverlay = useCallback(() => {
+    setScreen(returnTo === 'menu' || returnTo === 'mainMenu' ? 'main' : returnTo);
+  }, [returnTo]);
 
   const scenario = scenarioId ? getScenario(scenarioId) : null;
+  const street = streetId ? getStreet(streetId) : null;
+  const puzzle = puzzleId ? getPuzzle(puzzleId) : null;
 
   return (
     <div className="app">
@@ -81,25 +118,54 @@ export function App() {
         {screen === 'main' && (
           <MainScreen
             state={state}
-            onEnterPlace={openPlace}
-            onOpenMenu={() => setScreen('menu')}
-            onOpenMainMenu={openMainMenu}
+            onEnterPlace={enterPlace}
+            onOpenPuzzle={openPuzzle}
+            onOpenMenu={() => openOverlayScreen('menu')}
+            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
+          />
+        )}
+
+        {screen === 'street' && street && (
+          <StreetScreen
+            street={street}
+            state={state}
+            onTalk={talkTo}
+            onBackToMap={() => {
+              setStreetId(null);
+              setScreen('main');
+            }}
+            onOpenMenu={() => openOverlayScreen('menu')}
+            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
           />
         )}
 
         {screen === 'scenario' && scenario && (
           <ScenarioScreen
             scenario={scenario}
-            onFinish={finishScenario}
-            onQuit={quitScenario}
+            onFinish={() => endScenario(true)}
+            onQuit={() => endScenario(false)}
+          />
+        )}
+
+        {screen === 'puzzle' && puzzle && (
+          <PuzzleScreen
+            puzzle={puzzle}
+            state={state}
+            onMiss={() => setState((s) => applyPuzzleMiss(s, puzzle.id))}
+            onUseHint={() => setState((s) => applyHintUse(s, puzzle))}
+            onSolved={() => setState((s) => applyPuzzleSolved(s, puzzle))}
+            onQuit={() => {
+              setPuzzleId(null);
+              setScreen('main');
+            }}
           />
         )}
 
         {screen === 'menu' && (
           <MenuScreen
             state={state}
-            onBack={() => setScreen('main')}
-            onOpenMainMenu={openMainMenu}
+            onBack={backFromOverlay}
+            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
           />
         )}
 
@@ -107,8 +173,8 @@ export function App() {
           <MainMenuScreen
             state={state}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
-            onClose={() => setScreen(returnTo === 'mainMenu' ? 'main' : returnTo)}
-            onOpenMenu={() => setScreen('menu')}
+            onClose={backFromOverlay}
+            onOpenMenu={() => openOverlayScreen('menu')}
           />
         )}
 
@@ -144,19 +210,27 @@ function ResultOverlay({
   return (
     <div className="overlay" onClick={onClose} role="presentation">
       <div className="result" onClick={(e) => e.stopPropagation()}>
-        <p className="result__head">ナゾが とけた！</p>
+        <p className="result__head">話を 聞いた</p>
         <h2 className="result__title">{result.title}</h2>
         <ul className="result__rewards">
-          <li>
-            <span>ひらめきしすう</span>
-            <strong>+{result.picarat} ピカラット</strong>
-          </li>
           <li>
             <span>ひらめきコイン</span>
             <strong>+{result.coin} まい</strong>
           </li>
+          {result.note && (
+            <li>
+              <span>ちょうさメモ</span>
+              <strong>{result.note}</strong>
+            </li>
+          )}
+          {result.charm && (
+            <li>
+              <span>チャーム</span>
+              <strong>{result.charm}</strong>
+            </li>
+          )}
         </ul>
-        {result.unlocked.length > 0 && (
+        {result.unlocked && (
           <p className="result__unlock">あたらしい 行き先が ふえた！</p>
         )}
         <button type="button" className="result__ok" onClick={onClose}>

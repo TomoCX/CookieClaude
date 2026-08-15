@@ -211,23 +211,137 @@
   color: var(--ink);
 }
 
+/* ふかまるナゾ（ストーリー全体） */
+.panel__sub {
+  margin: 14px 0 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.panel__sub:first-of-type {
+  margin-top: 0;
+}
+
+.panel__lead--pre {
+  white-space: pre-line;
+}
+
+.qlist {
+  margin: 0 0 4px;
+  padding-left: 1.1em;
+  font-size: 0.7rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.beatlist {
+  margin: 0;
+  padding-left: 1.3em;
+  display: grid;
+  gap: 8px;
+}
+
+.beatlist li {
+  padding-left: 2px;
+}
+
+.beatlist h4 {
+  margin: 0 0 3px;
+  font-size: 0.72rem;
+  color: var(--orange-deep);
+}
+
+.beatlist p {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.castlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.castlist li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 9px;
+  font-size: 0.68rem;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 7px;
+}
+
+.castlist span {
+  color: var(--ink-soft);
+}
+
 /* ナゾじてん */
 .indexlist__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
   margin-bottom: 5px;
   font-size: 0.7rem;
   background: #fffaf0;
   border: 1.5px solid var(--line);
   border-radius: 8px;
   color: var(--ink-soft);
+  overflow: hidden;
 }
 
 .indexlist__item--cleared {
   color: var(--ink);
   border-color: var(--orange);
+}
+
+.indexlist__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+.indexlist__row:disabled {
+  cursor: default;
+}
+
+.indexlist__item--cleared .indexlist__row:hover {
+  background: rgba(226, 112, 28, 0.08);
+}
+
+.indexlist__detail {
+  padding: 8px 10px 10px;
+  border-top: 1.5px dotted var(--line);
+}
+
+.indexlist__q {
+  margin: 0 0 8px;
+  font-size: 0.66rem;
+  line-height: 1.6;
+  white-space: pre-line;
+  color: var(--ink-soft);
+}
+
+.indexlist__detail h4 {
+  margin: 0 0 3px;
+  font-size: 0.66rem;
+  color: var(--orange-deep);
+}
+
+.indexlist__detail p {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: var(--ink);
 }
 
 .indexlist__no {

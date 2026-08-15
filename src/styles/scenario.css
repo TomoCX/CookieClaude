@@ -26,6 +26,9 @@
   bottom: 24%;
   width: 34%;
   max-width: 158px;
+  /* 子ども・老人は 少し 小さく描く */
+  scale: var(--sprite-scale, 1);
+  transform-origin: bottom center;
   transition: filter 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
 }
 

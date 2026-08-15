@@ -1,0 +1,151 @@
+import type { Puzzle, PuzzleSpot } from '../types';
+
+/**
+ * 独立したナゾ解き。ストーリーとは切り離されていて、
+ * マップに置かれた「時計のような物体」を押すと挑戦できる。
+ */
+export const PUZZLES: Puzzle[] = [
+  {
+    id: 'pz_strike',
+    no: 1,
+    title: '鐘は 何回 鳴る',
+    picarat: [30, 25, 20],
+    figure: 'strike',
+    question:
+      'メープル町の時計は、1時に1回、2時に2回……と、時刻の数だけ鐘を鳴らす。\n1時から 12時までの あいだに、鐘は ぜんぶで 何回 鳴るだろうか。',
+    answer: { kind: 'number', value: 78, unit: '回' },
+    hints: [
+      '1 + 2 + 3 + …… + 12 を もとめればよい。',
+      'はしから 組にしていこう。1 と 12、2 と 11、3 と 10 ……。',
+      'どの組も たすと 13 になる。組は ぜんぶで 6 つ できる。',
+    ],
+    explanation:
+      '1 と 12、2 と 11、3 と 10、4 と 9、5 と 8、6 と 7。どれも たすと 13 で、組は 6 つ。13 × 6 = 78 回。',
+  },
+  {
+    id: 'pz_interval',
+    no: 2,
+    title: '鐘の 鳴りおわり',
+    picarat: [40, 35, 30],
+    figure: 'bell',
+    question:
+      'この時計が 6時の鐘を 鳴らしおえるまでには、ちょうど 10秒 かかる。\nでは 12時の鐘を 鳴らしおえるまでには、何秒 かかるだろうか。',
+    answer: { kind: 'number', value: 22, unit: '秒' },
+    hints: [
+      '20秒 と 答えたくなるが、それは まちがい。',
+      '数えるのは 鐘の数ではなく、鐘と鐘の あいだの「すきま」の数。',
+      '6回 鳴るとき すきまは 5つ。10 ÷ 5 = 2秒。12回なら すきまは 11 つ。',
+    ],
+    explanation:
+      '6回 鳴るときの すきまは 5つ。10 ÷ 5 = 2秒。12回 鳴るときの すきまは 11 つなので、2 × 11 = 22秒。',
+  },
+  {
+    id: 'pz_mirror',
+    no: 3,
+    title: 'かがみの 時計',
+    picarat: [35, 30, 25],
+    figure: 'mirror',
+    question:
+      'まんげつ亭の スプーンに、時計が うつっていた。\nうつった 時計は 4時20分 を さしている。ほんとうの 時刻は 何時何分だろうか。',
+    answer: {
+      kind: 'choice',
+      options: ['7時40分', '8時40分', '7時20分', '4時40分'],
+      correct: 0,
+    },
+    hints: [
+      '鏡にうつると、左右が 入れかわる。',
+      '文字ばんの 12 と 6 を むすぶ線を さかいに、折り返した位置になる。',
+      '「11時60分」から うつった時刻を ひけばよい。',
+    ],
+    explanation:
+      '鏡の中の時刻は、12時を さかいに 折り返した位置。11時60分 − 4時20分 = 7時40分。',
+  },
+  {
+    id: 'pz_gears',
+    no: 4,
+    title: 'かみあう 歯車',
+    picarat: [20, 15, 10],
+    figure: 'gears',
+    question:
+      '時計塔の中で、4つの歯車が 一列に かみあっている。\n左はしの 歯車を 右まわりに 回すと、右はしの 歯車は どちらに 回るだろうか。',
+    answer: {
+      kind: 'choice',
+      options: ['右まわり', '左まわり', '回らない'],
+      correct: 1,
+    },
+    hints: [
+      'となりあう 歯車は、かならず 反対まわりになる。',
+      '1つめが 右まわりなら、2つめは 左まわり、3つめは 右まわり……。',
+      '4つめは 2つめと 同じ向きになる。',
+    ],
+    explanation:
+      'となりあう歯車は 反対に 回るので、右・左・右・左 と つづく。4つめは 左まわり。',
+  },
+  {
+    id: 'pz_overlap',
+    no: 5,
+    title: 'かさなる 針',
+    picarat: [45, 40, 35],
+    figure: 'hands',
+    question:
+      '時計の 長針と 短針は、12時ちょうどに ぴったり かさなる。\n一日（24時間）のうちに、2つの針が かさなるのは 何回だろうか。',
+    answer: { kind: 'number', value: 22, unit: '回' },
+    hints: [
+      'まず 12時間で 何回 かさなるかを 考えよう。',
+      '1時台、2時台……と 各時間に 1回ずつ かさなりそうだが、11時台には かさならない。',
+      '11時台の ぶんは 12時ちょうどで かさなる。12時間で 11回、24時間で その 2倍。',
+    ],
+    explanation:
+      '長針は 短針より 1時間あたり ちょうど 1周ぶん 速い。12時間で 11回 追いこすので、24時間では 22回 かさなる。',
+  },
+  {
+    id: 'pz_stopped',
+    no: 6,
+    title: 'とまった 時計',
+    picarat: [25, 20, 15],
+    figure: 'clocks3',
+    question:
+      'ギアじいさんの 部屋には 時計が 3つ ある。\n1つは 一日に 1分 進み、1つは 一日に 1分 おくれ、1つは 完全に 止まっている。\nこの中で、正しい時刻を さす回数が いちばん 多いのは どれだろうか。',
+    answer: {
+      kind: 'choice',
+      options: [
+        '一日に 1分 進む時計',
+        '一日に 1分 おくれる時計',
+        '止まっている時計',
+        'どれも 同じ',
+      ],
+      correct: 2,
+    },
+    hints: [
+      'ずれる時計が ふたたび 正しい時刻を さすのは、ずれが 12時間 たまったとき。',
+      '1分ずつ ずれる時計は、720日 かかって ようやく 一周する。',
+      '止まっている時計は、一日に 2回 かならず 正しい時刻を さす。',
+    ],
+    explanation:
+      '1分ずつ ずれる時計が 正しくなるのは 720日に 1度きり。止まった時計は 一日に 2回 かならず あたる。動かないものが いちばん あたる、という ひねくれた答え。',
+  },
+];
+
+/**
+ * マップに置かれた「時計のような物体」。
+ * requiresCleared は、本筋を何話 読み終えると現れるか。
+ */
+export const PUZZLE_SPOTS: PuzzleSpot[] = [
+  { id: 'spot_1', puzzleId: 'pz_strike', x: 33, y: 40, requiresCleared: 0 },
+  { id: 'spot_2', puzzleId: 'pz_gears', x: 60, y: 78, requiresCleared: 0 },
+  { id: 'spot_3', puzzleId: 'pz_interval', x: 57, y: 20, requiresCleared: 1 },
+  { id: 'spot_4', puzzleId: 'pz_mirror', x: 12, y: 52, requiresCleared: 2 },
+  { id: 'spot_5', puzzleId: 'pz_stopped', x: 88, y: 42, requiresCleared: 3 },
+  { id: 'spot_6', puzzleId: 'pz_overlap', x: 40, y: 86, requiresCleared: 4 },
+];
+
+/** id からナゾを取得する */
+export function getPuzzle(id: string): Puzzle | undefined {
+  return PUZZLES.find((p) => p.id === id);
+}
+
+/** まちがえた回数に応じて もらえるピカラットを返す */
+export function picaratFor(puzzle: Puzzle, misses: number): number {
+  const i = Math.min(misses, puzzle.picarat.length - 1);
+  return puzzle.picarat[i] ?? puzzle.picarat[puzzle.picarat.length - 1] ?? 0;
+}

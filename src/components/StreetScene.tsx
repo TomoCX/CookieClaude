@@ -1,0 +1,263 @@
+import type { ReactNode } from 'react';
+import type { BackgroundId } from '../types';
+
+/** 場所ごとの色づかい */
+interface Palette {
+  sky: [string, string];
+  far: string;
+  wall: string[];
+  roof: string[];
+  road: string;
+  roadEdge: string;
+}
+
+const PALETTES: Record<BackgroundId, Palette> = {
+  gate: {
+    sky: ['#cfe4ef', '#f5e8d0'],
+    far: '#9db785',
+    wall: ['#e8d6b4', '#e0cba5', '#efdfc0'],
+    roof: ['#c56b52', '#d2a05c', '#b3654e'],
+    road: '#c2a878',
+    roadEdge: '#a98d5f',
+  },
+  plaza: {
+    sky: ['#bcdcea', '#f7ecd4'],
+    far: '#a8bd8c',
+    wall: ['#f0dfbe', '#e6cfa8', '#f6e7c8'],
+    roof: ['#b3543f', '#c89a58', '#a85b46'],
+    road: '#d3bb8d',
+    roadEdge: '#b39c6f',
+  },
+  clocktower: {
+    sky: ['#9fbdd2', '#e6dac2'],
+    far: '#8fa87c',
+    wall: ['#ddcaa8', '#cbb692', '#e4d3b3'],
+    roof: ['#8a6a4c', '#a3784f', '#7c5d45'],
+    road: '#b8a37c',
+    roadEdge: '#9a8666',
+  },
+  inn: {
+    sky: ['#e8c9a0', '#f7dfba'],
+    far: '#a08359',
+    wall: ['#8a6644', '#7a5637', '#96714d'],
+    roof: ['#5c3f27', '#6e4c30', '#4f351f'],
+    road: '#7b5c3c',
+    roadEdge: '#63482e',
+  },
+  alley: {
+    sky: ['#8ca3bb', '#c4bda9'],
+    far: '#6f7a77',
+    wall: ['#5f5548', '#544b40', '#6a5f51'],
+    roof: ['#3f382f', '#4a4239', '#372f28'],
+    road: '#6f6553',
+    roadEdge: '#584f41',
+  },
+  night: {
+    sky: ['#2c3d5e', '#5a5f7c'],
+    far: '#3f4a63',
+    wall: ['#4a4a5e', '#404052', '#55556a'],
+    roof: ['#2e2e3d', '#383848', '#262633'],
+    road: '#3a3648',
+    roadEdge: '#2b2839',
+  },
+};
+
+/** 建物の並び（幅・高さ・色番号）。街並みが単調にならないよう ずらしてある。 */
+const BUILDINGS = [
+  [70, 150, 0],
+  [58, 120, 1],
+  [82, 176, 2],
+  [64, 134, 1],
+  [76, 162, 0],
+  [56, 112, 2],
+  [88, 184, 1],
+  [66, 142, 0],
+  [72, 156, 2],
+  [60, 126, 1],
+  [80, 170, 0],
+  [62, 130, 2],
+] as const;
+
+interface Props {
+  bg: BackgroundId;
+  /** 0（左はし）〜 1（右はし）で表したカメラ位置 */
+  cameraT: number;
+  /** 道の上に置くもの（人物など） */
+  children: ReactNode;
+}
+
+/**
+ * 街並み。奥・中・手前の 3 層を ちがう速さで動かして、道を進んでいる感じを出す。
+ * 手前の層は横幅 300%、その中の座標が そのまま「道の 0〜1」になる。
+ */
+export function StreetScene({ bg, cameraT, children }: Props) {
+  const pal = PALETTES[bg];
+  const t = Math.min(Math.max(cameraT, 0), 1);
+
+  /**
+   * translateX の % は「その要素じたいの幅」に対する割合。
+   * 幅 L%（画面に対する割合）の層が すみからすみまで動く量は (L-100)/L。
+   * 手前 300% → 66.7%、中 200% → 50%、奥 140% → 28.6%。
+   * この比が そのまま 層ごとの 動く速さの ちがいになる。
+   */
+  const shiftNear = t * (200 / 3);
+  const shiftMid = t * 50;
+  const shiftFar = t * (40 / 1.4);
+
+  return (
+    <div className="street__world">
+      {/* 空 */}
+      <div
+        className="street__sky"
+        style={{
+          background: `linear-gradient(${pal.sky[0]}, ${pal.sky[1]})`,
+        }}
+      />
+
+      {/* 奥の層（いちばん ゆっくり動く） */}
+      <div
+        className="street__layer street__layer--far"
+        style={{ transform: `translateX(${-shiftFar}%)` }}
+      >
+        <svg viewBox="0 0 560 400" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            d="M0 210 Q70 168 140 200 Q210 232 280 196 Q350 162 420 198 Q490 230 560 200 L560 400 L0 400 Z"
+            fill={pal.far}
+          />
+          <path
+            d="M0 246 Q100 220 200 248 Q300 276 400 246 Q480 222 560 244 L560 400 L0 400 Z"
+            fill={pal.far}
+            opacity="0.75"
+          />
+        </svg>
+      </div>
+
+      {/* 中の層：建物の列 */}
+      <div
+        className="street__layer street__layer--mid"
+        style={{ transform: `translateX(${-shiftMid}%)` }}
+      >
+        <svg viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
+          {BUILDINGS.map(([w, h, c], i) => {
+            const x = i * 66;
+            const top = 300 - h;
+            return (
+              <g key={i}>
+                <rect x={x} y={top} width={w} height={h} fill={pal.wall[c]} />
+                <path
+                  d={`M${x - 6} ${top} L${x + w + 6} ${top} L${x + w / 2} ${top - 26} Z`}
+                  fill={pal.roof[c]}
+                />
+                <rect
+                  x={x + w * 0.2}
+                  y={top + 26}
+                  width={w * 0.24}
+                  height={h * 0.18}
+                  fill={pal.roof[c]}
+                  opacity="0.45"
+                />
+                <rect
+                  x={x + w * 0.56}
+                  y={top + 26}
+                  width={w * 0.24}
+                  height={h * 0.18}
+                  fill={pal.roof[c]}
+                  opacity="0.45"
+                />
+              </g>
+            );
+          })}
+
+          {/* 場所ごとの目じるし */}
+          {bg === 'clocktower' && (
+            <g transform="translate(360 40)">
+              <path d="M-34 260 L-24 0 L24 0 L34 260 Z" fill={pal.wall[1]} />
+              <path d="M-30 0 L0 -40 L30 0 Z" fill={pal.roof[2]} />
+              <circle cx="0" cy="54" r="26" fill="#f6ecd6" stroke="#6f5a41" strokeWidth="5" />
+              <path d="M0 54 L0 36" stroke="#4c3d2c" strokeWidth="4" strokeLinecap="round" />
+              <path d="M0 54 L15 62" stroke="#4c3d2c" strokeWidth="4" strokeLinecap="round" />
+            </g>
+          )}
+          {bg === 'gate' && (
+            <g>
+              <rect x="150" y="130" width="26" height="170" fill="#8c6a4a" />
+              <rect x="330" y="130" width="26" height="170" fill="#8c6a4a" />
+              <rect x="140" y="118" width="226" height="18" fill="#7a5b3e" />
+              <text
+                x="253"
+                y="112"
+                textAnchor="middle"
+                fill="#6b4d33"
+                fontSize="26"
+                fontWeight="700"
+              >
+                MAPLE
+              </text>
+            </g>
+          )}
+          {bg === 'plaza' && (
+            <g transform="translate(400 210)">
+              <circle cx="0" cy="60" r="52" fill="#c9b48c" />
+              <circle cx="0" cy="60" r="36" fill="#a8d3d8" />
+              <rect x="-8" y="6" width="16" height="56" fill="#9a8a6c" />
+              <circle cx="0" cy="0" r="18" fill="#c9b48c" />
+            </g>
+          )}
+          {bg === 'inn' && (
+            <g transform="translate(380 150)">
+              <circle cx="0" cy="0" r="34" fill="#f0c86a" opacity="0.9" />
+              <circle cx="0" cy="0" r="58" fill="#f0c86a" opacity="0.25" />
+              <rect x="-70" y="46" width="140" height="16" rx="4" fill="#4a3120" />
+              <text x="0" y="58" textAnchor="middle" fill="#f2dcae" fontSize="11" fontWeight="700">
+                まんげつ亭
+              </text>
+            </g>
+          )}
+        </svg>
+      </div>
+
+      {/* 手前の層：道と、その上に立つ人 */}
+      <div
+        className="street__layer street__layer--near"
+        style={{ transform: `translateX(${-shiftNear}%)` }}
+      >
+        <svg
+          className="street__road"
+          viewBox="0 0 1200 400"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <rect x="0" y="296" width="1200" height="8" fill={pal.roadEdge} />
+          <rect x="0" y="304" width="1200" height="96" fill={pal.road} />
+          {/* 敷石 */}
+          {Array.from({ length: 40 }, (_, i) => (
+            <rect
+              key={i}
+              x={i * 30 + (i % 2 ? 8 : 0)}
+              y="318"
+              width="22"
+              height="10"
+              rx="3"
+              fill={pal.roadEdge}
+              opacity="0.42"
+            />
+          ))}
+          {Array.from({ length: 26 }, (_, i) => (
+            <rect
+              key={`b-${i}`}
+              x={i * 46 + 14}
+              y="352"
+              width="34"
+              height="12"
+              rx="4"
+              fill={pal.roadEdge}
+              opacity="0.28"
+            />
+          ))}
+        </svg>
+
+        {children}
+      </div>
+    </div>
+  );
+}

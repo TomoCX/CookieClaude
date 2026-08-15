@@ -1,11 +1,19 @@
 import type { GameState } from '../types';
 import { getPlace } from '../data/places';
-import { SCENARIOS } from '../data/scenarios';
-import { formatPlayTime, progressPercent } from '../state/gameState';
+import { PUZZLES } from '../data/puzzles';
+import { MAIN_SCENARIOS } from '../data/scenarios';
+import {
+  TOTAL_PICARAT,
+  clearedMainCount,
+  formatPlayTime,
+  foundCount,
+  progressPercent,
+  solvedCount,
+} from '../state/gameState';
 
 interface Props {
   state: GameState;
-  /** メイン画面へ戻る */
+  /** 前の画面へ戻る */
   onBack: () => void;
   /** メインメニュー（トランク）を開く */
   onOpenMainMenu: () => void;
@@ -38,7 +46,7 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
         <StatCard
           icon="▮"
           label="とけたナゾ"
-          value={String(state.solved)}
+          value={String(solvedCount(state))}
           unit="コ"
           tone="orange"
         />
@@ -53,7 +61,7 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
         <StatCard
           icon="!"
           label="みつけたナゾ"
-          value={String(state.found)}
+          value={String(foundCount(state))}
           unit="コ"
           tone="orange"
         />
@@ -94,11 +102,18 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
         <div className="menu__progress-head">
           <span>ものがたりの しんこう</span>
           <span>
-            {state.clearedScenarios.length} / {SCENARIOS.length}（{percent}%）
+            {clearedMainCount(state)} / {MAIN_SCENARIOS.length}（{percent}%）
           </span>
         </div>
         <div className="menu__progress-track">
           <div className="menu__progress-fill" style={{ width: `${percent}%` }} />
+        </div>
+        <div className="menu__progress-head menu__progress-head--sub">
+          <span>ナゾの しゅうかい</span>
+          <span>
+            {solvedCount(state)} / {PUZZLES.length}（{state.picarat} /{' '}
+            {TOTAL_PICARAT} ピカラット）
+          </span>
         </div>
       </div>
     </div>

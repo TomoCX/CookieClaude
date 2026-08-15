@@ -1,4 +1,4 @@
-import type { Place } from '../types';
+import type { Place, PuzzleSpot } from '../types';
 
 interface Props {
   places: Place[];
@@ -7,9 +7,13 @@ interface Props {
   currentPlaceId: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  /** マップに置かれた「時計のような物体」 */
+  spots: PuzzleSpot[];
+  solvedPuzzles: string[];
+  onOpenPuzzle: (spot: PuzzleSpot) => void;
 }
 
-/** メイン画面のマップ。町の俯瞰図と、その上に並ぶ行き先ピン。 */
+/** メイン画面のマップ。町の俯瞰図に、行き先ピンと ナゾの時計が 並ぶ。 */
 export function TownMap({
   places,
   openPlaces,
@@ -17,6 +21,9 @@ export function TownMap({
   currentPlaceId,
   selectedId,
   onSelect,
+  spots,
+  solvedPuzzles,
+  onOpenPuzzle,
 }: Props) {
   return (
     <div className="map" onClick={() => onSelect(null)} role="presentation">
@@ -36,8 +43,14 @@ export function TownMap({
         <rect width="400" height="300" fill="url(#map-sky)" />
 
         {/* 遠くの丘 */}
-        <path d="M0 96 Q80 62 160 92 Q240 118 320 88 Q368 72 400 88 L400 300 L0 300 Z" fill="#9db785" />
-        <path d="M0 128 Q100 104 200 130 Q300 156 400 126 L400 300 L0 300 Z" fill="#8caa76" />
+        <path
+          d="M0 96 Q80 62 160 92 Q240 118 320 88 Q368 72 400 88 L400 300 L0 300 Z"
+          fill="#9db785"
+        />
+        <path
+          d="M0 128 Q100 104 200 130 Q300 156 400 126 L400 300 L0 300 Z"
+          fill="#8caa76"
+        />
 
         {/* 町の地面 */}
         <path d="M0 160 Q200 138 400 162 L400 300 L0 300 Z" fill="#d8c49a" />
@@ -98,10 +111,43 @@ export function TownMap({
         </g>
       </svg>
 
+      {/* ナゾの時計 */}
+      {spots.map((spot) => {
+        const solved = solvedPuzzles.includes(spot.puzzleId);
+        return (
+          <button
+            key={spot.id}
+            type="button"
+            className={`clockspot${solved ? ' clockspot--solved' : ''}`}
+            style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
+            aria-label={solved ? 'といたナゾ' : 'ナゾに ちょうせんする'}
+            title={solved ? 'といたナゾ' : 'ナゾ！'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenPuzzle(spot);
+            }}
+          >
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="20" cy="21" r="15" fill="#f6ecd6" stroke="#4c3d2c" strokeWidth="3" />
+              <circle cx="20" cy="21" r="15" fill="none" stroke="#c9a04a" strokeWidth="1.5" />
+              <path d="M20 21 L20 12" stroke="#4c3d2c" strokeWidth="2.6" strokeLinecap="round" />
+              <path d="M20 21 L27 25" stroke="#4c3d2c" strokeWidth="2.6" strokeLinecap="round" />
+              <circle cx="20" cy="21" r="2" fill="#4c3d2c" />
+              <rect x="17" y="1" width="6" height="5" rx="2" fill="#4c3d2c" />
+              <path d="M8 6 L13 10" stroke="#4c3d2c" strokeWidth="3" strokeLinecap="round" />
+              <path d="M32 6 L27 10" stroke="#4c3d2c" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <span className="clockspot__tag" aria-hidden="true">
+              {solved ? '✓' : 'ナゾ'}
+            </span>
+          </button>
+        );
+      })}
+
       {/* 行き先ピン */}
       {places.map((p) => {
         const open = openPlaces.includes(p.id);
-        const cleared = clearedScenarios.includes(p.scenarioId);
+        const cleared = clearedScenarios.includes(p.mainScenarioId);
         const isHere = p.id === currentPlaceId;
         const isSelected = p.id === selectedId;
         const cls = [

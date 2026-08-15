@@ -1,6 +1,8 @@
 @import './base.css';
 @import './main-screen.css';
+@import './street.css';
 @import './scenario.css';
+@import './puzzle.css';
 @import './menu.css';
 @import './trunk.css';
 @import './overlay.css';

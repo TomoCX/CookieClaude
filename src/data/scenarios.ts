@@ -1,16 +1,18 @@
 import type { Scenario } from '../types';
 
 /**
- * シナリオ本編。
- * 場所をタップすると、その場所に紐づいたシナリオが会話画面で再生される。
+ * 会話イベント。
+ * 街並みに立っている人をクリックすると、その人に結びついたシナリオが始まる。
+ * kind: 'main' が本筋、'flavor' は町の人とのちょっとした立ち話。
  */
 export const SCENARIOS: Scenario[] = [
+  /* ---- 町の入り口 ---- */
   {
     id: 'sc_gate',
-    no: 1,
     title: 'メープル町へようこそ',
     bg: 'gate',
-    reward: { picarat: 20, coin: 3 },
+    kind: 'main',
+    coin: 3,
     unlocks: ['plaza'],
     note: {
       id: 'note_letter',
@@ -19,32 +21,46 @@ export const SCENARIOS: Scenario[] = [
     },
     lines: [
       {
-        text: '霧のうすくかかった坂道の先に、赤い屋根の町が見えてきた。',
-        sub: 'Beyond the misty slope, a town of red roofs came into view.',
-      },
-      {
-        speaker: 'cookie',
-        pose: 'happy',
-        text: 'せんせい、ここがメープル町ですね！ 思ってたよりずっと大きい町です。',
-        sub: "Professor, so this is Maple Town! It's much bigger than I imagined.",
+        speaker: 'maurice',
+        pose: 'normal',
+        text: 'ようこそ、メープル町へ。……おや、めずらしい。旅の方ですかな。',
+        sub: 'Welcome to Maple Town. Well now — travelers? We see few of those.',
       },
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'ああ。……そして、この町のどこかに手紙の差出人がいる。',
-        sub: 'Indeed. And somewhere in this town is the one who sent the letter.',
+        text: 'クロードと申します。こちらは助手のクッキー。手紙を いただいてまいりました。',
+        sub: "The name is Claude. My assistant, Cookie. We came on account of a letter.",
+      },
+      {
+        speaker: 'maurice',
+        pose: 'surprised',
+        text: '手紙？ この町から？ ……はて、だれが そんなものを。',
+        sub: 'A letter? From this town? Now who would send such a thing...',
       },
       {
         speaker: 'cookie',
         pose: 'think',
-        text: '「まちの時計が十三回鳴る夜、まちの宝が消える」……。時計って、十三回も鳴りませんよね？',
-        sub: '"When the town clock strikes thirteen, the town\'s treasure vanishes." ...Clocks don\'t strike thirteen, do they?',
+        text: '差出人の名前が 書いてないんです。中身も 一行だけで。',
+        sub: "There's no sender's name. Just a single line inside.",
+      },
+      {
+        speaker: 'claude',
+        pose: 'normal',
+        text: '「まちの時計が十三回鳴る夜、まちの宝が消える」。',
+        sub: '"When the town clock strikes thirteen, the town\'s treasure vanishes."',
+      },
+      {
+        speaker: 'maurice',
+        pose: 'surprised',
+        text: '……じゅうさん回？ うちの時計は そんなに 鳴りませんぞ。',
+        sub: '...Thirteen? Our clock has never struck thirteen in its life.',
       },
       {
         speaker: 'claude',
         pose: 'think',
-        text: 'ふむ。だからこそ、これはナゾなのだよ、クッキー。',
-        sub: "Hmm. That, Cookie, is precisely why it is a mystery.",
+        text: 'ええ。だからこそ、これはナゾなのですよ。',
+        sub: 'Quite. And that is precisely why it is a mystery.',
       },
       {
         speaker: 'claude',
@@ -59,17 +75,58 @@ export const SCENARIOS: Scenario[] = [
         sub: "That's so cool...! I'm writing that down!",
       },
       {
+        speaker: 'maurice',
+        pose: 'normal',
+        text: 'ふむ……。話を聞くなら、大門広場へ お行きなさい。町じゅうの うわさが 集まる所です。',
+        sub: 'Hm. If it is talk you want, try the Great Gate Plaza. Every rumor in town ends up there.',
+      },
+      {
         text: '――こうして、ふたりの調査がはじまった。',
         sub: 'And so, their investigation began.',
       },
     ],
   },
   {
+    id: 'sc_gate_toby',
+    title: '旅商人のぼやき',
+    bg: 'gate',
+    kind: 'flavor',
+    coin: 1,
+    lines: [
+      {
+        speaker: 'toby',
+        pose: 'normal',
+        text: 'よう。荷を見ていくかい？ ……といっても、売れ残りばかりだがね。',
+        sub: "Hey there. Care to see my wares? Though it's all leftovers, mind you.",
+      },
+      {
+        speaker: 'cookie',
+        pose: 'think',
+        text: 'この町、あまり お客さんが 来ないんですか？',
+        sub: "Does this town not get many visitors?",
+      },
+      {
+        speaker: 'toby',
+        pose: 'normal',
+        text: '昔は 時計塔を 見に、よその町から わんさか 来たもんさ。……いまじゃ、地元の連中でさえ 見上げやしない。',
+        sub: 'Folks used to pour in from other towns just to see the clock tower. Now even the locals never look up.',
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: '……見上げない、ですか。',
+        sub: '...They never look up, you say.',
+      },
+    ],
+  },
+
+  /* ---- 大門広場 ---- */
+  {
     id: 'sc_plaza',
-    no: 2,
     title: '大門広場のうわさ話',
     bg: 'plaza',
-    reward: { picarat: 30, coin: 2 },
+    kind: 'main',
+    coin: 2,
     unlocks: ['clocktower', 'inn'],
     note: {
       id: 'note_rumor',
@@ -78,20 +135,22 @@ export const SCENARIOS: Scenario[] = [
     },
     lines: [
       {
-        text: '町の中心、大門広場。市が立ち、人の声がひっきりなしに行き交っている。',
-        sub: 'The Great Gate Plaza — a market square alive with voices.',
+        speaker: 'martha',
+        pose: 'normal',
+        text: 'あら、旅の方？ うちは まんげつ亭って宿を やってるマーサだよ。',
+        sub: "Oh, travelers? I'm Martha — I run the Full Moon Inn.",
       },
       {
         speaker: 'cookie',
         pose: 'normal',
-        text: 'この辺りに、時計塔の管理人さんがいるって聞いたんですけど……。',
-        sub: "I heard the clock tower's caretaker is somewhere around here...",
+        text: '時計塔の管理人さんを さがしてるんですけど……。',
+        sub: "We're looking for the clock tower's caretaker...",
       },
       {
         speaker: 'martha',
         pose: 'normal',
-        text: 'あら、旅の方？ ギアじいさんならもう店じまいだよ。……あの晩からずっと元気がなくてねえ。',
-        sub: "Oh, travelers? Old Gear's already closed up. He's been low ever since that night.",
+        text: 'ギアじいさんならもう店じまいだよ。……あの晩からずっと元気がなくてねえ。',
+        sub: "Old Gear's already closed up. He's been low ever since that night.",
       },
       {
         speaker: 'claude',
@@ -132,17 +191,52 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'ナゾが深まったのだからね。行こう、クッキー。時計塔だ。',
-        sub: 'The mystery deepened. Come, Cookie. To the clock tower.',
+        text: 'ナゾが深まったのだからね。行こう、クッキー。宿屋と 時計塔だ。',
+        sub: 'The mystery deepened. Come, Cookie. The inn, and then the tower.',
       },
     ],
   },
   {
+    id: 'sc_plaza_lily',
+    title: '花売りのリリー',
+    bg: 'plaza',
+    kind: 'flavor',
+    coin: 1,
+    lines: [
+      {
+        speaker: 'lily',
+        pose: 'happy',
+        text: 'お花、いかがですか？ 今朝つんだばかりの メープルベルですよ。',
+        sub: 'Flowers, sir? Maple bells, picked just this morning.',
+      },
+      {
+        speaker: 'cookie',
+        pose: 'happy',
+        text: 'かわいい名前ですね。鐘みたいな形だからかな。',
+        sub: 'What a nice name. Is it because they look like little bells?',
+      },
+      {
+        speaker: 'lily',
+        pose: 'normal',
+        text: 'そう。時計塔の鐘に にてるでしょ。……この町の子は、みんな この花で 育つの。',
+        sub: "That's right — like the tower bell. Every child in this town grows up with them.",
+      },
+      {
+        speaker: 'lily',
+        pose: 'think',
+        text: 'ちいさい子が ひとり、毎朝 ここで 花を 見てるわ。買わないけど、じっと ね。',
+        sub: "There's a little one who comes every morning to look. Never buys. Just looks.",
+      },
+    ],
+  },
+
+  /* ---- まんげつ亭 ---- */
+  {
     id: 'sc_inn',
-    no: 3,
     title: '宿屋「まんげつ亭」',
     bg: 'inn',
-    reward: { picarat: 25, coin: 4 },
+    kind: 'main',
+    coin: 4,
     charm: {
       id: 'charm_spoon',
       name: 'まんげつのスプーン',
@@ -152,13 +246,9 @@ export const SCENARIOS: Scenario[] = [
     note: {
       id: 'note_alibi',
       title: 'ギアじいさんのアリバイ',
-      body: 'ギアじいさんは三日前の夜、九時から朝まで宿の食堂にいた。ただし十時ごろ、三十分ほど席をはずしている。「スープをおかわりしに行った」とのこと。',
+      body: 'ギアじいさんは三日前の夜、九時から朝まで宿の食堂にいた。ただし十時ごろ、三十分ほど席をはずしている。上着は掛けにかけたままだった。',
     },
     lines: [
-      {
-        text: '宿屋「まんげつ亭」。暖炉の火が、木の壁をやわらかく照らしている。',
-        sub: 'The Full Moon Inn. Firelight washing warm over wooden walls.',
-      },
       {
         speaker: 'gear',
         pose: 'normal',
@@ -169,7 +259,7 @@ export const SCENARIOS: Scenario[] = [
         speaker: 'claude',
         pose: 'normal',
         text: 'いいえ。わたしは疑ってはいません。確かめているだけです。',
-        sub: "No. I do not suspect. I am merely confirming.",
+        sub: 'No. I do not suspect. I am merely confirming.',
       },
       {
         speaker: 'gear',
@@ -193,7 +283,7 @@ export const SCENARIOS: Scenario[] = [
         speaker: 'gear',
         pose: 'happy',
         text: 'う、うるさいわい。うまかったんじゃからしかたなかろう。',
-        sub: "Q-quiet, you. It was good soup. Nothing to be done about it.",
+        sub: 'Q-quiet, you. It was good soup. Nothing to be done about it.',
       },
       {
         speaker: 'claude',
@@ -216,18 +306,59 @@ export const SCENARIOS: Scenario[] = [
     ],
   },
   {
+    id: 'sc_inn_martha',
+    title: 'まんげつ亭のスープ',
+    bg: 'inn',
+    kind: 'flavor',
+    coin: 1,
+    lines: [
+      {
+        speaker: 'martha',
+        pose: 'happy',
+        text: 'スープ、飲んでいきなよ。うちの名物なんだ。',
+        sub: 'Have some soup. House specialty.',
+      },
+      {
+        speaker: 'cookie',
+        pose: 'happy',
+        text: 'いただきます！ ……あっ、スプーンが ぴかぴかだ。',
+        sub: "Don't mind if I do! ...Oh, the spoon's so shiny.",
+      },
+      {
+        speaker: 'martha',
+        pose: 'normal',
+        text: '磨くのが 好きなのさ。裏返すと 顔が さかさに うつるだろ。子どもらは それで よく 遊んでたよ。',
+        sub: "I like polishing them. Flip it over and your face turns upside down. The children used to play with that.",
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: '……さかさに、ね。おぼえておきましょう。',
+        sub: '...Upside down. I shall keep that in mind.',
+      },
+    ],
+  },
+
+  /* ---- 時計塔 ---- */
+  {
     id: 'sc_clocktower',
-    no: 4,
     title: '十三回鳴る時計',
     bg: 'clocktower',
-    reward: { picarat: 45, coin: 3 },
+    kind: 'main',
+    coin: 3,
     unlocks: ['alley'],
     note: {
       id: 'note_bell',
       title: '鐘のしかけ',
-      body: '時計塔の鐘は、歯車がひとつ ずれると 打つ回数が 1 つ増える。十三回鳴らすのは 故障ではなく、だれかが 意図的に ずらしたということ。',
+      body: '時計塔の鐘は、歯車がひとつずれると打つ回数が 1 つ増える。十三回鳴らすのは故障ではなく、だれかが意図的にずらしたということ。',
     },
     lines: [
+      {
+        speaker: 'gear',
+        pose: 'normal',
+        text: '……入りなさい。わしの鍵で 開けてやる。中を見れば、わかることも あろう。',
+        sub: "...Go on in. I'll open it with my key. Perhaps seeing inside will tell you something.",
+      },
       {
         text: '時計塔の内部。歯車が、低くうなりながら 噛み合っている。',
         sub: 'Inside the clock tower. Gears meshing with a low, patient growl.',
@@ -254,7 +385,7 @@ export const SCENARIOS: Scenario[] = [
         speaker: 'claude',
         pose: 'normal',
         text: 'そう。予言ではない。予告だ。だれかが、そうなるように 手を加えたのだよ。',
-        sub: "Precisely. Not a prophecy — an announcement. Someone arranged it.",
+        sub: 'Precisely. Not a prophecy — an announcement. Someone arranged it.',
       },
       {
         speaker: 'cookie',
@@ -283,33 +414,64 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: '結論を急がないことだ。まだ、聞いていない声がひとつある。',
-        sub: 'Let us not rush. There is still one voice we have not heard.',
+        text: '結論を急がないことだ。まだ、聞いていない声がひとつある。裏路地へ 行こう。',
+        sub: 'Let us not rush. There is still one voice we have not heard. To the back alley.',
       },
     ],
   },
   {
+    id: 'sc_tower_hans',
+    title: '見物人のはなし',
+    bg: 'clocktower',
+    kind: 'flavor',
+    coin: 1,
+    lines: [
+      {
+        speaker: 'hans',
+        pose: 'normal',
+        text: 'この塔もな、来月には 取りこわしだとよ。',
+        sub: "They're pulling this tower down next month, you know.",
+      },
+      {
+        speaker: 'cookie',
+        pose: 'surprised',
+        text: 'ええっ！ こんなに 立派なのに……！',
+        sub: "What?! But it's magnificent...!",
+      },
+      {
+        speaker: 'hans',
+        pose: 'normal',
+        text: '古いからな。あぶないってさ。……まあ、だれも 反対しなかったよ。だれも 見ちゃいなかったからな。',
+        sub: "It's old. Dangerous, they say. Nobody objected. Nobody was looking at it anyway.",
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: '……なるほど。「宝が消える」とは、そういうことか。',
+        sub: '...I see. So that is what "the treasure vanishes" means.',
+      },
+    ],
+  },
+
+  /* ---- 裏路地 ---- */
+  {
     id: 'sc_alley',
-    no: 5,
     title: '裏路地のミント',
     bg: 'alley',
-    reward: { picarat: 60, coin: 5 },
+    kind: 'main',
+    coin: 5,
     charm: {
       id: 'charm_gear',
       name: 'ちいさな歯車',
-      desc: 'ミントが 時計塔から 持ち出した 歯車。返された今も、彼女のポケットの重さを おぼえている。',
+      desc: 'ミントが時計塔から持ち出した歯車。返された今も、彼女のポケットの重さをおぼえている。',
       icon: '⚙️',
     },
     note: {
       id: 'note_truth',
       title: '十三回の意味',
-      body: 'ミントは 時計塔が 取りこわされると聞いて、町の人に 塔のことを 思い出してほしかった。「まちの宝」とは 時計塔そのもの。手紙は 犯行予告ではなく、助けを呼ぶ声だった。',
+      body: 'ミントは時計塔が取りこわされると聞いて、町の人に塔のことを思い出してほしかった。「まちの宝」とは時計塔そのもの。手紙は犯行予告ではなく、助けを呼ぶ声だった。',
     },
     lines: [
-      {
-        text: '細い裏路地。壁ぎわに、小さな影がひとつ うずくまっている。',
-        sub: 'A narrow back alley. A small shadow crouched against the wall.',
-      },
       {
         speaker: 'mint',
         pose: 'surprised',
@@ -368,7 +530,7 @@ export const SCENARIOS: Scenario[] = [
         speaker: 'claude',
         pose: 'normal',
         text: 'なら、やることは ひとつだ。……今夜、町じゅうに 顔を上げてもらおう。',
-        sub: "Then there is but one thing to do. Tonight, we shall make this town look up.",
+        sub: 'Then there is but one thing to do. Tonight, we shall make this town look up.',
       },
       {
         speaker: 'cookie',
@@ -386,9 +548,45 @@ export const SCENARIOS: Scenario[] = [
       },
     ],
   },
+  {
+    id: 'sc_alley_pete',
+    title: '路地の見張り番',
+    bg: 'alley',
+    kind: 'flavor',
+    coin: 1,
+    lines: [
+      {
+        speaker: 'pete',
+        pose: 'normal',
+        text: 'そっちは 行き止まりだよ。……なんで来たの、おじさんたち。',
+        sub: "Dead end that way. ...What're you two doing here, anyway?",
+      },
+      {
+        speaker: 'cookie',
+        pose: 'normal',
+        text: 'ちょっと 人を さがしてて。きみ、いつも ここに いるの？',
+        sub: "Looking for someone. Do you always hang around here?",
+      },
+      {
+        speaker: 'pete',
+        pose: 'think',
+        text: 'ぼくじゃないよ。ミントだよ。……あいつ、三日前の夜も ずぶぬれで 帰ってきた。',
+        sub: "Not me. Mint. ...She came back soaked through, three nights back.",
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: '雨の夜に、外に いたということか。……ありがとう、坊や。',
+        sub: 'Out in the rain, then. ...Thank you, lad.',
+      },
+    ],
+  },
 ];
 
 /** id からシナリオを取得する */
 export function getScenario(id: string): Scenario | undefined {
   return SCENARIOS.find((s) => s.id === id);
 }
+
+/** 本筋のシナリオだけを取り出す */
+export const MAIN_SCENARIOS = SCENARIOS.filter((s) => s.kind === 'main');

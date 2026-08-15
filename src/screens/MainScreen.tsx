@@ -1,23 +1,26 @@
 import { useState } from 'react';
-import type { GameState, Place } from '../types';
+import type { GameState, Place, PuzzleSpot } from '../types';
 import { PLACES, getPlace } from '../data/places';
-import { getScenario } from '../data/scenarios';
 import { TownMap } from '../components/TownMap';
+import { solvedCount, visibleSpots } from '../state/gameState';
 
 interface Props {
   state: GameState;
-  /** 場所を選んだとき（会話画面へ） */
+  /** 場所を選んだとき（街並みへ） */
   onEnterPlace: (place: Place) => void;
+  /** 時計を押したとき（ナゾ解きへ） */
+  onOpenPuzzle: (spot: PuzzleSpot) => void;
   /** 右上ボタン: メニュー画面へ戻る */
   onOpenMenu: () => void;
   /** 右下ボタン: メインメニューへ戻る */
   onOpenMainMenu: () => void;
 }
 
-/** メイン画面（写真3枚目の下側）。町のマップを歩いて場所を選ぶ。 */
+/** メイン画面（写真3枚目の下側）。町のマップから 街並みや ナゾへ 入っていく。 */
 export function MainScreen({
   state,
   onEnterPlace,
+  onOpenPuzzle,
   onOpenMenu,
   onOpenMainMenu,
 }: Props) {
@@ -25,27 +28,24 @@ export function MainScreen({
 
   const here = getPlace(state.placeId);
   const selectedPlace = selected ? getPlace(selected) : null;
-  const selectedScenario = selectedPlace
-    ? getScenario(selectedPlace.scenarioId)
-    : null;
-  const cleared =
-    selectedScenario != null &&
-    state.clearedScenarios.includes(selectedScenario.id);
+  const visited =
+    selectedPlace != null &&
+    state.clearedScenarios.includes(selectedPlace.mainScenarioId);
 
-  /** 次に行くとよい場所（まだ読んでいない、開放済みの場所） */
+  /** 次に行くとよい場所（まだ本筋を読んでいない、開放済みの場所） */
   const nextPlace = PLACES.find(
     (p) =>
       state.openPlaces.includes(p.id) &&
-      !state.clearedScenarios.includes(p.scenarioId),
+      !state.clearedScenarios.includes(p.mainScenarioId),
   );
 
   const hint = selectedPlace
-    ? cleared
-      ? `${selectedPlace.name}：もういちど 話を 聞いてみよう`
+    ? visited
+      ? `${selectedPlace.name}：もういちど 町の人に 会ってみよう`
       : `${selectedPlace.name}へ 行ってみよう`
     : nextPlace
       ? `${nextPlace.name}のことを 調べてみよう`
-      : 'すべてのナゾが とけた！ メインメニューで きろくを 見てみよう';
+      : 'ものがたりは 終わった。のこりの ナゾを といてみよう';
 
   return (
     <div className="main">
@@ -54,7 +54,7 @@ export function MainScreen({
         <div className="main__counter">
           <span className="main__counter-label">とけたナゾ</span>
           <span className="main__counter-value">
-            {String(state.solved).padStart(3, '0')}
+            {String(solvedCount(state)).padStart(3, '0')}
           </span>
         </div>
         <div className="main__place">
@@ -71,6 +71,9 @@ export function MainScreen({
         currentPlaceId={state.placeId}
         selectedId={selected}
         onSelect={setSelected}
+        spots={visibleSpots(state)}
+        solvedPuzzles={state.solvedPuzzles}
+        onOpenPuzzle={onOpenPuzzle}
       />
 
       {/* 右上：メニュー画面へ戻るボタン */}
@@ -111,7 +114,7 @@ export function MainScreen({
               onEnterPlace(selectedPlace);
             }}
           >
-            {cleared ? 'もういちど 見る' : 'ここへ 行く'} ▶
+            {visited ? 'もういちど 行く' : 'ここへ 行く'} ▶
           </button>
         )}
       </div>

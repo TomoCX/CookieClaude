@@ -1,0 +1,272 @@
+/* ---- 街並み画面（マップから入った先） ---- */
+
+.street {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #cfe4ef;
+}
+
+.street__world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.street__sky {
+  position: absolute;
+  inset: 0;
+}
+
+/* 3 つの層。手前ほど 大きく動く。 */
+.street__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  will-change: transform;
+}
+
+.street__layer > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.street__layer--far {
+  width: 140%;
+  opacity: 0.75;
+}
+
+.street__layer--mid {
+  width: 200%;
+}
+
+.street__layer--near {
+  width: 300%;
+}
+
+.street__road {
+  position: absolute;
+  inset: 0;
+}
+
+/* 道を歩く人。足もとが 下の操作バーに かくれないよう 少し 上げてある。 */
+.walker {
+  position: absolute;
+  bottom: 17%;
+  width: 5.6%;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+}
+
+.walker__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+/* NPC */
+.walker--npc {
+  cursor: pointer;
+  scale: var(--walker-scale, 1);
+  transition: translate 0.15s ease;
+}
+
+.walker--npc:hover {
+  translate: 0 -4px;
+}
+
+/* 頭の上の 名ふだ（しるし＋名前） */
+.walker__tag {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 3px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+  background: rgba(246, 236, 212, 0.95);
+  border: 1.5px solid var(--wood);
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  animation: mark-bob 1.6s ease-in-out infinite;
+}
+
+.walker__mark {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  font-size: 0.52rem;
+  font-style: normal;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border-radius: 50%;
+}
+
+.walker--talked .walker__tag {
+  animation: none;
+}
+
+.walker--talked .walker__mark {
+  background: #5d8a4a;
+}
+
+@keyframes mark-bob {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .walker__tag {
+    animation: none;
+  }
+}
+
+/* プレイヤー（クロードとクッキーが 並んで歩く） */
+.walker--player {
+  width: 6.4%;
+  z-index: 3;
+  /* 人の前を 通っても、うしろの人を クリックできるように */
+  pointer-events: none;
+}
+
+.walker--player .walker__art {
+  position: relative;
+}
+
+/* クッキーは クロードの ななめ後ろ。
+   .walker--player .walker__art より 詳しく書かないと 上の relative に 負ける。 */
+.walker--player .walker__art--behind {
+  position: absolute;
+  left: -48%;
+  bottom: 0;
+  width: 80%;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25)) brightness(0.95);
+}
+
+/* 上部バー */
+.street__topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.street__place {
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--cream);
+  background: rgba(64, 42, 25, 0.8);
+  border-radius: 999px;
+}
+
+/* 下部の操作 */
+.street__controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  min-height: 58px;
+  background: linear-gradient(transparent, rgba(48, 32, 18, 0.72) 42%);
+}
+
+.street__walk {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  color: var(--cream);
+  background: rgba(64, 42, 25, 0.86);
+  border: 2px solid var(--wood-dark);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  touch-action: none;
+}
+
+.street__walk:hover {
+  background: var(--wood);
+}
+
+.street__walk:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.street__talk {
+  flex: 1;
+  padding: 11px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border: 2px solid var(--orange-deep);
+  border-radius: 11px;
+  box-shadow: var(--shadow-soft);
+  animation: talk-pulse 1.6s ease-in-out infinite;
+}
+
+.street__talk:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+@keyframes talk-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .street__talk {
+    animation: none;
+  }
+}
+
+.street__tip {
+  flex: 1;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: var(--cream);
+  background: rgba(48, 32, 18, 0.66);
+  border-radius: 10px;
+}
+
+/* 街並みでは 右下ボタンを 操作バーの 上に ずらす */
+.street .main__corner--br {
+  bottom: 68px;
+}
