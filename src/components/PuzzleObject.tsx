@@ -15,7 +15,7 @@ export function PuzzleObject({ look, solved }: Props) {
     <svg viewBox="0 0 120 200" className="streetpuzzle__art" aria-hidden="true">
       {look === 'clock' && (
         <g>
-          {/* 台つきの 大時計 */}
+          {/* 台つきの大時計 */}
           <rect x="46" y="96" width="28" height="92" fill="#7a5b3e" />
           <rect x="30" y="182" width="60" height="14" rx="5" fill="#5c422c" />
           <circle cx="60" cy="62" r="42" fill={frame} />
@@ -52,7 +52,7 @@ export function PuzzleObject({ look, solved }: Props) {
 
       {look === 'pocketwatch' && (
         <g>
-          {/* 台に置かれた 懐中時計 */}
+          {/* 台に置かれた懐中時計 */}
           <rect x="18" y="150" width="84" height="12" rx="4" fill="#6b5c44" />
           <path d="M28 150 L34 190 L44 190 L40 150 Z" fill="#5c4c38" />
           <path d="M92 150 L86 190 L76 190 L80 150 Z" fill="#5c4c38" />

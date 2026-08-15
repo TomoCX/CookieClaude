@@ -11,6 +11,13 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  cursor: grab;
+  /* 横のドラッグは 自前で さばく */
+  touch-action: pan-y;
+}
+
+.street--grabbing .street__world {
+  cursor: grabbing;
 }
 
 .street__sky {

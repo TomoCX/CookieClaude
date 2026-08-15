@@ -17,7 +17,7 @@ export const SCENARIOS: Scenario[] = [
     note: {
       id: 'note_letter',
       title: 'さしだしにんのない手紙',
-      body: '「まちの時計が十三回鳴る夜、まちの宝が消える」とだけ書かれている。消印はメープル町。文字はきれいだが、インクがところどころにじんでいる。',
+      body: '「町の時計が十三回鳴る夜、町の宝が消える」とだけ記されている。消印はメープル町。筆跡は整っているが、インクがところどころにじんでいる。',
     },
     lines: [
       {
@@ -29,31 +29,31 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'クロードと申します。こちらは助手のクッキー。手紙を いただいてまいりました。',
+        text: 'クロードと申します。こちらは助手のクッキー。手紙をいただいてまいりました。',
         sub: "The name is Claude. My assistant, Cookie. We came on account of a letter.",
       },
       {
         speaker: 'maurice',
         pose: 'surprised',
-        text: '手紙？ この町から？ ……はて、だれが そんなものを。',
+        text: '手紙？この町から？……はて、だれがそんなものを。',
         sub: 'A letter? From this town? Now who would send such a thing...',
       },
       {
         speaker: 'cookie',
         pose: 'think',
-        text: '差出人の名前が 書いてないんです。中身も 一行だけで。',
+        text: '差出人の名前が書いてないんです。中身も一行だけで。',
         sub: "There's no sender's name. Just a single line inside.",
       },
       {
         speaker: 'claude',
         pose: 'normal',
-        text: '「まちの時計が十三回鳴る夜、まちの宝が消える」。',
+        text: '「町の時計が十三回鳴る夜、町の宝が消える」。',
         sub: '"When the town clock strikes thirteen, the town\'s treasure vanishes."',
       },
       {
         speaker: 'maurice',
         pose: 'surprised',
-        text: '……じゅうさん回？ うちの時計は そんなに 鳴りませんぞ。',
+        text: '……じゅうさん回？うちの時計はそんなに鳴りませんぞ。',
         sub: '...Thirteen? Our clock has never struck thirteen in its life.',
       },
       {
@@ -71,13 +71,13 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'cookie',
         pose: 'surprised',
-        text: 'かっこいい……！ ぼく、いまのメモしておきます！',
+        text: 'かっこいい……！ぼく、いまのメモしておきます！',
         sub: "That's so cool...! I'm writing that down!",
       },
       {
         speaker: 'maurice',
         pose: 'normal',
-        text: 'ふむ……。話を聞くなら、大門広場へ お行きなさい。町じゅうの うわさが 集まる所です。',
+        text: 'ふむ……。話を聞くなら、大門広場へお行きなさい。町じゅうのうわさが集まる所です。',
         sub: 'Hm. If it is talk you want, try the Great Gate Plaza. Every rumor in town ends up there.',
       },
       {
@@ -96,19 +96,19 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'toby',
         pose: 'normal',
-        text: 'よう。荷を見ていくかい？ ……といっても、売れ残りばかりだがね。',
+        text: 'よう。荷を見ていくかい？……といっても、売れ残りばかりだがね。',
         sub: "Hey there. Care to see my wares? Though it's all leftovers, mind you.",
       },
       {
         speaker: 'cookie',
         pose: 'think',
-        text: 'この町、あまり お客さんが 来ないんですか？',
+        text: 'この町、あまりお客さんが来ないんですか？',
         sub: "Does this town not get many visitors?",
       },
       {
         speaker: 'toby',
         pose: 'normal',
-        text: '昔は 時計塔を 見に、よその町から わんさか 来たもんさ。……いまじゃ、地元の連中でさえ 見上げやしない。',
+        text: '昔は時計塔を見に、よその町からわんさか来たもんさ。……いまじゃ、地元の連中でさえ見上げやしない。',
         sub: 'Folks used to pour in from other towns just to see the clock tower. Now even the locals never look up.',
       },
       {
@@ -131,19 +131,19 @@ export const SCENARIOS: Scenario[] = [
     note: {
       id: 'note_rumor',
       title: '広場のうわさ',
-      body: '三日前の夜、時計塔の窓に明かりがついていた。だが時計塔の鍵を持つギアじいさんは、その晩ずっと宿屋にいたという。',
+      body: '三日前の夜、時計塔の窓に明かりが灯っていた。だが時計塔の鍵を持つギアじいさんは、その晩ずっと宿屋にいたという。',
     },
     lines: [
       {
         speaker: 'martha',
         pose: 'normal',
-        text: 'あら、旅の方？ うちは まんげつ亭って宿を やってるマーサだよ。',
+        text: 'あら、旅の方？うちはまんげつ亭って宿をやってるマーサだよ。',
         sub: "Oh, travelers? I'm Martha — I run the Full Moon Inn.",
       },
       {
         speaker: 'cookie',
         pose: 'normal',
-        text: '時計塔の管理人さんを さがしてるんですけど……。',
+        text: '時計塔の管理人さんをさがしてるんですけど……。',
         sub: "We're looking for the clock tower's caretaker...",
       },
       {
@@ -167,7 +167,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'cookie',
         pose: 'surprised',
-        text: 'ええっ！ じゃあ、だれかが忍びこんだってことですか？',
+        text: 'ええっ！じゃあ、だれかが忍びこんだってことですか？',
         sub: 'What?! So someone snuck in?',
       },
       {
@@ -179,7 +179,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'happy',
-        text: 'なるほど。……鍵はひとつ、人はふたつの場所にいられない。実に結構。',
+        text: 'なるほど。……鍵は一つ、人は二つの場所にいられない。実に結構。',
         sub: 'I see. One key, and no man can be in two places. Splendid.',
       },
       {
@@ -191,7 +191,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'ナゾが深まったのだからね。行こう、クッキー。宿屋と 時計塔だ。',
+        text: 'ナゾが深まったのだからね。行こう、クッキー。宿屋と時計塔だ。',
         sub: 'The mystery deepened. Come, Cookie. The inn, and then the tower.',
       },
     ],
@@ -206,7 +206,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'lily',
         pose: 'happy',
-        text: 'お花、いかがですか？ 今朝つんだばかりの メープルベルですよ。',
+        text: 'お花、いかがですか？今朝つんだばかりのメープルベルですよ。',
         sub: 'Flowers, sir? Maple bells, picked just this morning.',
       },
       {
@@ -218,13 +218,13 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'lily',
         pose: 'normal',
-        text: 'そう。時計塔の鐘に にてるでしょ。……この町の子は、みんな この花で 育つの。',
+        text: 'そう。時計塔の鐘ににてるでしょ。……この町の子は、みんなこの花で育つの。',
         sub: "That's right — like the tower bell. Every child in this town grows up with them.",
       },
       {
         speaker: 'lily',
         pose: 'think',
-        text: 'ちいさい子が ひとり、毎朝 ここで 花を 見てるわ。買わないけど、じっと ね。',
+        text: '小子がひとり、毎朝ここで花を見てるわ。買わないけど、じっとね。',
         sub: "There's a little one who comes every morning to look. Never buys. Just looks.",
       },
     ],
@@ -240,13 +240,13 @@ export const SCENARIOS: Scenario[] = [
     charm: {
       id: 'charm_spoon',
       name: 'まんげつのスプーン',
-      desc: 'まんげつ亭の名物スープについてくる銀のスプーン。よく磨くと、鏡のように文字が読める。',
+      desc: 'まんげつ亭の名物スープについてくる銀のスプーン。よく磨けば、鏡のように文字が読める。',
       icon: '🥄',
     },
     note: {
       id: 'note_alibi',
       title: 'ギアじいさんのアリバイ',
-      body: 'ギアじいさんは三日前の夜、九時から朝まで宿の食堂にいた。ただし十時ごろ、三十分ほど席をはずしている。上着は掛けにかけたままだった。',
+      body: 'ギアじいさんは三日前の夜、九時から朝まで宿の食堂にいた。ただし十時頃、三十分ほど席を外している。上着は掛けにかけたままだった。',
     },
     lines: [
       {
@@ -270,7 +270,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'cookie',
         pose: 'surprised',
-        text: '三十分！ 時計塔まで走れば、行って帰ってこられるんじゃ……？',
+        text: '三十分！時計塔まで走れば、行って帰ってこられるんじゃ……？',
         sub: 'Half an hour! You could run to the tower and back in that...',
       },
       {
@@ -288,7 +288,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'think',
-        text: '……ひとつだけ、うかがっても？ 時計塔の鍵は、いつも どこに？',
+        text: '……ひとつだけ、うかがっても？時計塔の鍵は、いつもどこに？',
         sub: 'May I ask one thing? Where do you keep the tower key?',
       },
       {
@@ -300,7 +300,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'happy',
-        text: 'ありがとうございます。ナゾが、ひとつ ほどけました。',
+        text: 'ありがとうございます。ナゾが、ひとつほどけました。',
         sub: 'Thank you. One knot has come loose.',
       },
     ],
@@ -321,13 +321,13 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'cookie',
         pose: 'happy',
-        text: 'いただきます！ ……あっ、スプーンが ぴかぴかだ。',
+        text: 'いただきます！……あっ、スプーンがぴかぴかだ。',
         sub: "Don't mind if I do! ...Oh, the spoon's so shiny.",
       },
       {
         speaker: 'martha',
         pose: 'normal',
-        text: '磨くのが 好きなのさ。裏返すと 顔が さかさに うつるだろ。子どもらは それで よく 遊んでたよ。',
+        text: '磨くのが好きなのさ。裏返すと顔がさかさにうつるだろ。子どもらはそれでよく遊んでたよ。',
         sub: "I like polishing them. Flip it over and your face turns upside down. The children used to play with that.",
       },
       {
@@ -350,17 +350,17 @@ export const SCENARIOS: Scenario[] = [
     note: {
       id: 'note_bell',
       title: '鐘のしかけ',
-      body: '時計塔の鐘は、歯車がひとつずれると打つ回数が 1 つ増える。十三回鳴らすのは故障ではなく、だれかが意図的にずらしたということ。',
+      body: '時計塔の鐘は、歯車がひとつずれると打つ回数が 1 つ増える。十三回鳴らすのは故障ではなく、何者かが意図的にずらしたということ。',
     },
     lines: [
       {
         speaker: 'gear',
         pose: 'normal',
-        text: '……入りなさい。わしの鍵で 開けてやる。中を見れば、わかることも あろう。',
+        text: '……入りなさい。わしの鍵で開けてやる。中を見れば、わかることもあろう。',
         sub: "...Go on in. I'll open it with my key. Perhaps seeing inside will tell you something.",
       },
       {
-        text: '時計塔の内部。歯車が、低くうなりながら 噛み合っている。',
+        text: '時計塔の内部。歯車が、低くうなりながら噛み合っている。',
         sub: 'Inside the clock tower. Gears meshing with a low, patient growl.',
       },
       {
@@ -372,7 +372,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'think',
-        text: 'よく気づいたね、クッキー。……歯車が ひとつ ずれると、鐘は 一回 多く鳴る。',
+        text: 'よく気づいたね、クッキー。……歯車がひとつずれると、鐘は一回多く鳴る。',
         sub: 'Well spotted, Cookie. Shift one gear, and the bell strikes once more than it should.',
       },
       {
@@ -384,7 +384,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'そう。予言ではない。予告だ。だれかが、そうなるように 手を加えたのだよ。',
+        text: 'そう。予言ではない。予告だ。だれかが、そうなるように手を加えたのだよ。',
         sub: 'Precisely. Not a prophecy — an announcement. Someone arranged it.',
       },
       {
@@ -402,19 +402,19 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: '上着は掛けにかかっていた。あの三十分のあいだ、鍵は 部屋に ひとりで いたわけだ。',
+        text: '上着は掛けにかかっていた。あの三十分のあいだ、鍵は部屋にひとりでいたわけだ。',
         sub: 'The coat hung on the peg. For that half hour, the key sat in that room alone.',
       },
       {
         speaker: 'cookie',
         pose: 'surprised',
-        text: 'あっ……！ じゃあ、あの晩 食堂にいた だれかが……！',
+        text: 'あっ……！じゃあ、あの晩食堂にいただれかが……！',
         sub: "Ah...! Then someone who was in the dining hall that night...!",
       },
       {
         speaker: 'claude',
         pose: 'normal',
-        text: '結論を急がないことだ。まだ、聞いていない声がひとつある。裏路地へ 行こう。',
+        text: '結論を急がないことだ。まだ、聞いていない声がひとつある。裏路地へ行こう。',
         sub: 'Let us not rush. There is still one voice we have not heard. To the back alley.',
       },
     ],
@@ -429,19 +429,19 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'hans',
         pose: 'normal',
-        text: 'この塔もな、来月には 取りこわしだとよ。',
+        text: 'この塔もな、来月には取りこわしだとよ。',
         sub: "They're pulling this tower down next month, you know.",
       },
       {
         speaker: 'cookie',
         pose: 'surprised',
-        text: 'ええっ！ こんなに 立派なのに……！',
+        text: 'ええっ！こんなに立派なのに……！',
         sub: "What?! But it's magnificent...!",
       },
       {
         speaker: 'hans',
         pose: 'normal',
-        text: '古いからな。あぶないってさ。……まあ、だれも 反対しなかったよ。だれも 見ちゃいなかったからな。',
+        text: '古いからな。あぶないってさ。……まあ、だれも反対しなかったよ。だれも見ちゃいなかったからな。',
         sub: "It's old. Dangerous, they say. Nobody objected. Nobody was looking at it anyway.",
       },
       {
@@ -463,13 +463,13 @@ export const SCENARIOS: Scenario[] = [
     charm: {
       id: 'charm_gear',
       name: 'ちいさな歯車',
-      desc: 'ミントが時計塔から持ち出した歯車。返された今も、彼女のポケットの重さをおぼえている。',
+      desc: 'ミントが時計塔から持ち出した歯車。返却された今も、彼女のポケットの重みを覚えている。',
       icon: '⚙️',
     },
     note: {
       id: 'note_truth',
       title: '十三回の意味',
-      body: 'ミントは時計塔が取りこわされると聞いて、町の人に塔のことを思い出してほしかった。「まちの宝」とは時計塔そのもの。手紙は犯行予告ではなく、助けを呼ぶ声だった。',
+      body: 'ミントは時計塔が取り壊されると聞いて、町の人に塔のことを思い出してほしかった。「町の宝」とは時計塔そのもの。手紙は犯行予告ではなく、助けを呼ぶ声だった。',
     },
     lines: [
       {
@@ -487,19 +487,19 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'mint',
         pose: 'surprised',
-        text: 'なんで……なんで わたしだって……！',
+        text: 'なんで……なんでわたしだって……！',
         sub: 'How... how did you know it was me...!',
       },
       {
         speaker: 'claude',
         pose: 'normal',
-        text: '鐘を十三回鳴らすには、歯車をずらすしかない。塔にのぼれた人は 限られている。',
+        text: '鐘を十三回鳴らすには、歯車をずらすしかない。塔にのぼれた人は限られている。',
         sub: 'To strike thirteen, a gear must be moved. Few could have climbed that tower.',
       },
       {
         speaker: 'claude',
         pose: 'think',
-        text: 'そして――だれよりも あの塔を 好きな人だ。',
+        text: 'そして――だれよりもあの塔を好きな人だ。',
         sub: 'And more than that — it had to be someone who loves that tower.',
       },
       {
@@ -511,13 +511,13 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'mint',
         pose: 'normal',
-        text: 'でも、だれも 気にしてなかった。だから――十三回 鳴らせば、みんな 顔を上げると思って。',
+        text: 'でも、だれも気にしてなかった。だから――十三回鳴らせば、みんな顔を上げると思って。',
         sub: "But nobody cared. So I thought — if it struck thirteen, everyone would look up.",
       },
       {
         speaker: 'cookie',
         pose: 'think',
-        text: '「まちの宝が消える」って……時計塔のことだったんだ。',
+        text: '「町の宝が消える」って……時計塔のことだったんだ。',
         sub: '"The town\'s treasure vanishes"... you meant the clock tower itself.',
       },
       {
@@ -529,7 +529,7 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'claude',
         pose: 'normal',
-        text: 'なら、やることは ひとつだ。……今夜、町じゅうに 顔を上げてもらおう。',
+        text: 'なら、やることはひとつだ。……今夜、町じゅうに顔を上げてもらおう。',
         sub: 'Then there is but one thing to do. Tonight, we shall make this town look up.',
       },
       {
@@ -539,11 +539,11 @@ export const SCENARIOS: Scenario[] = [
         sub: 'Yes, Professor!',
       },
       {
-        text: '――その夜、メープル町の時計は 十三回 鳴った。だれひとり、こわがらなかった。',
+        text: '――その夜、メープル町の時計は十三回鳴った。だれひとり、こわがらなかった。',
         sub: 'That night, the clock of Maple Town struck thirteen. Not one soul was afraid.',
       },
       {
-        text: 'ナゾは とけた。〈おわり〉',
+        text: 'ナゾはとけた。〈おわり〉',
         sub: 'The mystery is solved. — The End —',
       },
     ],
@@ -558,25 +558,25 @@ export const SCENARIOS: Scenario[] = [
       {
         speaker: 'pete',
         pose: 'normal',
-        text: 'そっちは 行き止まりだよ。……なんで来たの、おじさんたち。',
+        text: 'そっちは行き止まりだよ。……なんで来たの、おじさんたち。',
         sub: "Dead end that way. ...What're you two doing here, anyway?",
       },
       {
         speaker: 'cookie',
         pose: 'normal',
-        text: 'ちょっと 人を さがしてて。きみ、いつも ここに いるの？',
+        text: 'ちょっと人をさがしてて。きみ、いつもここにいるの？',
         sub: "Looking for someone. Do you always hang around here?",
       },
       {
         speaker: 'pete',
         pose: 'think',
-        text: 'ぼくじゃないよ。ミントだよ。……あいつ、三日前の夜も ずぶぬれで 帰ってきた。',
+        text: 'ぼくじゃないよ。ミントだよ。……あいつ、三日前の夜もずぶぬれで帰ってきた。',
         sub: "Not me. Mint. ...She came back soaked through, three nights back.",
       },
       {
         speaker: 'claude',
         pose: 'think',
-        text: '雨の夜に、外に いたということか。……ありがとう、坊や。',
+        text: '雨の夜に、外にいたということか。……ありがとう、坊や。',
         sub: 'Out in the rain, then. ...Thank you, lad.',
       },
     ],

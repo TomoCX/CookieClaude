@@ -164,7 +164,7 @@ export function PuzzleFigure({ id }: Props) {
           <g>
             <ClockFace cx={82} cy={65} r={46} hour={4} minute={20} />
             <text x="82" y="126" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              かがみに うつった 時計
+              鏡に映った時計
             </text>
             <rect x="152" y="10" width="6" height="110" rx="3" fill="#9fc0cc" opacity="0.8" />
             <ClockFace cx={228} cy={65} r={46} hour={7} minute={40} dim />
@@ -198,7 +198,7 @@ export function PuzzleFigure({ id }: Props) {
           <g>
             <ClockFace cx={80} cy={65} r={46} hour={12} minute={0} />
             <text x="80" y="126" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              12時 かさなる
+              12時に重なる
             </text>
             <path
               d="M144 65 L184 65"
@@ -210,7 +210,7 @@ export function PuzzleFigure({ id }: Props) {
             <path d="M184 65 L174 59 L174 71 Z" fill="#8a6f45" />
             <ClockFace cx={240} cy={65} r={46} hour={1} minute={5} dim />
             <text x="240" y="126" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              つぎは いつ？
+              次はいつ？
             </text>
           </g>
         )}
@@ -219,15 +219,15 @@ export function PuzzleFigure({ id }: Props) {
           <g>
             <ClockFace cx={58} cy={60} r={40} hour={10} minute={11} />
             <text x="58" y="120" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              1分 すすむ
+              1分進む
             </text>
             <ClockFace cx={160} cy={60} r={40} hour={10} minute={9} />
             <text x="160" y="120" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              1分 おくれる
+              1分遅れる
             </text>
             <ClockFace cx={262} cy={60} r={40} hour={10} minute={10} dim />
             <text x="262" y="120" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
-              とまっている
+              止まっている
             </text>
           </g>
         )}

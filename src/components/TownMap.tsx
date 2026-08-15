@@ -9,8 +9,8 @@ interface Props {
   onSelect: (id: string | null) => void;
 }
 
-/** メイン画面のマップ。町の俯瞰図に 行き先ピンが 並ぶ。
-    ナゾは マップではなく、それぞれの街並みの中に 置いてある。 */
+/** メイン画面のマップ。町の俯瞰図に行き先ピンが並ぶ。
+    ナゾはマップではなく、それぞれの街並みの中に置いてある。 */
 export function TownMap({
   places,
   openPlaces,
@@ -128,7 +128,7 @@ export function TownMap({
             className={cls}
             style={{ left: `${p.x}%`, top: `${p.y}%` }}
             disabled={!open}
-            aria-label={open ? p.name : 'まだ行けない場所'}
+            aria-label={open ? p.name : '未到達の地点'}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(isSelected ? null : p.id);

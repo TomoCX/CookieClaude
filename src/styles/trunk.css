@@ -23,6 +23,11 @@
   gap: 8px;
 }
 
+/* 歯車を外したぶん、題名が 中央に 来るように 左右を そろえる */
+.trunk__spacer {
+  width: 34px;
+}
+
 .trunk__title {
   margin: 0;
   font-size: 0.85rem;
@@ -443,17 +448,17 @@
 /* 下のタブ */
 .trunk__footer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .tab {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 9px 6px;
-  font-size: 0.68rem;
+  gap: 4px;
+  padding: 9px 4px;
+  font-size: 0.64rem;
   font-weight: 800;
   color: var(--ink);
   background: var(--cream);

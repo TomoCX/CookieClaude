@@ -5,7 +5,7 @@ import { PUZZLES, picaratFor } from '../data/puzzles';
 
 const SAVE_KEY = 'cookieclaude.save.v2';
 
-/** はじめから始めるときの状態 */
+/** 最初から始めるときの状態 */
 export function createInitialState(): GameState {
   return {
     picarat: 0,
@@ -26,12 +26,12 @@ export function createInitialState(): GameState {
 
 /* ---- 集計 ---- */
 
-/** とけたナゾの数 */
+/** 解いたナゾの数 */
 export function solvedCount(state: GameState): number {
   return state.solvedPuzzles.length;
 }
 
-/** みつけたナゾの数 */
+/** 発見したナゾの数 */
 export function foundCount(state: GameState): number {
   return state.foundPuzzles.length;
 }

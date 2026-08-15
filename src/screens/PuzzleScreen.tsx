@@ -9,11 +9,11 @@ interface Props {
   state: GameState;
   /** まちがえた */
   onMiss: () => void;
-  /** ヒントを 1 つ見る（ひらめきコイン 1 まい） */
+  /** ヒントを一つ見る（ひらめきコイン1枚） */
   onUseHint: () => void;
   /** 正解した */
   onSolved: () => void;
-  /** マップへ戻る */
+  /** 街へ戻る */
   onQuit: () => void;
 }
 
@@ -62,7 +62,7 @@ export function PuzzleScreen({
     return (
       <div className="puzzle puzzle--clear">
         <div className="clear">
-          <p className="clear__head">せいかい！</p>
+          <p className="clear__head">正解</p>
           <h2 className="clear__title">
             ナゾ {String(puzzle.no).padStart(3, '0')}・{puzzle.title}
           </h2>
@@ -71,13 +71,13 @@ export function PuzzleScreen({
               +{reward} <em>ピカラット</em>
             </p>
           )}
-          {alreadySolved && <p className="clear__again">（このナゾは 解決ずみ）</p>}
+          {alreadySolved && <p className="clear__again">※ このナゾは解決済み</p>}
           <div className="clear__explain">
-            <h3>かいせつ</h3>
+            <h3>解説</h3>
             <p>{puzzle.explanation}</p>
           </div>
           <button type="button" className="result__ok" onClick={onQuit}>
-            マップへ もどる
+            街へ戻る
           </button>
         </div>
       </div>
@@ -87,7 +87,7 @@ export function PuzzleScreen({
   return (
     <div className="puzzle">
       <div className="puzzle__bar">
-        <button type="button" className="iconbtn" onClick={onQuit} title="やめる">
+        <button type="button" className="iconbtn" onClick={onQuit} title="中断">
           ↰
         </button>
         <span className="puzzle__no">ナゾ {String(puzzle.no).padStart(3, '0')}</span>
@@ -103,7 +103,7 @@ export function PuzzleScreen({
           <ul className="hintlist">
             {puzzle.hints.slice(0, hintsSeen).map((h, i) => (
               <li key={i}>
-                <span className="hintlist__no">ヒント {i + 1}</span>
+                <span className="hintlist__no">ヒント{i + 1}</span>
                 {h}
               </li>
             ))}
@@ -113,7 +113,7 @@ export function PuzzleScreen({
         <div className={`answer${wrong ? ' answer--wrong' : ''}`}>
           {puzzle.answer.kind === 'number' ? (
             <label className="answer__num">
-              <span className="answer__label">こたえ</span>
+              <span className="answer__label">答え</span>
               <input
                 type="number"
                 inputMode="numeric"
@@ -142,9 +142,9 @@ export function PuzzleScreen({
           )}
         </div>
 
-        {wrong && <p className="puzzle__wrong">ざんねん。もういちど 考えてみよう。</p>}
+        {wrong && <p className="puzzle__wrong">不正解。もう一度考えてみよう。</p>}
         {misses > 0 && !wrong && (
-          <p className="puzzle__misses">まちがえた回数：{misses} 回</p>
+          <p className="puzzle__misses">誤答：{misses} 回</p>
         )}
       </div>
 
@@ -159,8 +159,8 @@ export function PuzzleScreen({
           disabled={hintsSeen >= puzzle.hints.length || state.coin < 1}
         >
           {hintsSeen >= puzzle.hints.length
-            ? 'ヒントは もうない'
-            : `ヒント ${hintsSeen + 1}（コイン 1まい）`}
+            ? 'ヒントは残っていない'
+            : `ヒント${hintsSeen + 1}（コイン1枚）`}
         </button>
         <button
           type="button"
@@ -168,7 +168,7 @@ export function PuzzleScreen({
           onClick={check}
           disabled={!canAnswer}
         >
-          こたえる
+          答える
         </button>
       </div>
     </div>

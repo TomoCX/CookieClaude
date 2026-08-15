@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import type { BackgroundId } from '../types';
 
 /** 場所ごとの色づかい */
@@ -62,7 +62,7 @@ const PALETTES: Record<BackgroundId, Palette> = {
   },
 };
 
-/** 建物の並び（幅・高さ・色番号）。街並みが単調にならないよう ずらしてある。 */
+/** 建物の並び（幅・高さ・色番号）。街並みが単調にならないようずらしてある。 */
 const BUILDINGS = [
   [70, 150, 0],
   [58, 120, 1],
@@ -82,30 +82,32 @@ interface Props {
   bg: BackgroundId;
   /** 0（左はし）〜 1（右はし）で表したカメラ位置 */
   cameraT: number;
+  /** ドラッグで見わたすための handler をまとめて受けとる */
+  surface?: HTMLAttributes<HTMLDivElement>;
   /** 道の上に置くもの（人物など） */
   children: ReactNode;
 }
 
 /**
- * 街並み。奥・中・手前の 3 層を ちがう速さで動かして、道を進んでいる感じを出す。
- * 手前の層は横幅 300%、その中の座標が そのまま「道の 0〜1」になる。
+ * 街並み。奥・中・手前の 3 層をちがう速さで動かして、道を進んでいる感じを出す。
+ * 手前の層は横幅 300%、その中の座標がそのまま「道の 0〜1」になる。
  */
-export function StreetScene({ bg, cameraT, children }: Props) {
+export function StreetScene({ bg, cameraT, surface, children }: Props) {
   const pal = PALETTES[bg];
   const t = Math.min(Math.max(cameraT, 0), 1);
 
   /**
    * translateX の % は「その要素じたいの幅」に対する割合。
-   * 幅 L%（画面に対する割合）の層が すみからすみまで動く量は (L-100)/L。
+   * 幅 L%（画面に対する割合）の層がすみからすみまで動く量は (L-100)/L。
    * 手前 300% → 66.7%、中 200% → 50%、奥 140% → 28.6%。
-   * この比が そのまま 層ごとの 動く速さの ちがいになる。
+   * この比がそのまま層ごとの動く速さのちがいになる。
    */
   const shiftNear = t * (200 / 3);
   const shiftMid = t * 50;
   const shiftFar = t * (40 / 1.4);
 
   return (
-    <div className="street__world">
+    <div className="street__world" {...surface}>
       {/* 空 */}
       <div
         className="street__sky"
@@ -114,7 +116,7 @@ export function StreetScene({ bg, cameraT, children }: Props) {
         }}
       />
 
-      {/* 奥の層（いちばん ゆっくり動く） */}
+      {/* 奥の層（いちばんゆっくり動く） */}
       <div
         className="street__layer street__layer--far"
         style={{ transform: `translateX(${-shiftFar}%)` }}

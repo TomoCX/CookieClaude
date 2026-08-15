@@ -7,7 +7,6 @@ import { MainScreen } from './screens/MainScreen';
 import { StreetScreen } from './screens/StreetScreen';
 import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
-import { MenuScreen } from './screens/MenuScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setSe, unlock } from './audio/audio';
@@ -36,9 +35,9 @@ export function App() {
   const [screen, setScreen] = useState<ScreenId>('main');
   /** 街並みに戻れるように、いま入っている街並みを覚えておく */
   const [streetId, setStreetId] = useState<string | null>(null);
-  /** メインメニュー・メニュー画面を「とじる」で戻る先 */
+  /** メインメニュー・メニュー画面を「閉じる」で戻る先 */
   const [returnTo, setReturnTo] = useState<ScreenId>('main');
-  /** 街並みごとの 立ち位置。会話に入って戻っても そのつづきから 歩けるように覚えておく */
+  /** 街並みごとの立ち位置。会話に入って戻ってもその続きから歩けるように覚えておく */
   const streetPos = useRef<Record<string, number>>({});
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
@@ -46,7 +45,7 @@ export function App() {
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
 
-  // 設定を 覚えておき、音にも すぐ 反映する
+  // 設定を覚えておき、音にもすぐ反映する
   useEffect(() => {
     saveSettings(settings);
     setBgm(settings.bgmOn, settings.bgmVolume);
@@ -62,7 +61,7 @@ export function App() {
     return () => clearInterval(id);
   }, [booting]);
 
-  /** マップから 街並みへ入る。入りなおしたときは 道の入口から。 */
+  /** マップから街並みへ入る。入りなおしたときは道の入口から。 */
   const enterPlace = useCallback((place: Place) => {
     setState((s) => ({ ...s, placeId: place.id }));
     delete streetPos.current[place.streetId];
@@ -70,7 +69,7 @@ export function App() {
     setScreen('street');
   }, []);
 
-  /** 街並みで 人に話しかけた */
+  /** 街並みで人に話しかけた */
   const talkTo = useCallback((id: string) => {
     setScenarioId(id);
     setScreen('scenario');
@@ -99,26 +98,24 @@ export function App() {
     [scenarioId, state.clearedScenarios, streetId],
   );
 
-  /** 街並みで ナゾを 押した */
+  /** 街並みでナゾを押した */
   const openPuzzle = useCallback((id: string) => {
     setState((s) => applyPuzzleFound(s, id));
     setPuzzleId(id);
     setScreen('puzzle');
   }, []);
 
-  /** メニュー画面・メインメニューを開く（戻り先を覚えておく） */
+  /** メインメニューを開く（戻り先を覚えておく） */
   const openOverlayScreen = useCallback(
-    (next: 'menu' | 'mainMenu') => {
-      setReturnTo((prev) =>
-        screen === 'menu' || screen === 'mainMenu' ? prev : screen,
-      );
+    (next: 'mainMenu') => {
+      setReturnTo((prev) => (screen === 'mainMenu' ? prev : screen));
       setScreen(next);
     },
     [screen],
   );
 
   const backFromOverlay = useCallback(() => {
-    setScreen(returnTo === 'menu' || returnTo === 'mainMenu' ? 'main' : returnTo);
+    setScreen(returnTo === 'mainMenu' ? 'main' : returnTo);
   }, [returnTo]);
 
   const scenario = scenarioId ? getScenario(scenarioId) : null;
@@ -132,7 +129,6 @@ export function App() {
           <MainScreen
             state={state}
             onEnterPlace={enterPlace}
-            onOpenMenu={() => openOverlayScreen('menu')}
             onOpenMainMenu={() => openOverlayScreen('mainMenu')}
           />
         )}
@@ -152,7 +148,6 @@ export function App() {
               setStreetId(null);
               setScreen('main');
             }}
-            onOpenMenu={() => openOverlayScreen('menu')}
             onOpenMainMenu={() => openOverlayScreen('mainMenu')}
           />
         )}
@@ -179,14 +174,6 @@ export function App() {
           />
         )}
 
-        {screen === 'menu' && (
-          <MenuScreen
-            state={state}
-            onBack={backFromOverlay}
-            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
-          />
-        )}
-
         {screen === 'mainMenu' && (
           <MainMenuScreen
             state={state}
@@ -194,7 +181,6 @@ export function App() {
             onChangeSettings={setSettings}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
             onClose={backFromOverlay}
-            onOpenMenu={() => openOverlayScreen('menu')}
           />
         )}
 
@@ -234,16 +220,16 @@ function ResultOverlay({
   return (
     <div className="overlay" onClick={onClose} role="presentation">
       <div className="result" onClick={(e) => e.stopPropagation()}>
-        <p className="result__head">話を 聞いた</p>
+        <p className="result__head">聞き込みを終えた</p>
         <h2 className="result__title">{result.title}</h2>
         <ul className="result__rewards">
           <li>
             <span>ひらめきコイン</span>
-            <strong>+{result.coin} まい</strong>
+            <strong>+{result.coin} 枚</strong>
           </li>
           {result.note && (
             <li>
-              <span>ちょうさメモ</span>
+              <span>調査メモ</span>
               <strong>{result.note}</strong>
             </li>
           )}
@@ -255,10 +241,10 @@ function ResultOverlay({
           )}
         </ul>
         {result.unlocked && (
-          <p className="result__unlock">あたらしい 行き先が ふえた！</p>
+          <p className="result__unlock">新たな行き先が開かれた</p>
         )}
         <button type="button" className="result__ok" onClick={onClose}>
-          つづける
+          続ける
         </button>
       </div>
     </div>
@@ -284,11 +270,11 @@ function BootOverlay({
           ナゾ解き事件簿
         </h1>
         <p className="boot__lead">
-          まちの時計が 十三回 鳴る夜、まちの宝が 消える――
+          町の時計が十三回鳴る夜、町の宝が消える――
         </p>
         <div className="boot__buttons">
           <button type="button" className="boot__btn" onClick={onNewGame}>
-            はじめから
+            最初から
           </button>
           <button
             type="button"
@@ -296,11 +282,11 @@ function BootOverlay({
             onClick={onContinue}
             disabled={!canContinue}
           >
-            つづきから
+            続きから
           </button>
         </div>
         {!canContinue && (
-          <p className="boot__note">※ セーブデータは まだ ありません</p>
+          <p className="boot__note">※ セーブデータはまだありません</p>
         )}
       </div>
     </div>

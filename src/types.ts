@@ -5,9 +5,8 @@ export type ScreenId =
   | 'main' // メイン画面（マップ / 写真3枚目の下側）
   | 'street' // 街並み画面（マップから入った先。人に話しかける）
   | 'scenario' // シナリオ会話画面（写真2枚目）
-  | 'puzzle' // ナゾ解き画面（マップの時計を押すと開く）
-  | 'menu' // メニュー画面（ステータス / 写真1枚目の上側）
-  | 'mainMenu'; // メインメニュー（トランク / 写真1枚目の下側）
+  | 'puzzle' // ナゾ解き画面（街並みの時計を押すと開く）
+  | 'mainMenu'; // メインメニュー（トランク）
 
 /** 立ち絵の表示位置 */
 export type Side = 'left' | 'right';
@@ -81,7 +80,7 @@ export interface Scenario {
   /** 本筋の会話か、町の人とのちょっとした立ち話か */
   kind: 'main' | 'flavor';
   lines: DialogueLine[];
-  /** 読了時にもらえる ひらめきコイン */
+  /** 読了時にもらえるひらめきコイン */
   coin: number;
   /** 読了時に手に入る調査メモ */
   note?: Note;
@@ -125,14 +124,14 @@ export interface Street {
   npcs: Npc[];
   /** 置かれているナゾ */
   puzzles: StreetPuzzle[];
-  /** 入ってきたときの カメラの位置（0〜1） */
+  /** 入ってきたときのカメラの位置（0〜1） */
   startX: number;
 }
 
 /** マップ上の場所 */
 export interface Place {
   id: string;
-  /** げんざいち表示用の名前 */
+  /** 現在地表示用の名前 */
   name: string;
   /** ふりがな */
   ruby: string;
@@ -158,7 +157,7 @@ export type FigureId =
   | 'clocks3'
   | 'strike';
 
-/** こたえの形式 */
+/** 答えの形式 */
 export type PuzzleAnswer =
   | { kind: 'number'; value: number; unit: string }
   | { kind: 'choice'; options: string[]; correct: number };
@@ -166,7 +165,7 @@ export type PuzzleAnswer =
 /** 独立したナゾ解き 1 問 */
 export interface Puzzle {
   id: string;
-  /** ナゾじてんに並ぶ番号 */
+  /** ナゾ事典に並ぶ番号 */
   no: number;
   title: string;
   /** 1回目・2回目・3回目以降の正解でもらえるピカラット */
@@ -174,7 +173,7 @@ export interface Puzzle {
   question: string;
   figure: FigureId;
   answer: PuzzleAnswer;
-  /** ヒントは 1 つにつき ひらめきコイン 1 まい */
+  /** ヒントは 1 つにつきひらめきコイン 1 まい */
   hints: string[];
   /** 正解したあとに読める解説 */
   explanation: string;
@@ -183,7 +182,7 @@ export interface Puzzle {
 /* ---- 設定 ---- */
 
 /** 画面の大きさ */
-export type ScreenSize = 'small' | 'medium' | 'large' | 'full';
+export type ScreenSize = 'small' | 'medium' | 'large' | 'xlarge' | 'full';
 
 /** ゲームの設定。進行状況とは別に保存する。 */
 export interface Settings {
@@ -200,25 +199,25 @@ export interface Settings {
 
 /** セーブ対象のゲーム進行状況 */
 export interface GameState {
-  /** トータルひらめきしすう（ピカラット） */
+  /** ひらめき指数（累計）（ピカラット） */
   picarat: number;
   /** ひらめきコイン */
   coin: number;
   /** プレイ時間（秒） */
   playSeconds: number;
-  /** げんざいち（Place.id） */
+  /** 現在地（Place.id） */
   placeId: string;
   /** 行けるようになった場所 */
   openPlaces: string[];
   /** 読み終えたシナリオ */
   clearedScenarios: string[];
-  /** みつけたナゾ（一度でも開いたもの） */
+  /** 発見したナゾ（一度でも開いたもの） */
   foundPuzzles: string[];
-  /** といたナゾ */
+  /** 解いたナゾ */
   solvedPuzzles: string[];
-  /** ナゾごとの まちがえた回数 */
+  /** ナゾごとの誤答 */
   misses: Record<string, number>;
-  /** ナゾごとに 見たヒントの数 */
+  /** ナゾごとに見たヒントの数 */
   hints: Record<string, number>;
   /** 集めた調査メモ */
   notes: Note[];

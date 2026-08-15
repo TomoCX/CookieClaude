@@ -8,17 +8,14 @@ interface Props {
   state: GameState;
   /** 場所を選んだとき（街並みへ） */
   onEnterPlace: (place: Place) => void;
-  /** 右上ボタン: メニュー画面へ戻る */
-  onOpenMenu: () => void;
   /** 右下ボタン: メインメニューへ戻る */
   onOpenMainMenu: () => void;
 }
 
-/** メイン画面（写真3枚目の下側）。町のマップから 街並みや ナゾへ 入っていく。 */
+/** メイン画面（写真3枚目の下側）。町のマップから街並みやナゾへ入っていく。 */
 export function MainScreen({
   state,
   onEnterPlace,
-  onOpenMenu,
   onOpenMainMenu,
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -38,18 +35,18 @@ export function MainScreen({
 
   const hint = selectedPlace
     ? visited
-      ? `${selectedPlace.name}：もういちど 町の人に 会ってみよう`
-      : `${selectedPlace.name}へ 行ってみよう`
+      ? `${selectedPlace.name}：再訪して話を聞ける`
+      : `${selectedPlace.name}へ向かおう`
     : nextPlace
-      ? `${nextPlace.name}のことを 調べてみよう`
-      : 'ものがたりは 終わった。町を 歩いて のこりの ナゾを といてみよう';
+      ? `${nextPlace.name}を調べよう`
+      : '物語は完結した。町を巡り、残るナゾを解こう';
 
   return (
     <div className="main">
-      {/* 上部バー：とけたナゾの数と げんざいち */}
+      {/* 上部バー：解いたナゾの数と現在地 */}
       <div className="main__topbar">
         <div className="main__counter">
-          <span className="main__counter-label">とけたナゾ</span>
+          <span className="main__counter-label">解いたナゾ</span>
           <span className="main__counter-value">
             {String(solvedCount(state)).padStart(3, '0')}
           </span>
@@ -69,19 +66,6 @@ export function MainScreen({
         selectedId={selected}
         onSelect={setSelected}
       />
-
-      {/* 右上：メニュー画面へ戻るボタン */}
-      <button
-        type="button"
-        className="main__corner main__corner--tr"
-        onClick={onOpenMenu}
-        title="メニュー画面へ"
-      >
-        <span className="main__corner-icon" aria-hidden="true">
-          ⚙
-        </span>
-        <span className="main__corner-label">メニュー</span>
-      </button>
 
       {/* 右下：メインメニューへ戻るボタン */}
       <button
@@ -108,7 +92,7 @@ export function MainScreen({
               onEnterPlace(selectedPlace);
             }}
           >
-            {visited ? 'もういちど 行く' : 'ここへ 行く'} ▶
+            {visited ? '再訪する' : 'ここへ行く'} ▶
           </button>
         )}
       </div>

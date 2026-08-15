@@ -6,13 +6,13 @@ interface Props {
   onChange: (next: Settings) => void;
 }
 
-/** メインメニューの「せってい」。画面の大きさ・BGM・効果音を 調整する。 */
+/** メインメニューの「設定」。画面の大きさ・BGM・効果音を調整する。 */
 export function SettingsPanel({ settings, onChange }: Props) {
   const patch = (part: Partial<Settings>) => onChange({ ...settings, ...part });
 
   return (
     <div className="panel__body">
-      <h2 className="panel__title">せってい</h2>
+      <h2 className="panel__title">設定</h2>
 
       <h3 className="panel__sub">画面の大きさ</h3>
       <div className="sizepick">
@@ -29,7 +29,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
         ))}
       </div>
 
-      <h3 className="panel__sub">おと</h3>
+      <h3 className="panel__sub">音声</h3>
 
       <SoundRow
         name="BGM"
@@ -39,7 +39,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
         onVolume={(v) => patch({ bgmVolume: v })}
       />
       <SoundRow
-        name="こうかおん（SE）"
+        name="効果音（SE）"
         on={settings.seOn}
         volume={settings.seVolume}
         onToggle={(v) => patch({ seOn: v })}
@@ -47,8 +47,8 @@ export function SettingsPanel({ settings, onChange }: Props) {
       />
 
       <p className="panel__note">
-        音は 音声ファイルを 使わず、ブラウザで その場で 作っている。
-        設定は この端末に 覚えておくので、セーブとは べつに 残る。
+        音声ファイルは使用せず、ブラウザ上で合成している。
+        設定はこの端末に保存され、セーブデータとは別に残る。
       </p>
     </div>
   );
@@ -78,7 +78,7 @@ function SoundRow({ name, on, volume, onToggle, onVolume }: RowProps) {
         </button>
       </div>
       <label className="soundrow__slider">
-        <span className="soundrow__srlabel">おおきさ</span>
+        <span className="soundrow__srlabel">音量</span>
         <input
           type="range"
           min={0}

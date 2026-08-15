@@ -9,19 +9,21 @@ import { StreetScene } from '../components/StreetScene';
 import { PuzzleObject } from '../components/PuzzleObject';
 import { playSe } from '../audio/audio';
 
-/** 1 秒あたりに カメラが 進む道の割合 */
+/** 1 秒あたりにカメラが進む道の割合 */
 const PAN_SPEED = 0.3;
 /** 画面に見えている道の幅（手前の層の 1/3） */
 const VIEW = 1 / 3;
-/** 画面の まんなか近くと みなす距離 */
+/** 画面のまんなか近くとみなす距離 */
 const FOCUS_RANGE = 0.075;
-/** カメラの まんなかが 動ける範囲 */
+/** カメラのまんなかが動ける範囲 */
 const MIN_C = VIEW / 2;
 const MAX_C = 1 - VIEW / 2;
-/** フェードにかける時間（ミリ秒）。CSS の street__fade と そろえる。 */
+/** フェードにかける時間（ミリ秒）。CSS の street__fade とそろえる。 */
 const FADE_MS = 380;
+/** これ以上指が動いたら、クリックではなくドラッグとみなす */
+const DRAG_SLOP = 5;
 
-/** クリックしたものを どう開くか */
+/** クリックしたものをどう開くか */
 type Pending =
   | { kind: 'talk'; scenarioId: string }
   | { kind: 'puzzle'; puzzleId: string };
@@ -29,26 +31,24 @@ type Pending =
 interface Props {
   street: Street;
   state: GameState;
-  /** 入ってきたときの カメラ位置（会話から戻ったときは そのつづきから） */
+  /** 入ってきたときのカメラ位置（会話から戻ったときはその続きから） */
   initialX: number;
-  /** カメラが 動くたびに 知らせる */
+  /** カメラが動くたびに知らせる */
   onMove: (x: number) => void;
   /** 人に話しかけた */
   onTalk: (scenarioId: string) => void;
-  /** ナゾを 開いた */
+  /** ナゾを開いた */
   onOpenPuzzle: (puzzleId: string) => void;
-  /** マップへ戻る */
+  /** 街へ戻る */
   onBackToMap: () => void;
-  /** 右上ボタン: メニュー画面 */
-  onOpenMenu: () => void;
   /** 右下ボタン: メインメニュー */
   onOpenMainMenu: () => void;
 }
 
 /**
  * 街並み画面。
- * カメラ＝クロードたちの目線なので、画面に 自分の姿は 出さない。
- * ◀ ▶ で 道を見わたし、人や ナゾを クリックすると フェードして その画面へ入る。
+ * カメラ＝クロードたちの目線なので、画面に自分の姿は出さない。
+ * ◀ ▶ で道を見わたし、人やナゾをクリックするとフェードしてその画面へ入る。
  */
 export function StreetScreen({
   street,
@@ -58,21 +58,25 @@ export function StreetScreen({
   onTalk,
   onOpenPuzzle,
   onBackToMap,
-  onOpenMenu,
   onOpenMainMenu,
 }: Props) {
   const [center, setCenter] = useState(() =>
     Math.min(MAX_C, Math.max(MIN_C, initialX)),
   );
-  /** これから 開くもの。入っているあいだ 画面を 暗くする。 */
+  /** これから開くもの。入っているあいだ画面を暗くする。 */
   const [pending, setPending] = useState<Pending | null>(null);
-  /** 入ってきた直後の 明るくなる演出 */
+  /** 入ってきた直後の明るくなる演出 */
   const [entering, setEntering] = useState(true);
-  /** ◀ ▶ で 押されている向き */
+  /** ◀ ▶ で押されている向き */
   const held = useRef(0);
   const centerRef = useRef(center);
   const onMoveRef = useRef(onMove);
   onMoveRef.current = onMove;
+  /** ドラッグ中の指の情報 */
+  const drag = useRef<{ id: number; fromX: number; fromCenter: number } | null>(null);
+  /** 直前の操作がドラッグだったか。人やナゾのクリックを打ち消すのに使う。 */
+  const dragged = useRef(false);
+  const [grabbing, setGrabbing] = useState(false);
 
   const place = getPlace(street.placeId);
 
@@ -91,10 +95,11 @@ export function StreetScreen({
     [street.npcs, state.clearedScenarios],
   );
 
-  /** クリックしたら フェードしてから 画面を 切りかえる */
+  /** クリックしたらフェードしてから画面を切りかえる */
   const open = useCallback(
     (next: Pending) => {
-      if (pending) return;
+      // ドラッグの終わりに出る click は無視する
+      if (pending || dragged.current) return;
       held.current = 0;
       playSe('fade');
       setPending(next);
@@ -106,7 +111,7 @@ export function StreetScreen({
     [pending, onTalk, onOpenPuzzle],
   );
 
-  /** カメラを 動かす */
+  /** カメラを動かす */
   const panTo = (next: number) => {
     const clamped = Math.min(MAX_C, Math.max(MIN_C, next));
     centerRef.current = clamped;
@@ -132,7 +137,7 @@ export function StreetScreen({
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  /** 画面の まんなかに 来ているもの */
+  /** 画面のまんなかに来ているもの */
   const focusNpc = npcs.find((n) => Math.abs(n.x - center) < FOCUS_RANGE);
   const focusPuzzle = street.puzzles.find((p) => Math.abs(p.x - center) < FOCUS_RANGE);
 
@@ -169,6 +174,47 @@ export function StreetScreen({
     };
   }, [npcs, street.puzzles, open, onBackToMap]);
 
+  /** 画面をつかんで見わたす。矢印ボタンと併用できる。 */
+  const surface = {
+    onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.button !== 0 || pending) return;
+      // ここでは まだ setPointerCapture しない。
+      // 押した時点で捕まえると click の宛先を奪ってしまい、
+      // 人やナゾのボタンが押せなくなる。
+      drag.current = {
+        id: e.pointerId,
+        fromX: e.clientX,
+        fromCenter: centerRef.current,
+      };
+      dragged.current = false;
+      held.current = 0;
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
+      const d = drag.current;
+      if (!d || d.id !== e.pointerId) return;
+      const width = e.currentTarget.clientWidth || 1;
+      const dx = e.clientX - d.fromX;
+      // しきい値を こえて はじめて ドラッグとみなし、そこで 指を 捕まえる
+      if (!dragged.current) {
+        if (Math.abs(dx) <= DRAG_SLOP) return;
+        dragged.current = true;
+        setGrabbing(true);
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }
+      // 指の動きと景色が 1 対 1 になるように、画面幅 ＝ 見えている道幅（VIEW）で換算する
+      panRef.current(d.fromCenter - (dx / width) * VIEW);
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
+      if (drag.current?.id !== e.pointerId) return;
+      drag.current = null;
+      setGrabbing(false);
+    },
+    onPointerCancel: () => {
+      drag.current = null;
+      setGrabbing(false);
+    },
+  };
+
   const cameraT = (center - MIN_C) / (MAX_C - MIN_C);
 
   const hold = (dir: 1 | -1) => ({
@@ -183,24 +229,24 @@ export function StreetScreen({
     },
   });
 
-  /** 下のバーに 出す案内 */
+  /** 下のバーに出す案内 */
   const action = focusNpc
     ? {
-        label: `${getCharacter(focusNpc.characterId)?.name}に 話しかける`,
+        label: `${getCharacter(focusNpc.characterId)?.name}に話しかける`,
         run: () => open({ kind: 'talk', scenarioId: focusNpc.scenarioId }),
       }
     : focusPuzzle
       ? {
           label: state.solvedPuzzles.includes(focusPuzzle.puzzleId)
-            ? 'といた ナゾを 見なおす'
-            : 'ナゾに ちょうせんする',
+            ? '解いたナゾを見直す'
+            : 'ナゾに挑戦する',
           run: () => open({ kind: 'puzzle', puzzleId: focusPuzzle.puzzleId }),
         }
       : null;
 
   return (
-    <div className="street">
-      <StreetScene bg={street.bg} cameraT={cameraT}>
+    <div className={`street${grabbing ? ' street--grabbing' : ''}`}>
+      <StreetScene bg={street.bg} cameraT={cameraT} surface={surface}>
         {/* 立っている人 */}
         {npcs.map((npc) => {
           const ch = getCharacter(npc.characterId);
@@ -219,7 +265,7 @@ export function StreetScreen({
                 } as React.CSSProperties
               }
               onClick={() => open({ kind: 'talk', scenarioId: npc.scenarioId })}
-              title={`${ch.name}に 話しかける`}
+              title={`${ch.name}に話しかける`}
             >
               <span className="walker__tag">
                 <i className="walker__mark" aria-hidden="true">
@@ -232,7 +278,7 @@ export function StreetScreen({
           );
         })}
 
-        {/* 置かれている ナゾ */}
+        {/* 置かれているナゾ */}
         {street.puzzles.map((sp: StreetPuzzle) => {
           const pz = getPuzzle(sp.puzzleId);
           const solved = state.solvedPuzzles.includes(sp.puzzleId);
@@ -244,7 +290,7 @@ export function StreetScreen({
               className={`streetpuzzle${solved ? ' streetpuzzle--solved' : ''}`}
               style={{ left: `${sp.x * 100}%` }}
               onClick={() => open({ kind: 'puzzle', puzzleId: sp.puzzleId })}
-              title={solved ? 'といた ナゾ' : 'ナゾ！'}
+              title={solved ? '解いたナゾ' : 'ナゾ！'}
             >
               <span className="streetpuzzle__tag">
                 <i className="streetpuzzle__mark" aria-hidden="true">
@@ -258,7 +304,7 @@ export function StreetScreen({
         })}
       </StreetScene>
 
-      {/* 画面の まんなかを さす目じるし */}
+      {/* 画面のまんなかをさす目じるし */}
       <div
         className={`street__sight${action ? ' street__sight--on' : ''}`}
         aria-hidden="true"
@@ -266,24 +312,11 @@ export function StreetScreen({
 
       {/* 上部バー */}
       <div className="street__topbar">
-        <button type="button" className="iconbtn" onClick={onBackToMap} title="マップへ">
+        <button type="button" className="iconbtn" onClick={onBackToMap} title="地図へ戻る">
           ↰
         </button>
         <span className="street__place">{place?.name}</span>
       </div>
-
-      {/* 右上：メニュー画面へ */}
-      <button
-        type="button"
-        className="main__corner main__corner--tr"
-        onClick={onOpenMenu}
-        title="メニュー画面へ"
-      >
-        <span className="main__corner-icon" aria-hidden="true">
-          ⚙
-        </span>
-        <span className="main__corner-label">メニュー</span>
-      </button>
 
       {/* 右下：メインメニューへ */}
       <button
@@ -303,7 +336,7 @@ export function StreetScreen({
         <button
           type="button"
           className="street__walk"
-          aria-label="左を 見る"
+          aria-label="左を見る"
           {...hold(-1)}
         >
           ◀
@@ -311,7 +344,7 @@ export function StreetScreen({
         <button
           type="button"
           className="street__walk"
-          aria-label="右を 見る"
+          aria-label="右を見る"
           {...hold(1)}
         >
           ▶
@@ -323,12 +356,12 @@ export function StreetScreen({
           </button>
         ) : (
           <p className="street__tip">
-            ◀ ▶ で 道を 見わたす。人や ナゾを クリックすると 中に 入れる。
+            ◀ ▶ かドラッグで道を見わたす。人やナゾをクリックすると中に入れる。
           </p>
         )}
       </div>
 
-      {/* 出入りの フェード */}
+      {/* 出入りのフェード */}
       <div
         className={`street__fade${pending || entering ? ' street__fade--on' : ''}`}
         aria-hidden="true"

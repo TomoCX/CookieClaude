@@ -8,7 +8,7 @@ interface ArtProps {
 
 /**
  * 人物の絵そのもの（SVG）。外部画像は使っていない。
- * 会話画面の立ち絵にも、街並みに立っている人にも これを使う。
+ * 会話画面の立ち絵にも、街並みに立っている人にもこれを使う。
  */
 export function CharacterArt({ character, pose, className }: ArtProps) {
   const { coat, accent, skin, hair, hat } = character;

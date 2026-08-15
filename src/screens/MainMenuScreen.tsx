@@ -9,6 +9,7 @@ import {
   metCast,
 } from '../data/story';
 import { SettingsPanel } from './SettingsPanel';
+import { ProgressPanel } from './ProgressPanel';
 import { playSe } from '../audio/audio';
 import {
   TOTAL_PICARAT,
@@ -20,6 +21,7 @@ import {
 
 /** メインメニューの中で開いているサブ画面 */
 type Panel =
+  | 'progress'
   | 'notes'
   | 'story'
   | 'index'
@@ -36,10 +38,8 @@ interface Props {
   onChangeSettings: (next: Settings) => void;
   /** 自由記入メモが変わったとき */
   onChangeMemo: (memo: string) => void;
-  /** とじる（前の画面に戻る） */
+  /** 閉じる（前の画面に戻る） */
   onClose: () => void;
-  /** メニュー画面（ステータス）を開く */
-  onOpenMenu: () => void;
 }
 
 /** メインメニュー（写真1枚目の下側）。トランクを開いた道具ばこ。 */
@@ -49,7 +49,6 @@ export function MainMenuScreen({
   onChangeSettings,
   onChangeMemo,
   onClose,
-  onOpenMenu,
 }: Props) {
   const [panel, setPanel] = useState<Panel>(null);
   const [saveMsg, setSaveMsg] = useState('');
@@ -59,8 +58,8 @@ export function MainMenuScreen({
     setPanel('save');
     setSaveMsg(
       saveGame(state)
-        ? 'ぼうけんの きろくを セーブしました。'
-        : 'セーブできませんでした。ブラウザの せっていを かくにんしてください。',
+        ? '冒険の記録を保存した。'
+        : 'セーブに失敗した。ブラウザの設定を確認してほしい。',
     );
   };
 
@@ -71,19 +70,12 @@ export function MainMenuScreen({
           type="button"
           className="iconbtn"
           onClick={() => (panel ? setPanel(null) : onClose())}
-          title="もどる"
+          title="戻る"
         >
           ↰
         </button>
         <h1 className="trunk__title">メインメニュー</h1>
-        <button
-          type="button"
-          className="iconbtn iconbtn--gear"
-          onClick={onOpenMenu}
-          title="メニュー画面へ"
-        >
-          ⚙
-        </button>
+        <span className="trunk__spacer" aria-hidden="true" />
       </div>
 
       <div className="trunk__case">
@@ -92,18 +84,18 @@ export function MainMenuScreen({
             <div className="trunk__row">
               <TrunkItem
                 icon="📖"
-                label="ちょうさメモ"
+                label="調査メモ"
                 badge={state.notes.length}
                 onClick={() => setPanel('notes')}
               />
               <TrunkItem
                 icon="🎩"
-                label="ふかまるナゾ"
+                label="深まるナゾ"
                 onClick={() => setPanel('story')}
               />
               <TrunkItem
                 icon="📙"
-                label="ナゾじてん"
+                label="ナゾ事典"
                 badge={solvedCount(state)}
                 onClick={() => setPanel('index')}
               />
@@ -113,7 +105,7 @@ export function MainMenuScreen({
             <div className="trunk__row">
               <TrunkItem
                 icon="⚙"
-                label="せってい"
+                label="設定"
                 onClick={() => setPanel('settings')}
               />
               <TrunkItem icon="？" label="？？？" locked />
@@ -123,6 +115,7 @@ export function MainMenuScreen({
           </>
         ) : (
           <div className="panel">
+            {panel === 'progress' && <ProgressPanel state={state} />}
             {panel === 'notes' && <NotesPanel state={state} />}
             {panel === 'story' && <StoryPanel state={state} />}
             {panel === 'index' && <IndexPanel state={state} />}
@@ -138,15 +131,15 @@ export function MainMenuScreen({
                 <p className="panel__lead">{saveMsg}</p>
                 <dl className="savesheet">
                   <div>
-                    <dt>とけたナゾ</dt>
-                    <dd>{solvedCount(state)} コ</dd>
+                    <dt>解いたナゾ</dt>
+                    <dd>{solvedCount(state)} 問</dd>
                   </div>
                   <div>
-                    <dt>ひらめきしすう</dt>
+                    <dt>ひらめき指数</dt>
                     <dd>{state.picarat} ピカラット</dd>
                   </div>
                   <div>
-                    <dt>ものがたり</dt>
+                    <dt>物語</dt>
                     <dd>{progressPercent(state)} %</dd>
                   </div>
                 </dl>
@@ -157,6 +150,13 @@ export function MainMenuScreen({
       </div>
 
       <div className="trunk__footer">
+        <button
+          type="button"
+          className={`tab${panel === 'progress' ? ' tab--on' : ''}`}
+          onClick={() => setPanel(panel === 'progress' ? null : 'progress')}
+        >
+          <span aria-hidden="true">📊</span> 進行状況
+        </button>
         <button
           type="button"
           className={`tab${panel === 'memo' ? ' tab--on' : ''}`}
@@ -172,7 +172,7 @@ export function MainMenuScreen({
           <span aria-hidden="true">💝</span> チャーム
         </button>
         <button type="button" className="tab tab--close" onClick={onClose}>
-          <span aria-hidden="true">🧳</span> とじる
+          <span aria-hidden="true">🧳</span> 閉じる
         </button>
       </div>
     </div>
@@ -197,7 +197,7 @@ function TrunkItem({ icon, label, badge, locked, onClick }: TrunkItemProps) {
         onClick?.();
       }}
       disabled={locked}
-      title={locked ? 'まだ つかえない' : label}
+      title={locked ? 'まだ使用できない' : label}
     >
       <span className="titem__icon" aria-hidden="true">
         {icon}
@@ -211,9 +211,9 @@ function TrunkItem({ icon, label, badge, locked, onClick }: TrunkItemProps) {
 function NotesPanel({ state }: { state: GameState }) {
   return (
     <div className="panel__body">
-      <h2 className="panel__title">ちょうさメモ</h2>
+      <h2 className="panel__title">調査メモ</h2>
       {state.notes.length === 0 ? (
-        <p className="panel__empty">まだ なにも 書かれていない。</p>
+        <p className="panel__empty">まだなにも書かれていない。</p>
       ) : (
         <ul className="notelist">
           {state.notes.map((n) => (
@@ -229,8 +229,8 @@ function NotesPanel({ state }: { state: GameState }) {
 }
 
 /**
- * ふかまるナゾ。ストーリー全体にかかわることだけを 書いてある。
- * （1 問ずつの ナゾ解きは ナゾじてん のほう）
+ * 深まるナゾ。ストーリー全体にかかわることだけを書いてある。
+ * （1 問ずつのナゾ解きはナゾ事典のほう）
  */
 function StoryPanel({ state }: { state: GameState }) {
   const percent = progressPercent(state);
@@ -240,12 +240,12 @@ function StoryPanel({ state }: { state: GameState }) {
 
   return (
     <div className="panel__body">
-      <h2 className="panel__title">ふかまるナゾ</h2>
+      <h2 className="panel__title">深まるナゾ</h2>
 
-      <h3 className="panel__sub">あらすじ</h3>
+      <h3 className="panel__sub">概要</h3>
       <p className="panel__lead panel__lead--pre">{STORY_SUMMARY}</p>
 
-      <h3 className="panel__sub">この事件の 問い</h3>
+      <h3 className="panel__sub">本件の争点</h3>
       <ul className="qlist">
         {CENTRAL_QUESTIONS.map((q) => (
           <li key={q}>{q}</li>
@@ -254,7 +254,7 @@ function StoryPanel({ state }: { state: GameState }) {
 
       <div className="menu__progress">
         <div className="menu__progress-head">
-          <span>ときあかした ぶん</span>
+          <span>解明した範囲</span>
           <span>
             {clearedMainCount(state)} / {MAIN_SCENARIOS.length}（{percent}%）
           </span>
@@ -264,9 +264,9 @@ function StoryPanel({ state }: { state: GameState }) {
         </div>
       </div>
 
-      <h3 className="panel__sub">わかっていること</h3>
+      <h3 className="panel__sub">判明していること</h3>
       {beats.length === 0 ? (
-        <p className="panel__empty">まだ 何も わかっていない。町の人に 話を 聞こう。</p>
+        <p className="panel__empty">まだ何も判明していない。町の人物に話を聞こう。</p>
       ) : (
         <ol className="beatlist">
           {beats.map((b) => (
@@ -278,9 +278,9 @@ function StoryPanel({ state }: { state: GameState }) {
         </ol>
       )}
 
-      <h3 className="panel__sub">出会った人</h3>
+      <h3 className="panel__sub">関係者</h3>
       {cast.length === 0 ? (
-        <p className="panel__empty">まだ だれにも 会っていない。</p>
+        <p className="panel__empty">まだ誰とも会っていない。</p>
       ) : (
         <ul className="castlist">
           {cast.map((c) => (
@@ -294,26 +294,26 @@ function StoryPanel({ state }: { state: GameState }) {
 
       <p className="panel__next">
         {next
-          ? `つぎに 調べること：「${next.title}」`
-          : 'メープル町の 事件は 幕を とじた。'}
+          ? `次に調べること：「${next.title}」`
+          : 'メープル町の事件は幕を閉じた。'}
       </p>
     </div>
   );
 }
 
-/** ナゾじてん。独立した ナゾ解き 1 問ずつを 並べる。 */
+/** ナゾ事典。独立したナゾ解き 1 問ずつを並べる。 */
 function IndexPanel({ state }: { state: GameState }) {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
     <div className="panel__body">
-      <h2 className="panel__title">ナゾじてん</h2>
+      <h2 className="panel__title">ナゾ事典</h2>
       <p className="panel__lead">
-        マップの 時計を 押すと ちょうせんできる、1問ずつの ナゾ。
+        街を歩いて見つけた時計から挑戦する、独立した一問。
       </p>
       <div className="menu__progress">
         <div className="menu__progress-head">
-          <span>といた ナゾ</span>
+          <span>解いたナゾ</span>
           <span>
             {solvedCount(state)} / {PUZZLES.length}（{state.picarat} /{' '}
             {TOTAL_PICARAT} ピカラット）
@@ -364,7 +364,7 @@ function PuzzleRow({
         className="indexlist__row"
         onClick={onToggle}
         disabled={!solved}
-        title={solved ? 'かいせつを 見る' : 'まだ といていない'}
+        title={solved ? '解説を見る' : '未解答'}
       >
         <span className="indexlist__no">{String(puzzle.no).padStart(3, '0')}</span>
         <span className="indexlist__title">
@@ -377,7 +377,7 @@ function PuzzleRow({
       {open && solved && (
         <div className="indexlist__detail">
           <p className="indexlist__q">{puzzle.question}</p>
-          <h4>かいせつ</h4>
+          <h4>解説</h4>
           <p>{puzzle.explanation}</p>
         </div>
       )}
@@ -390,7 +390,7 @@ function CharmsPanel({ state }: { state: GameState }) {
     <div className="panel__body">
       <h2 className="panel__title">チャーム</h2>
       {state.charms.length === 0 ? (
-        <p className="panel__empty">まだ なにも 持っていない。</p>
+        <p className="panel__empty">まだなにも持っていない。</p>
       ) : (
         <ul className="charmlist">
           {state.charms.map((c) => (
@@ -420,12 +420,12 @@ function MemoPanel({
   return (
     <div className="panel__body">
       <h2 className="panel__title">メモ</h2>
-      <p className="panel__lead">気づいたことを 書きとめておこう。</p>
+      <p className="panel__lead">気づいたことを書き留めておこう。</p>
       <textarea
         className="memopad"
         value={memo}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="ここに 自由に 書けます"
+        placeholder="自由に記入できる"
         spellCheck={false}
       />
     </div>

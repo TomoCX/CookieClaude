@@ -72,16 +72,15 @@
   color: var(--ink);
 }
 
-/* オン・オフの つまみ */
+/* オン・オフのつまみ。
+   つまみは絶対配置にして、文字の並びと干渉しないようにする。 */
 .toggle {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 74px;
-  padding: 3px 6px 3px 3px;
+  width: 76px;
+  padding: 5px 0;
   font-size: 0.58rem;
   font-weight: 800;
+  text-align: center;
   color: var(--ink-soft);
   background: var(--cream-dim);
   border: 2px solid var(--wood);
@@ -89,17 +88,21 @@
 }
 
 .toggle__knob {
+  position: absolute;
+  top: 50%;
+  left: 4px;
   width: 16px;
   height: 16px;
-  flex-shrink: 0;
+  margin-top: -8px;
   background: var(--wood);
   border-radius: 50%;
   transition: transform 0.16s ease, background 0.16s ease;
 }
 
 .toggle__text {
-  flex: 1;
-  text-align: center;
+  display: block;
+  padding-left: 18px;
+  transition: padding 0.16s ease;
 }
 
 .toggle--on {
@@ -110,16 +113,15 @@
 
 .toggle--on .toggle__knob {
   background: #fff;
-  transform: translateX(40px);
+  transform: translateX(48px);
 }
 
 .toggle--on .toggle__text {
-  /* つまみが 右へ行くぶん、文字は 左に寄せる */
-  order: -1;
-  text-align: center;
+  padding-left: 0;
+  padding-right: 18px;
 }
 
-/* おおきさのスライダー */
+/* 音量のスライダー */
 .soundrow__slider {
   display: flex;
   align-items: center;

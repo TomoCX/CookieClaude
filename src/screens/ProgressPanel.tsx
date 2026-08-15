@@ -13,46 +13,30 @@ import {
 
 interface Props {
   state: GameState;
-  /** 前の画面へ戻る */
-  onBack: () => void;
-  /** メインメニュー（トランク）を開く */
-  onOpenMainMenu: () => void;
 }
 
-/** メニュー画面（写真1枚目の上側）。今の進み具合をまとめて見せる。 */
-export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
+/** 進行状況。メインメニューのタブから開く。 */
+export function ProgressPanel({ state }: Props) {
   const time = formatPlayTime(state.playSeconds);
   const here = getPlace(state.placeId);
   const percent = progressPercent(state);
 
   return (
-    <div className="menu">
-      <div className="menu__bar">
-        <button type="button" className="iconbtn" onClick={onBack} title="もどる">
-          ↰
-        </button>
-        <h1 className="menu__title">メニュー</h1>
-        <button
-          type="button"
-          className="iconbtn iconbtn--gear"
-          onClick={onOpenMainMenu}
-          title="メインメニューへ"
-        >
-          ⚙
-        </button>
-      </div>
+    <div className="progress">
+
+      <h2 className="panel__title">進行状況</h2>
 
       <div className="menu__grid">
         <StatCard
           icon="▮"
-          label="とけたナゾ"
+          label="解いたナゾ"
           value={String(solvedCount(state))}
-          unit="コ"
+          unit="問"
           tone="orange"
         />
         <StatCard
           icon="✦"
-          label="トータルひらめきしすう"
+          label="ひらめき指数（累計）"
           value={String(state.picarat)}
           unit="ピカラット"
           tone="orange"
@@ -60,27 +44,27 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
         />
         <StatCard
           icon="!"
-          label="みつけたナゾ"
+          label="発見したナゾ"
           value={String(foundCount(state))}
-          unit="コ"
+          unit="問"
           tone="orange"
         />
         <StatCard
           icon="C"
           label="ひらめきコイン"
           value={String(state.coin)}
-          unit="まい"
+          unit="枚"
           tone="gold"
           wide
         />
         <div className="card card--time">
           <span className="card__icon">◷</span>
-          <span className="card__label">プレイじかん</span>
+          <span className="card__label">プレイ時間</span>
           <span className="card__value">
             {time.h}
-            <em>じかん</em>
+            <em>時間</em>
             {time.m}
-            <em>ふん</em>
+            <em>分</em>
           </span>
         </div>
       </div>
@@ -89,7 +73,7 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
         <span className="menu__place-icon" aria-hidden="true">
           🎩
         </span>
-        <span className="menu__place-label">げんざいち</span>
+        <span className="menu__place-label">現在地</span>
         <span className="menu__place-value">
           <ruby>
             {here?.name}
@@ -100,7 +84,7 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
 
       <div className="menu__progress">
         <div className="menu__progress-head">
-          <span>ものがたりの しんこう</span>
+          <span>物語の進行</span>
           <span>
             {clearedMainCount(state)} / {MAIN_SCENARIOS.length}（{percent}%）
           </span>
@@ -109,7 +93,7 @@ export function MenuScreen({ state, onBack, onOpenMainMenu }: Props) {
           <div className="menu__progress-fill" style={{ width: `${percent}%` }} />
         </div>
         <div className="menu__progress-head menu__progress-head--sub">
-          <span>ナゾの しゅうかい</span>
+          <span>ナゾの収集</span>
           <span>
             {solvedCount(state)} / {PUZZLES.length}（{state.picarat} /{' '}
             {TOTAL_PICARAT} ピカラット）

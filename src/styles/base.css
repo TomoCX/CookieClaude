@@ -60,11 +60,14 @@ button:disabled {
   padding: 20px;
 }
 
-/* 携帯ゲーム機の画面に見立てた枠 */
+/* 携帯ゲーム機の画面に見立てた枠。
+   幅と高さの どちらでも あふれないよう、高さから 幅を 割りだしている。
+   （3.4 / 4 = 0.85） */
 .device {
+  --device-h: min(calc(var(--device-w, 720px) * 0.85), calc(100dvh - 40px));
   position: relative;
-  width: min(100%, var(--device-w, 460px));
-  aspect-ratio: 4 / 3.4;
+  height: var(--device-h);
+  width: min(100%, calc(var(--device-h) / 0.85));
   border-radius: 20px;
   overflow: hidden;
   background: var(--cream);
@@ -73,17 +76,21 @@ button:disabled {
   user-select: none;
 }
 
-/* せっていの「画面の大きさ」 */
+/* 設定の「画面の大きさ」 */
 .app--small {
-  --device-w: 380px;
+  --device-w: 560px;
 }
 
 .app--medium {
-  --device-w: 460px;
+  --device-w: 720px;
 }
 
 .app--large {
-  --device-w: 560px;
+  --device-w: 880px;
+}
+
+.app--xlarge {
+  --device-w: 1040px;
 }
 
 .app--full {
@@ -93,7 +100,6 @@ button:disabled {
 .app--full .device {
   width: 100%;
   height: 100dvh;
-  aspect-ratio: auto;
   border-radius: 0;
   border-width: 0;
 }
@@ -106,7 +112,6 @@ button:disabled {
   .device {
     width: 100%;
     height: 100dvh;
-    aspect-ratio: auto;
     border-radius: 0;
     border-width: 0;
   }

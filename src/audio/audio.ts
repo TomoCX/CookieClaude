@@ -1,19 +1,19 @@
 /**
- * 音まわり。音声ファイルは持たず、Web Audio API で その場で 音を作る。
+ * 音まわり。音声ファイルは持たず、Web Audio API でその場で音を作る。
  * （画像とおなじく、素材ファイルは使わない方針）
  *
- * ブラウザの決まりで、AudioContext は 人の操作がないと 動きださない。
+ * ブラウザの決まりで、AudioContext は人の操作がないと動きださない。
  * タイトルのボタンを押したときに unlock() を呼ぶこと。
  */
 
 /** 効果音の種類 */
 export type SeName =
   | 'click' // ボタン・決定
-  | 'talk' // 会話を すすめる
-  | 'correct' // ナゾに 正解
-  | 'wrong' // まちがい
-  | 'coin' // コインを つかう
-  | 'fade'; // 画面の きりかえ
+  | 'talk' // 会話をすすめる
+  | 'correct' // ナゾに正解
+  | 'wrong' // 誤答
+  | 'coin' // コインをつかう
+  | 'fade'; // 画面のきりかえ
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -25,7 +25,7 @@ let bgmVolume = 0.45;
 let seOn = true;
 let seVolume = 0.7;
 
-/** BGM の 次に鳴らす音の 位置 */
+/** BGM の次に鳴らす音の位置 */
 let step = 0;
 let nextNoteAt = 0;
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -42,7 +42,7 @@ const CHORDS: number[][] = [
   [196.0, 246.94, 293.66], // G
 ];
 
-/** 上でなぞる メロディ（和音の 何番目の音か。-1 は 休み） */
+/** 上でなぞるメロディ（和音の何番目の音か。-1 は休み） */
 const MELODY = [0, 2, 1, 2, 0, -1, 1, 2, 2, 1, 0, 1, 2, -1, 1, 0];
 
 function ensure(): boolean {
@@ -72,14 +72,14 @@ function ensure(): boolean {
   }
 }
 
-/** 人の操作のあとに 呼ぶ。音を 鳴らせる状態にする。 */
+/** 人の操作のあとに呼ぶ。音を鳴らせる状態にする。 */
 export function unlock(): void {
   if (!ensure() || !ctx) return;
   if (ctx.state === 'suspended') void ctx.resume();
   if (bgmOn) startBgm();
 }
 
-/** ひとつの音を 鳴らす */
+/** ひとつの音を鳴らす */
 function tone(
   freq: number,
   at: number,
@@ -93,7 +93,7 @@ function tone(
   const env = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, at);
-  // ぷつっと切れないよう、立ち上がりと 減衰を つける
+  // ぷつっと切れないよう、立ち上がりと減衰をつける
   env.gain.setValueAtTime(0, at);
   env.gain.linearRampToValueAtTime(peak, at + 0.012);
   env.gain.exponentialRampToValueAtTime(0.0001, at + dur);
@@ -103,7 +103,7 @@ function tone(
   osc.stop(at + dur + 0.02);
 }
 
-/** 少し先の ぶんまで BGM を 予約しておく */
+/** 少し先のぶんまで BGM を予約しておく */
 function schedule(): void {
   if (!ctx || !bgmGain) return;
   const lookahead = 0.25;
@@ -111,11 +111,11 @@ function schedule(): void {
     const bar = Math.floor(step / 4) % CHORDS.length;
     const chord = CHORDS[bar] ?? CHORDS[0]!;
 
-    // 小節あたまの ベース
+    // 小節あたまのベース
     if (step % 4 === 0) {
       tone(chord[0]! / 2, nextNoteAt, 0.5, 'sine', 0.5, bgmGain);
     }
-    // 和音を そっと 重ねる
+    // 和音をそっと重ねる
     if (step % 2 === 0) {
       tone(chord[1]!, nextNoteAt, 0.34, 'sine', 0.13, bgmGain);
     }
@@ -130,20 +130,20 @@ function schedule(): void {
   }
 }
 
-/** BGM を 鳴らしはじめる */
+/** BGM を鳴らしはじめる */
 export function startBgm(): void {
   if (!ensure() || !ctx || timer) return;
   nextNoteAt = ctx.currentTime + 0.1;
   timer = setInterval(schedule, 60);
 }
 
-/** BGM を 止める */
+/** BGM を止める */
 export function stopBgm(): void {
   if (timer) clearInterval(timer);
   timer = null;
 }
 
-/** BGM の 設定を 変える */
+/** BGM の設定を変える */
 export function setBgm(on: boolean, volume: number): void {
   bgmOn = on;
   bgmVolume = Math.min(Math.max(volume, 0), 100) / 100;
@@ -153,7 +153,7 @@ export function setBgm(on: boolean, volume: number): void {
   else stopBgm();
 }
 
-/** 効果音の 設定を 変える */
+/** 効果音の設定を変える */
 export function setSe(on: boolean, volume: number): void {
   seOn = on;
   seVolume = Math.min(Math.max(volume, 0), 100) / 100;
@@ -161,7 +161,7 @@ export function setSe(on: boolean, volume: number): void {
   seGain.gain.setValueAtTime(on ? seVolume * 0.5 : 0, ctx.currentTime);
 }
 
-/** 効果音を 鳴らす */
+/** 効果音を鳴らす */
 export function playSe(name: SeName): void {
   if (!seOn || !ctx || !seGain) return;
   const t = ctx.currentTime;
