@@ -1,7 +1,7 @@
 import type { GameState, Puzzle, Scenario } from '../types';
 import { PLACES } from '../data/places';
 import { MAIN_SCENARIOS } from '../data/scenarios';
-import { PUZZLES, PUZZLE_SPOTS, picaratFor } from '../data/puzzles';
+import { PUZZLES, picaratFor } from '../data/puzzles';
 
 const SAVE_KEY = 'cookieclaude.save.v2';
 
@@ -47,12 +47,6 @@ export function progressPercent(state: GameState): number {
 /** 読み終えた本筋シナリオの数 */
 export function clearedMainCount(state: GameState): number {
   return MAIN_SCENARIOS.filter((s) => state.clearedScenarios.includes(s.id)).length;
-}
-
-/** いまマップに現れているナゾの置き場 */
-export function visibleSpots(state: GameState) {
-  const cleared = clearedMainCount(state);
-  return PUZZLE_SPOTS.filter((s) => s.requiresCleared <= cleared);
 }
 
 /** 集められるピカラットの合計 */

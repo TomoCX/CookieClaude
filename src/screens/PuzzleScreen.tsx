@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { GameState, Puzzle } from '../types';
 import { picaratFor } from '../data/puzzles';
 import { PuzzleFigure } from '../components/PuzzleFigure';
+import { playSe } from '../audio/audio';
 
 interface Props {
   puzzle: Puzzle;
@@ -42,10 +43,12 @@ export function PuzzleScreen({
         : picked === puzzle.answer.correct;
 
     if (ok) {
+      playSe('correct');
       setWrong(false);
       setCleared(true);
       onSolved();
     } else {
+      playSe('wrong');
       setWrong(true);
       onMiss();
       setTimeout(() => setWrong(false), 700);
@@ -149,7 +152,10 @@ export function PuzzleScreen({
         <button
           type="button"
           className="puzzle__hint"
-          onClick={onUseHint}
+          onClick={() => {
+            playSe('coin');
+            onUseHint();
+          }}
           disabled={hintsSeen >= puzzle.hints.length || state.coin < 1}
         >
           {hintsSeen >= puzzle.hints.length

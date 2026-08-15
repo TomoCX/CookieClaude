@@ -139,28 +139,6 @@
   }
 }
 
-/* プレイヤー（クロードとクッキーが 並んで歩く） */
-.walker--player {
-  width: 6.4%;
-  z-index: 3;
-  /* 人の前を 通っても、うしろの人を クリックできるように */
-  pointer-events: none;
-}
-
-.walker--player .walker__art {
-  position: relative;
-}
-
-/* クッキーは クロードの ななめ後ろ。
-   .walker--player .walker__art より 詳しく書かないと 上の relative に 負ける。 */
-.walker--player .walker__art--behind {
-  position: absolute;
-  left: -48%;
-  bottom: 0;
-  width: 80%;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25)) brightness(0.95);
-}
-
 /* 上部バー */
 .street__topbar {
   position: absolute;
@@ -269,4 +247,121 @@
 /* 街並みでは 右下ボタンを 操作バーの 上に ずらす */
 .street .main__corner--br {
   bottom: 68px;
+}
+
+/* 街並みに置かれた ナゾ */
+.streetpuzzle {
+  position: absolute;
+  bottom: 17%;
+  width: 4.4%;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  cursor: pointer;
+  transition: translate 0.15s ease;
+}
+
+.streetpuzzle:hover {
+  translate: 0 -4px;
+}
+
+.streetpuzzle__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.32));
+}
+
+.streetpuzzle__tag {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 3px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+  background: rgba(246, 236, 212, 0.95);
+  border: 1.5px solid var(--wood);
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  animation: mark-bob 1.6s ease-in-out infinite;
+}
+
+.streetpuzzle__mark {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  font-size: 0.5rem;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.streetpuzzle--solved .streetpuzzle__tag {
+  animation: none;
+  opacity: 0.85;
+}
+
+.streetpuzzle--solved .streetpuzzle__mark {
+  color: #fff;
+  background: #5d8a4a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streetpuzzle__tag {
+    animation: none;
+  }
+}
+
+/* 画面の まんなかを さす目じるし（カメラ＝自分の目線） */
+.street__sight {
+  position: absolute;
+  left: 50%;
+  bottom: 21%;
+  z-index: 2;
+  width: 54px;
+  height: 10px;
+  margin-left: -27px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.28), transparent 70%);
+  opacity: 0.5;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  pointer-events: none;
+}
+
+.street__sight--on {
+  opacity: 1;
+  background: radial-gradient(ellipse, rgba(226, 112, 28, 0.55), transparent 70%);
+}
+
+/* 出入りの フェード。JS の FADE_MS と そろえること。 */
+.street__fade {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: #1b1108;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms ease;
+}
+
+.street__fade--on {
+  opacity: 1;
+  pointer-events: all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .street__fade {
+    transition-duration: 120ms;
+  }
 }

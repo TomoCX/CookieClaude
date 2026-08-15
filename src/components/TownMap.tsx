@@ -1,4 +1,4 @@
-import type { Place, PuzzleSpot } from '../types';
+import type { Place } from '../types';
 
 interface Props {
   places: Place[];
@@ -7,13 +7,10 @@ interface Props {
   currentPlaceId: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  /** マップに置かれた「時計のような物体」 */
-  spots: PuzzleSpot[];
-  solvedPuzzles: string[];
-  onOpenPuzzle: (spot: PuzzleSpot) => void;
 }
 
-/** メイン画面のマップ。町の俯瞰図に、行き先ピンと ナゾの時計が 並ぶ。 */
+/** メイン画面のマップ。町の俯瞰図に 行き先ピンが 並ぶ。
+    ナゾは マップではなく、それぞれの街並みの中に 置いてある。 */
 export function TownMap({
   places,
   openPlaces,
@@ -21,9 +18,6 @@ export function TownMap({
   currentPlaceId,
   selectedId,
   onSelect,
-  spots,
-  solvedPuzzles,
-  onOpenPuzzle,
 }: Props) {
   return (
     <div className="map" onClick={() => onSelect(null)} role="presentation">
@@ -110,39 +104,6 @@ export function TownMap({
           <circle cx="248" cy="272" r="9" />
         </g>
       </svg>
-
-      {/* ナゾの時計 */}
-      {spots.map((spot) => {
-        const solved = solvedPuzzles.includes(spot.puzzleId);
-        return (
-          <button
-            key={spot.id}
-            type="button"
-            className={`clockspot${solved ? ' clockspot--solved' : ''}`}
-            style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-            aria-label={solved ? 'といたナゾ' : 'ナゾに ちょうせんする'}
-            title={solved ? 'といたナゾ' : 'ナゾ！'}
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenPuzzle(spot);
-            }}
-          >
-            <svg viewBox="0 0 40 40" aria-hidden="true">
-              <circle cx="20" cy="21" r="15" fill="#f6ecd6" stroke="#4c3d2c" strokeWidth="3" />
-              <circle cx="20" cy="21" r="15" fill="none" stroke="#c9a04a" strokeWidth="1.5" />
-              <path d="M20 21 L20 12" stroke="#4c3d2c" strokeWidth="2.6" strokeLinecap="round" />
-              <path d="M20 21 L27 25" stroke="#4c3d2c" strokeWidth="2.6" strokeLinecap="round" />
-              <circle cx="20" cy="21" r="2" fill="#4c3d2c" />
-              <rect x="17" y="1" width="6" height="5" rx="2" fill="#4c3d2c" />
-              <path d="M8 6 L13 10" stroke="#4c3d2c" strokeWidth="3" strokeLinecap="round" />
-              <path d="M32 6 L27 10" stroke="#4c3d2c" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-            <span className="clockspot__tag" aria-hidden="true">
-              {solved ? '✓' : 'ナゾ'}
-            </span>
-          </button>
-        );
-      })}
 
       {/* 行き先ピン */}
       {places.map((p) => {

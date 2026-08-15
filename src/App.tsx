@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { GameState, Place, PuzzleSpot, ScreenId } from './types';
+import type { GameState, Place, ScreenId, Settings } from './types';
 import { getScenario } from './data/scenarios';
 import { getStreet } from './data/streets';
 import { getPuzzle } from './data/puzzles';
@@ -9,6 +9,8 @@ import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MenuScreen } from './screens/MenuScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
+import { loadSettings, saveSettings } from './state/settings';
+import { playSe, setBgm, setSe, unlock } from './audio/audio';
 import {
   applyHintUse,
   applyPuzzleFound,
@@ -42,6 +44,14 @@ export function App() {
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [booting, setBooting] = useState(true);
+  const [settings, setSettings] = useState<Settings>(loadSettings);
+
+  // 設定を 覚えておき、音にも すぐ 反映する
+  useEffect(() => {
+    saveSettings(settings);
+    setBgm(settings.bgmOn, settings.bgmVolume);
+    setSe(settings.seOn, settings.seVolume);
+  }, [settings]);
 
   // プレイ時間を数える
   useEffect(() => {
@@ -89,10 +99,10 @@ export function App() {
     [scenarioId, state.clearedScenarios, streetId],
   );
 
-  /** マップの時計を押した */
-  const openPuzzle = useCallback((spot: PuzzleSpot) => {
-    setState((s) => applyPuzzleFound(s, spot.puzzleId));
-    setPuzzleId(spot.puzzleId);
+  /** 街並みで ナゾを 押した */
+  const openPuzzle = useCallback((id: string) => {
+    setState((s) => applyPuzzleFound(s, id));
+    setPuzzleId(id);
     setScreen('puzzle');
   }, []);
 
@@ -116,13 +126,12 @@ export function App() {
   const puzzle = puzzleId ? getPuzzle(puzzleId) : null;
 
   return (
-    <div className="app">
+    <div className={`app app--${settings.screenSize}`}>
       <div className="device">
         {screen === 'main' && (
           <MainScreen
             state={state}
             onEnterPlace={enterPlace}
-            onOpenPuzzle={openPuzzle}
             onOpenMenu={() => openOverlayScreen('menu')}
             onOpenMainMenu={() => openOverlayScreen('mainMenu')}
           />
@@ -138,6 +147,7 @@ export function App() {
               streetPos.current[street.id] = x;
             }}
             onTalk={talkTo}
+            onOpenPuzzle={openPuzzle}
             onBackToMap={() => {
               setStreetId(null);
               setScreen('main');
@@ -164,7 +174,7 @@ export function App() {
             onSolved={() => setState((s) => applyPuzzleSolved(s, puzzle))}
             onQuit={() => {
               setPuzzleId(null);
-              setScreen('main');
+              setScreen(streetId ? 'street' : 'main');
             }}
           />
         )}
@@ -180,6 +190,8 @@ export function App() {
         {screen === 'mainMenu' && (
           <MainMenuScreen
             state={state}
+            settings={settings}
+            onChangeSettings={setSettings}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
             onClose={backFromOverlay}
             onOpenMenu={() => openOverlayScreen('menu')}
@@ -193,10 +205,14 @@ export function App() {
         {booting && (
           <BootOverlay
             onNewGame={() => {
+              unlock();
+              playSe('click');
               setState(createInitialState());
               setBooting(false);
             }}
             onContinue={() => {
+              unlock();
+              playSe('click');
               const saved = loadGame();
               if (saved) setState(saved);
               setBooting(false);
@@ -265,7 +281,7 @@ function BootOverlay({
         <h1 className="boot__title">
           クッキーとクロードの
           <br />
-          謎解き事件簿
+          ナゾ解き事件簿
         </h1>
         <p className="boot__lead">
           まちの時計が 十三回 鳴る夜、まちの宝が 消える――

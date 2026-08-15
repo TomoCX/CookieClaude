@@ -1,0 +1,95 @@
+import type { Settings } from '../types';
+import { SCREEN_SIZES } from '../state/settings';
+
+interface Props {
+  settings: Settings;
+  onChange: (next: Settings) => void;
+}
+
+/** メインメニューの「せってい」。画面の大きさ・BGM・効果音を 調整する。 */
+export function SettingsPanel({ settings, onChange }: Props) {
+  const patch = (part: Partial<Settings>) => onChange({ ...settings, ...part });
+
+  return (
+    <div className="panel__body">
+      <h2 className="panel__title">せってい</h2>
+
+      <h3 className="panel__sub">画面の大きさ</h3>
+      <div className="sizepick">
+        {SCREEN_SIZES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={`sizepick__btn${settings.screenSize === s.id ? ' sizepick__btn--on' : ''}`}
+            onClick={() => patch({ screenSize: s.id })}
+          >
+            <span className="sizepick__label">{s.label}</span>
+            <span className="sizepick__note">{s.note}</span>
+          </button>
+        ))}
+      </div>
+
+      <h3 className="panel__sub">おと</h3>
+
+      <SoundRow
+        name="BGM"
+        on={settings.bgmOn}
+        volume={settings.bgmVolume}
+        onToggle={(v) => patch({ bgmOn: v })}
+        onVolume={(v) => patch({ bgmVolume: v })}
+      />
+      <SoundRow
+        name="こうかおん（SE）"
+        on={settings.seOn}
+        volume={settings.seVolume}
+        onToggle={(v) => patch({ seOn: v })}
+        onVolume={(v) => patch({ seVolume: v })}
+      />
+
+      <p className="panel__note">
+        音は 音声ファイルを 使わず、ブラウザで その場で 作っている。
+        設定は この端末に 覚えておくので、セーブとは べつに 残る。
+      </p>
+    </div>
+  );
+}
+
+interface RowProps {
+  name: string;
+  on: boolean;
+  volume: number;
+  onToggle: (v: boolean) => void;
+  onVolume: (v: number) => void;
+}
+
+function SoundRow({ name, on, volume, onToggle, onVolume }: RowProps) {
+  return (
+    <div className={`soundrow${on ? '' : ' soundrow--off'}`}>
+      <div className="soundrow__head">
+        <span className="soundrow__name">{name}</span>
+        <button
+          type="button"
+          className={`toggle${on ? ' toggle--on' : ''}`}
+          onClick={() => onToggle(!on)}
+          aria-pressed={on}
+        >
+          <span className="toggle__knob" />
+          <span className="toggle__text">{on ? 'オン' : 'オフ'}</span>
+        </button>
+      </div>
+      <label className="soundrow__slider">
+        <span className="soundrow__srlabel">おおきさ</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={volume}
+          disabled={!on}
+          onChange={(e) => onVolume(Number(e.target.value))}
+        />
+        <output>{volume}</output>
+      </label>
+    </div>
+  );
+}

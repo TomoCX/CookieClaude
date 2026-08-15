@@ -104,7 +104,17 @@ export interface Npc {
   requiresScenario?: string;
 }
 
-/** 街並み（マップから入った先の、道を歩ける画面） */
+/** 街並みに置かれた「時計のような物体」。押すとナゾが始まる。 */
+export interface StreetPuzzle {
+  id: string;
+  puzzleId: string;
+  /** 街並みの中での位置（0〜1） */
+  x: number;
+  /** 物体の見た目 */
+  look: 'clock' | 'sundial' | 'pocketwatch';
+}
+
+/** 街並み（マップから入った先の、道を見わたせる画面） */
 export interface Street {
   id: string;
   /** どの場所の街並みか */
@@ -113,7 +123,9 @@ export interface Street {
   bg: BackgroundId;
   /** 立っている人たち */
   npcs: Npc[];
-  /** 入ってきたときの立ち位置（0〜1） */
+  /** 置かれているナゾ */
+  puzzles: StreetPuzzle[];
+  /** 入ってきたときの カメラの位置（0〜1） */
   startX: number;
 }
 
@@ -168,15 +180,20 @@ export interface Puzzle {
   explanation: string;
 }
 
-/** マップに置かれた「時計のような物体」。押すとナゾが始まる。 */
-export interface PuzzleSpot {
-  id: string;
-  puzzleId: string;
-  /** マップ上の位置（％） */
-  x: number;
-  y: number;
-  /** 何話 読み終えると現れるか */
-  requiresCleared: number;
+/* ---- 設定 ---- */
+
+/** 画面の大きさ */
+export type ScreenSize = 'small' | 'medium' | 'large' | 'full';
+
+/** ゲームの設定。進行状況とは別に保存する。 */
+export interface Settings {
+  screenSize: ScreenSize;
+  bgmOn: boolean;
+  /** 0〜100 */
+  bgmVolume: number;
+  seOn: boolean;
+  /** 0〜100 */
+  seVolume: number;
 }
 
 /* ---- 進行状況 ---- */

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { GameState, Puzzle } from '../types';
+import type { GameState, Puzzle, Settings } from '../types';
 import { PUZZLES, picaratFor } from '../data/puzzles';
 import { MAIN_SCENARIOS } from '../data/scenarios';
 import {
@@ -8,6 +8,8 @@ import {
   knownBeats,
   metCast,
 } from '../data/story';
+import { SettingsPanel } from './SettingsPanel';
+import { playSe } from '../audio/audio';
 import {
   TOTAL_PICARAT,
   clearedMainCount,
@@ -17,10 +19,21 @@ import {
 } from '../state/gameState';
 
 /** メインメニューの中で開いているサブ画面 */
-type Panel = 'notes' | 'story' | 'index' | 'save' | 'memo' | 'charms' | null;
+type Panel =
+  | 'notes'
+  | 'story'
+  | 'index'
+  | 'save'
+  | 'memo'
+  | 'charms'
+  | 'settings'
+  | null;
 
 interface Props {
   state: GameState;
+  settings: Settings;
+  /** 設定が変わったとき */
+  onChangeSettings: (next: Settings) => void;
   /** 自由記入メモが変わったとき */
   onChangeMemo: (memo: string) => void;
   /** とじる（前の画面に戻る） */
@@ -32,6 +45,8 @@ interface Props {
 /** メインメニュー（写真1枚目の下側）。トランクを開いた道具ばこ。 */
 export function MainMenuScreen({
   state,
+  settings,
+  onChangeSettings,
   onChangeMemo,
   onClose,
   onOpenMenu,
@@ -40,6 +55,7 @@ export function MainMenuScreen({
   const [saveMsg, setSaveMsg] = useState('');
 
   const handleSave = () => {
+    playSe('click');
     setPanel('save');
     setSaveMsg(
       saveGame(state)
@@ -94,7 +110,12 @@ export function MainMenuScreen({
               <TrunkItem icon="🖋" label="セーブ" onClick={handleSave} />
             </div>
 
-            <div className="trunk__row trunk__row--locked">
+            <div className="trunk__row">
+              <TrunkItem
+                icon="⚙"
+                label="せってい"
+                onClick={() => setPanel('settings')}
+              />
               <TrunkItem icon="？" label="？？？" locked />
               <TrunkItem icon="？" label="？？？" locked />
               <TrunkItem icon="？" label="？？？" locked />
@@ -106,6 +127,9 @@ export function MainMenuScreen({
             {panel === 'story' && <StoryPanel state={state} />}
             {panel === 'index' && <IndexPanel state={state} />}
             {panel === 'charms' && <CharmsPanel state={state} />}
+            {panel === 'settings' && (
+              <SettingsPanel settings={settings} onChange={onChangeSettings} />
+            )}
             {panel === 'memo' && (
               <MemoPanel memo={state.memo} onChange={onChangeMemo} />
             )}
@@ -168,7 +192,10 @@ function TrunkItem({ icon, label, badge, locked, onClick }: TrunkItemProps) {
     <button
       type="button"
       className={`titem${locked ? ' titem--locked' : ''}`}
-      onClick={onClick}
+      onClick={() => {
+        playSe('click');
+        onClick?.();
+      }}
       disabled={locked}
       title={locked ? 'まだ つかえない' : label}
     >

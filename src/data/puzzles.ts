@@ -1,4 +1,4 @@
-import type { Puzzle, PuzzleSpot } from '../types';
+import type { Puzzle } from '../types';
 
 /**
  * 独立したナゾ解き。ストーリーとは切り離されていて、
@@ -124,19 +124,6 @@ export const PUZZLES: Puzzle[] = [
     explanation:
       '1分ずつ ずれる時計が 正しくなるのは 720日に 1度きり。止まった時計は 一日に 2回 かならず あたる。動かないものが いちばん あたる、という ひねくれた答え。',
   },
-];
-
-/**
- * マップに置かれた「時計のような物体」。
- * requiresCleared は、本筋を何話 読み終えると現れるか。
- */
-export const PUZZLE_SPOTS: PuzzleSpot[] = [
-  { id: 'spot_1', puzzleId: 'pz_strike', x: 33, y: 40, requiresCleared: 0 },
-  { id: 'spot_2', puzzleId: 'pz_gears', x: 60, y: 78, requiresCleared: 0 },
-  { id: 'spot_3', puzzleId: 'pz_interval', x: 57, y: 20, requiresCleared: 1 },
-  { id: 'spot_4', puzzleId: 'pz_mirror', x: 12, y: 52, requiresCleared: 2 },
-  { id: 'spot_5', puzzleId: 'pz_stopped', x: 88, y: 42, requiresCleared: 3 },
-  { id: 'spot_6', puzzleId: 'pz_overlap', x: 40, y: 86, requiresCleared: 4 },
 ];
 
 /** id からナゾを取得する */

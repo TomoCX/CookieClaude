@@ -1,0 +1,165 @@
+/* ---- せってい（メインメニューの中） ---- */
+
+/* 画面の大きさ */
+.sizepick {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.sizepick__btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+}
+
+.sizepick__btn:hover {
+  border-color: var(--orange);
+}
+
+.sizepick__btn--on {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.sizepick__label {
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.sizepick__note {
+  font-size: 0.58rem;
+  color: var(--ink-soft);
+}
+
+.sizepick__btn--on .sizepick__note {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* BGM・効果音 */
+.soundrow {
+  padding: 9px 11px;
+  margin-bottom: 8px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.soundrow--off {
+  opacity: 0.62;
+}
+
+.soundrow__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.soundrow__name {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* オン・オフの つまみ */
+.toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 74px;
+  padding: 3px 6px 3px 3px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  background: var(--cream-dim);
+  border: 2px solid var(--wood);
+  border-radius: 999px;
+}
+
+.toggle__knob {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: var(--wood);
+  border-radius: 50%;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.toggle__text {
+  flex: 1;
+  text-align: center;
+}
+
+.toggle--on {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.toggle--on .toggle__knob {
+  background: #fff;
+  transform: translateX(40px);
+}
+
+.toggle--on .toggle__text {
+  /* つまみが 右へ行くぶん、文字は 左に寄せる */
+  order: -1;
+  text-align: center;
+}
+
+/* おおきさのスライダー */
+.soundrow__slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.soundrow__srlabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.soundrow__slider input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
+.soundrow__slider input[type='range']:disabled {
+  cursor: default;
+}
+
+.soundrow__slider output {
+  width: 2.2em;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-align: right;
+  color: var(--orange-deep);
+}
+
+.panel__note {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  font-size: 0.62rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}

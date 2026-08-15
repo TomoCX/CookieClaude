@@ -3,6 +3,7 @@ import type { Scenario } from '../types';
 import { getCharacter } from '../data/characters';
 import { Background } from '../components/Background';
 import { CharacterSprite } from '../components/CharacterSprite';
+import { playSe } from '../audio/audio';
 
 /** 1 文字あたりの表示間隔（ミリ秒） */
 const TYPE_SPEED_MS = 42;
@@ -71,6 +72,7 @@ export function ScenarioScreen({ scenario, onFinish, onQuit }: Props) {
       setTyped(line.text);
       return;
     }
+    playSe('talk');
     if (index + 1 >= scenario.lines.length) onFinish();
     else setIndex(index + 1);
   }, [line, typed, index, scenario.lines.length, onFinish]);

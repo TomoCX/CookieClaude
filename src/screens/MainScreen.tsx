@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import type { GameState, Place, PuzzleSpot } from '../types';
+import type { GameState, Place } from '../types';
 import { PLACES, getPlace } from '../data/places';
 import { TownMap } from '../components/TownMap';
-import { solvedCount, visibleSpots } from '../state/gameState';
+import { solvedCount } from '../state/gameState';
 
 interface Props {
   state: GameState;
   /** 場所を選んだとき（街並みへ） */
   onEnterPlace: (place: Place) => void;
-  /** 時計を押したとき（ナゾ解きへ） */
-  onOpenPuzzle: (spot: PuzzleSpot) => void;
   /** 右上ボタン: メニュー画面へ戻る */
   onOpenMenu: () => void;
   /** 右下ボタン: メインメニューへ戻る */
@@ -20,7 +18,6 @@ interface Props {
 export function MainScreen({
   state,
   onEnterPlace,
-  onOpenPuzzle,
   onOpenMenu,
   onOpenMainMenu,
 }: Props) {
@@ -45,7 +42,7 @@ export function MainScreen({
       : `${selectedPlace.name}へ 行ってみよう`
     : nextPlace
       ? `${nextPlace.name}のことを 調べてみよう`
-      : 'ものがたりは 終わった。のこりの ナゾを といてみよう';
+      : 'ものがたりは 終わった。町を 歩いて のこりの ナゾを といてみよう';
 
   return (
     <div className="main">
@@ -71,9 +68,6 @@ export function MainScreen({
         currentPlaceId={state.placeId}
         selectedId={selected}
         onSelect={setSelected}
-        spots={visibleSpots(state)}
-        solvedPuzzles={state.solvedPuzzles}
-        onOpenPuzzle={onOpenPuzzle}
       />
 
       {/* 右上：メニュー画面へ戻るボタン */}
