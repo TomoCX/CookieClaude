@@ -1,0 +1,122 @@
+/* ---- 共通の色と土台 ---- */
+
+:root {
+  --wood-dark: #402a19;
+  --wood: #6b4a2c;
+  --wood-light: #8b6540;
+  --board: #545c2c;
+  --board-dark: #3f4620;
+  --cream: #f6ecd4;
+  --cream-dim: #e3d5b6;
+  --ink: #4a3826;
+  --ink-soft: #7a6549;
+  --orange: #e2701c;
+  --orange-deep: #b8500f;
+  --gold: #d9a428;
+  --line: #b79a6f;
+
+  --radius: 14px;
+  --shadow-soft: 0 3px 0 rgba(0, 0, 0, 0.18);
+  --shadow-panel: 0 10px 26px rgba(0, 0, 0, 0.32);
+
+  --font-ui:
+    'Hiragino Maru Gothic ProN', 'ヒラギノ丸ゴ ProN', 'Yu Gothic', 'Meiryo',
+    system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 50% 0%, #6e5136 0%, #3a2617 70%),
+    var(--wood-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.app {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+/* 携帯ゲーム機の画面に見立てた枠 */
+.device {
+  position: relative;
+  width: min(100%, 460px);
+  aspect-ratio: 4 / 3.4;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--cream);
+  border: 8px solid var(--wood-dark);
+  box-shadow: var(--shadow-panel);
+  user-select: none;
+}
+
+@media (max-width: 520px) {
+  .app {
+    padding: 0;
+  }
+
+  .device {
+    width: 100%;
+    height: 100dvh;
+    aspect-ratio: auto;
+    border-radius: 0;
+    border-width: 0;
+  }
+}
+
+/* 角の丸いアイコンボタン（もどる・歯車） */
+.iconbtn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--cream);
+  background: var(--wood);
+  border: 2px solid var(--wood-dark);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+
+.iconbtn:hover {
+  background: var(--wood-light);
+}
+
+.iconbtn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.iconbtn--gear {
+  background: var(--board);
+  border-color: var(--board-dark);
+}
+
+.iconbtn--gear:hover {
+  background: #66702f;
+}

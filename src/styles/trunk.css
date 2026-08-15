@@ -1,0 +1,366 @@
+/* ---- メインメニュー（写真1枚目の下側・トランク） ---- */
+
+.trunk {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.06) 0 3px,
+      transparent 3px 11px
+    );
+  background-color: var(--wood);
+}
+
+.trunk__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trunk__title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--cream);
+}
+
+/* トランクの内側 */
+.trunk__case {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.05) 0 2px,
+      transparent 2px 9px
+    ),
+    var(--board);
+  border: 3px solid var(--wood-dark);
+  border-radius: 12px;
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.trunk__row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* 未開放のスロットは 3 つだけ並べる */
+.trunk__row--locked {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 道具 */
+.titem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 4px 7px;
+  background: rgba(246, 236, 212, 0.92);
+  border: 2px solid var(--wood-dark);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.titem:hover:not(:disabled) {
+  background: #fff8e6;
+  transform: translateY(-2px);
+}
+
+.titem:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.titem__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.titem__label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ink);
+}
+
+.titem__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 19px;
+  padding: 1px 5px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border: 2px solid var(--cream);
+  border-radius: 999px;
+}
+
+.titem--locked {
+  background: rgba(52, 44, 24, 0.55);
+  border-style: dashed;
+  border-color: rgba(246, 236, 212, 0.35);
+  box-shadow: none;
+}
+
+.titem--locked .titem__icon,
+.titem--locked .titem__label {
+  color: rgba(246, 236, 212, 0.55);
+}
+
+/* サブ画面 */
+.panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--cream);
+  border: 2px solid var(--wood-dark);
+  border-radius: 10px;
+}
+
+.panel__body {
+  padding: 12px 14px 16px;
+}
+
+.panel__body--center {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  min-height: 100%;
+  text-align: center;
+}
+
+.panel__title {
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--orange-deep);
+  border-bottom: 2px dotted var(--line);
+}
+
+.panel__lead,
+.panel__next,
+.panel__empty {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.panel__empty {
+  padding: 16px 0;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.panel__next {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-weight: 700;
+  background: rgba(226, 112, 28, 0.12);
+  border-left: 4px solid var(--orange);
+  border-radius: 0 8px 8px 0;
+}
+
+/* 調査メモ一覧 */
+.notelist,
+.indexlist,
+.charmlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notelist__item {
+  padding: 9px 11px;
+  margin-bottom: 8px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.notelist__item h3 {
+  margin: 0 0 4px;
+  font-size: 0.74rem;
+  color: var(--orange-deep);
+}
+
+.notelist__item p {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+/* ナゾじてん */
+.indexlist__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  margin-bottom: 5px;
+  font-size: 0.7rem;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink-soft);
+}
+
+.indexlist__item--cleared {
+  color: var(--ink);
+  border-color: var(--orange);
+}
+
+.indexlist__no {
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.indexlist__title {
+  flex: 1;
+  font-weight: 700;
+}
+
+.indexlist__picarat {
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+/* チャーム */
+.charmlist__item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 11px;
+  margin-bottom: 8px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.charmlist__icon {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.charmlist__item h3 {
+  margin: 0 0 3px;
+  font-size: 0.74rem;
+  color: var(--orange-deep);
+}
+
+.charmlist__item p {
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+/* メモ帳 */
+.memopad {
+  width: 100%;
+  min-height: 130px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      transparent 0 calc(1.7em - 1px),
+      var(--cream-dim) calc(1.7em - 1px) 1.7em
+    ),
+    #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.memopad:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+}
+
+/* セーブ結果 */
+.savesheet {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  width: min(100%, 240px);
+}
+
+.savesheet > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.savesheet dt {
+  color: var(--ink-soft);
+}
+
+.savesheet dd {
+  margin: 0;
+  font-weight: 800;
+  color: var(--orange-deep);
+}
+
+/* 下のタブ */
+.trunk__footer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid var(--wood-dark);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+}
+
+.tab:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.tab--on {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.tab--close {
+  color: #fff;
+  background: var(--wood-dark);
+  border-color: #2b1b0e;
+}

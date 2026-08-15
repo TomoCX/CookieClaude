@@ -1,0 +1,22 @@
+{
+  "name": "cookieclaude",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "レイトン風シナリオアドベンチャー『クッキーとクロードの謎解き事件簿』",
+  "scripts": {
+    "dev": "bun --hot src/index.html",
+    "start": "bun src/index.html",
+    "build": "bun build src/index.html --outdir=dist --minify",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^7.0.2"
+  }
+}

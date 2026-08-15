@@ -1,0 +1,168 @@
+/* ---- 重ねて出す表示（結果・タイトル） ---- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(28, 18, 10, 0.66);
+  backdrop-filter: blur(3px);
+  animation: overlay-in 0.2s ease;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* シナリオ読了の結果 */
+.result {
+  width: min(100%, 300px);
+  padding: 18px 18px 16px;
+  text-align: center;
+  background: var(--cream);
+  border: 3px solid var(--wood-dark);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.result__head {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--orange);
+}
+
+.result__title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.result__rewards {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.result__rewards li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.result__rewards strong {
+  color: var(--orange-deep);
+}
+
+.result__unlock {
+  margin: 0 0 12px;
+  padding: 6px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #35602a;
+  background: rgba(93, 138, 74, 0.16);
+  border-radius: 8px;
+}
+
+.result__ok {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border: 2px solid var(--orange-deep);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+}
+
+.result__ok:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* タイトル */
+.overlay--boot {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(226, 176, 108, 0.3), transparent 60%),
+    linear-gradient(160deg, #2f3f57, #1d2433);
+}
+
+.boot {
+  width: min(100%, 330px);
+  padding: 24px 20px 20px;
+  text-align: center;
+  color: var(--cream);
+}
+
+.boot__sub {
+  margin: 0 0 6px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+}
+
+.boot__title {
+  margin: 0 0 14px;
+  font-size: 1.3rem;
+  line-height: 1.45;
+  font-weight: 800;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+.boot__lead {
+  margin: 0 0 20px;
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: #dcd0b8;
+}
+
+.boot__buttons {
+  display: grid;
+  gap: 8px;
+}
+
+.boot__btn {
+  padding: 11px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--orange);
+  border: 2px solid var(--orange-deep);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+}
+
+.boot__btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.boot__btn--sub {
+  color: var(--cream);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(246, 236, 212, 0.45);
+}
+
+.boot__btn:disabled {
+  opacity: 0.4;
+}
+
+.boot__note {
+  margin: 10px 0 0;
+  font-size: 0.6rem;
+  color: #b9ad97;
+}
