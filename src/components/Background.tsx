@@ -3,6 +3,7 @@ import type { BackgroundId } from '../types';
 /** 背景ごとの空・地面の色 */
 const PALETTE: Record<BackgroundId, { sky: [string, string]; ground: string }> =
   {
+    highway: { sky: ['#c7e2ee', '#f6ecd6'], ground: '#c9b183' },
     gate: { sky: ['#cfe4ef', '#f3e5cd'], ground: '#b39a6f' },
     plaza: { sky: ['#bcdcea', '#f6ead1'], ground: '#c0a878' },
     clocktower: { sky: ['#9fbdd2', '#e3d6be'], ground: '#8f8069' },
@@ -41,6 +42,25 @@ export function Background({ id }: Props) {
       </g>
 
       {/* 場所ごとの前景 */}
+      {id === 'highway' && (
+        <g>
+          <path d="M0 300 Q200 250 400 292 Q600 330 800 286 L800 300 Z" fill="#8fae74" />
+          {[90, 210, 590, 720].map((x, i) => (
+            <g key={x}>
+              <rect x={x - 6} y={228} width="12" height="72" fill="#7a5b3e" />
+              <ellipse cx={x} cy={214} rx={44} ry={54} fill={i % 2 ? '#7f9a68' : '#6e8a59'} />
+            </g>
+          ))}
+          <g transform="translate(400 176)">
+            <rect x="-5" y="0" width="10" height="124" fill="#8a6f45" />
+            <path d="M-64 8 L52 8 L66 26 L52 44 L-64 44 Z" fill="#d8bf90" />
+            <text x="-6" y="36" textAnchor="middle" fontSize="21" fontWeight="800" fill="#6b5230">
+              メープル町 →
+            </text>
+          </g>
+        </g>
+      )}
+
       {id === 'gate' && (
         <g>
           <path d="M120 300 L120 150 L160 150 L160 300 Z" fill="#8c6a4a" />

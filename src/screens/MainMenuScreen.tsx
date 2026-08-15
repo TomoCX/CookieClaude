@@ -34,6 +34,8 @@ type Panel =
 interface Props {
   state: GameState;
   settings: Settings;
+  /** セーブ用に、いまいる街並みも含めた状態を組み立てる */
+  buildSave: () => GameState;
   /** 設定が変わったとき */
   onChangeSettings: (next: Settings) => void;
   /** 自由記入メモが変わったとき */
@@ -46,6 +48,7 @@ interface Props {
 export function MainMenuScreen({
   state,
   settings,
+  buildSave,
   onChangeSettings,
   onChangeMemo,
   onClose,
@@ -57,7 +60,7 @@ export function MainMenuScreen({
     playSe('click');
     setPanel('save');
     setSaveMsg(
-      saveGame(state)
+      saveGame(buildSave())
         ? '冒険の記録を保存した。'
         : 'セーブに失敗した。ブラウザの設定を確認してほしい。',
     );

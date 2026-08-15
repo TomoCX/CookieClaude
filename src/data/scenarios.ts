@@ -6,6 +6,67 @@ import type { Scenario } from '../types';
  * kind: 'main' が本筋、'flavor' は町の人とのちょっとした立ち話。
  */
 export const SCENARIOS: Scenario[] = [
+  /* ---- 街道の馬車止め（物語の始まり） ---- */
+  {
+    id: 'sc_coach',
+    title: '街道の馬車止め',
+    bg: 'highway',
+    kind: 'main',
+    coin: 2,
+    unlocks: ['gate'],
+    lines: [
+      {
+        text: '朝もやの立ちこめる街道。乗合馬車が、ゆっくりと速度を落として止まった。',
+        sub: 'A misty highway. The coach slowed, and came to a halt.',
+      },
+      {
+        speaker: 'driver',
+        pose: 'normal',
+        text: '着きましたよ、旦那がた。ここから先は歩きだ。馬車は町へは入れません。',
+        sub: "Here we are, gentlemen. You walk from here — coaches don't enter the town.",
+      },
+      {
+        speaker: 'cookie',
+        pose: 'surprised',
+        text: 'わあ……先生、丘の向こうに屋根が見えます。あれがメープル町ですね！',
+        sub: "Wow... Professor, roofs beyond the hill. That must be Maple Town!",
+      },
+      {
+        speaker: 'claude',
+        pose: 'normal',
+        text: 'ああ。……ここからが、我々の仕事だ。',
+        sub: 'Indeed. From here, the work begins.',
+      },
+      {
+        speaker: 'driver',
+        pose: 'think',
+        text: '物好きですなあ。近ごろあの町へ行きたがる者なんて、めったにいませんよ。',
+        sub: "Odd sort, you two. Hardly anyone asks for that town these days.",
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: 'ほう。それはまた、なぜ。',
+        sub: 'Oh? And why is that?',
+      },
+      {
+        speaker: 'driver',
+        pose: 'normal',
+        text: 'さあね。見るものがなくなった、とでも言いますか。……気をつけて。',
+        sub: "Who knows. Nothing left to look at, they say. ...Mind yourselves.",
+      },
+      {
+        text: '馬車は来た道を引き返していった。ふたりは、町へ続く坂道を歩きだす。',
+        sub: 'The coach turned back the way it came. The two set off up the slope.',
+      },
+    ],
+    note: {
+      id: 'note_letter',
+      title: '差出人のない手紙',
+      body: '「町の時計が十三回鳴る夜、町の宝が消える」とだけ記されている。消印はメープル町。筆跡は整っているが、インクがところどころにじんでいる。',
+    },
+  },
+
   /* ---- 町の入り口 ---- */
   {
     id: 'sc_gate',
@@ -15,9 +76,9 @@ export const SCENARIOS: Scenario[] = [
     coin: 3,
     unlocks: ['plaza'],
     note: {
-      id: 'note_letter',
-      title: 'さしだしにんのない手紙',
-      body: '「町の時計が十三回鳴る夜、町の宝が消える」とだけ記されている。消印はメープル町。筆跡は整っているが、インクがところどころにじんでいる。',
+      id: 'note_gatekeeper',
+      title: '門番モーリスの証言',
+      body: 'この町の時計が十三回鳴ったことは、一度もない。手紙が告げているのは、まだ起きていない出来事である。',
     },
     lines: [
       {

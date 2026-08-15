@@ -2,9 +2,8 @@
 
 /** 画面の種類 */
 export type ScreenId =
-  | 'main' // メイン画面（マップ / 写真3枚目の下側）
-  | 'street' // 街並み画面（マップから入った先。人に話しかける）
-  | 'scenario' // シナリオ会話画面（写真2枚目）
+  | 'street' // 街並み画面。遊びの土台になる画面
+  | 'scenario' // シナリオ会話画面
   | 'puzzle' // ナゾ解き画面（街並みの時計を押すと開く）
   | 'mainMenu'; // メインメニュー（トランク）
 
@@ -50,6 +49,7 @@ export interface DialogueLine {
 
 /** 背景の種類 */
 export type BackgroundId =
+  | 'highway'
   | 'gate'
   | 'plaza'
   | 'clocktower'
@@ -155,12 +155,33 @@ export type FigureId =
   | 'mirror'
   | 'hands'
   | 'clocks3'
-  | 'strike';
+  | 'strike'
+  | 'riddle'
+  | 'flower'
+  | 'lamps'
+  | 'timeline';
+
+/** ウミガメのスープ用。ひとつずつ開いていく「はい／いいえ」の手がかり。 */
+export interface Clue {
+  q: string;
+  a: string;
+}
 
 /** 答えの形式 */
 export type PuzzleAnswer =
+  /** 数を入れる */
   | { kind: 'number'; value: number; unit: string }
-  | { kind: 'choice'; options: string[]; correct: number };
+  /** 選択肢から選ぶ */
+  | { kind: 'choice'; options: string[]; correct: number }
+  /** 言葉で答える（表記ゆれは accept に並べる） */
+  | { kind: 'text'; accept: string[]; placeholder: string }
+  /** 早い順などに並べかえる。correct は items の番号を正しい順に並べたもの。 */
+  | { kind: 'order'; items: string[]; correct: number[] }
+  /**
+   * ます目を押していく二次元パズル。
+   * rule 'oneEachRowCol' は「どの行にも、どの列にも、ちょうど一つ」。
+   */
+  | { kind: 'grid'; rows: number; cols: number; rule: 'oneEachRowCol' };
 
 /** 独立したナゾ解き 1 問 */
 export interface Puzzle {
@@ -173,8 +194,10 @@ export interface Puzzle {
   question: string;
   figure: FigureId;
   answer: PuzzleAnswer;
-  /** ヒントは 1 つにつきひらめきコイン 1 まい */
+  /** ヒントは一つにつきひらめきコイン 1 枚 */
   hints: string[];
+  /** ウミガメのスープ形式のときの「はい／いいえ」。無料で開ける。 */
+  clues?: Clue[];
   /** 正解したあとに読める解説 */
   explanation: string;
 }
@@ -207,6 +230,10 @@ export interface GameState {
   playSeconds: number;
   /** 現在地（Place.id） */
   placeId: string;
+  /** 最後にいた街並み（Street.id）。「続きから」でここに戻る。 */
+  streetId: string;
+  /** その街並みでのカメラ位置（0〜1） */
+  streetX: number;
   /** 行けるようになった場所 */
   openPlaces: string[];
   /** 読み終えたシナリオ */

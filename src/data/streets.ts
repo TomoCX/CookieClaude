@@ -7,6 +7,18 @@ import type { Street } from '../types';
  */
 export const STREETS: Street[] = [
   {
+    id: 'st_coach',
+    placeId: 'coach',
+    bg: 'highway',
+    startX: 0.06,
+    npcs: [
+      { id: 'npc_driver', characterId: 'driver', x: 0.26, scenarioId: 'sc_coach' },
+    ],
+    puzzles: [
+      { id: 'sp_coach_1', puzzleId: 'pz_riddle', x: 0.62, look: 'sundial' },
+    ],
+  },
+  {
     id: 'st_gate',
     placeId: 'gate',
     bg: 'gate',
@@ -23,6 +35,7 @@ export const STREETS: Street[] = [
     ],
     puzzles: [
       { id: 'sp_gate_1', puzzleId: 'pz_strike', x: 0.5, look: 'clock' },
+      { id: 'sp_gate_2', puzzleId: 'pz_lamps', x: 0.93, look: 'pocketwatch' },
     ],
   },
   {
@@ -55,6 +68,7 @@ export const STREETS: Street[] = [
     ],
     puzzles: [
       { id: 'sp_inn_1', puzzleId: 'pz_stopped', x: 0.55, look: 'pocketwatch' },
+      { id: 'sp_inn_2', puzzleId: 'pz_soup', x: 0.94, look: 'clock' },
     ],
   },
   {
@@ -73,6 +87,7 @@ export const STREETS: Street[] = [
     ],
     puzzles: [
       { id: 'sp_tower_1', puzzleId: 'pz_gears', x: 0.52, look: 'sundial' },
+      { id: 'sp_tower_2', puzzleId: 'pz_order', x: 0.94, look: 'clock' },
     ],
   },
   {

@@ -12,6 +12,14 @@ interface Palette {
 }
 
 const PALETTES: Record<BackgroundId, Palette> = {
+  highway: {
+    sky: ['#c7e2ee', '#f6ecd6'],
+    far: '#94b47e',
+    wall: ['#a8c48e', '#98b880', '#b4cf9a'],
+    roof: ['#7f9a68', '#6e8a59', '#8fa876'],
+    road: '#c9b183',
+    roadEdge: '#a8906a',
+  },
   gate: {
     sky: ['#cfe4ef', '#f5e8d0'],
     far: '#9db785',
@@ -140,7 +148,28 @@ export function StreetScene({ bg, cameraT, surface, children }: Props) {
         style={{ transform: `translateX(${-shiftMid}%)` }}
       >
         <svg viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
-          {BUILDINGS.map(([w, h, c], i) => {
+          {/* 街道は町の外なので、建物ではなく並木を並べる */}
+          {bg === 'highway' &&
+            Array.from({ length: 10 }, (_, i) => {
+              const x = 40 + i * 78;
+              const h = 96 + (i % 3) * 26;
+              return (
+                <g key={`t-${i}`}>
+                  <rect x={x - 5} y={300 - h * 0.42} width="10" height={h * 0.42} fill="#7a5b3e" />
+                  <ellipse cx={x} cy={300 - h * 0.52} rx={34} ry={h * 0.34} fill={pal.roof[i % 3]} />
+                  <ellipse
+                    cx={x - 8}
+                    cy={300 - h * 0.62}
+                    rx={22}
+                    ry={h * 0.24}
+                    fill={pal.wall[i % 3]}
+                    opacity="0.75"
+                  />
+                </g>
+              );
+            })}
+          {bg !== 'highway' &&
+            BUILDINGS.map(([w, h, c], i) => {
             const x = i * 66;
             const top = 300 - h;
             return (
@@ -171,6 +200,15 @@ export function StreetScene({ bg, cameraT, surface, children }: Props) {
           })}
 
           {/* 場所ごとの目じるし */}
+          {bg === 'highway' && (
+            <g transform="translate(392 196)">
+              <rect x="-5" y="0" width="10" height="104" fill="#8a6f45" />
+              <path d="M-58 6 L46 6 L58 22 L46 38 L-58 38 Z" fill="#d8bf90" />
+              <text x="-6" y="30" textAnchor="middle" fontSize="19" fontWeight="800" fill="#6b5230">
+                メープル町 →
+              </text>
+            </g>
+          )}
           {bg === 'clocktower' && (
             <g transform="translate(360 40)">
               <path d="M-34 260 L-24 0 L24 0 L34 260 Z" fill={pal.wall[1]} />

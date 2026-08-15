@@ -55,6 +55,16 @@ export const CHARACTERS: Record<string, Character> = {
     hair: '#c98b3f',
     scale: 0.84,
   },
+  driver: {
+    id: 'driver',
+    name: 'バルド',
+    side: 'left',
+    hat: 'hood',
+    coat: '#6b5240',
+    accent: '#463527',
+    skin: '#e0b58c',
+    hair: '#3f342a',
+  },
   maurice: {
     id: 'maurice',
     name: 'モーリス',

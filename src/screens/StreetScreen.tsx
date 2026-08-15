@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameState, Street, StreetPuzzle } from '../types';
 import { getCharacter } from '../data/characters';
-import { getPlace } from '../data/places';
 import { getPuzzle } from '../data/puzzles';
 import { getScenario } from '../data/scenarios';
 import { CharacterArt } from '../components/CharacterSprite';
@@ -39,10 +38,8 @@ interface Props {
   onTalk: (scenarioId: string) => void;
   /** ナゾを開いた */
   onOpenPuzzle: (puzzleId: string) => void;
-  /** 街へ戻る */
-  onBackToMap: () => void;
-  /** 右下ボタン: メインメニュー */
-  onOpenMainMenu: () => void;
+  /** 地図などがかぶさっている間は操作を受けつけない */
+  frozen?: boolean;
 }
 
 /**
@@ -57,8 +54,7 @@ export function StreetScreen({
   onMove,
   onTalk,
   onOpenPuzzle,
-  onBackToMap,
-  onOpenMainMenu,
+  frozen = false,
 }: Props) {
   const [center, setCenter] = useState(() =>
     Math.min(MAX_C, Math.max(MIN_C, initialX)),
@@ -78,7 +74,6 @@ export function StreetScreen({
   const dragged = useRef(false);
   const [grabbing, setGrabbing] = useState(false);
 
-  const place = getPlace(street.placeId);
 
   useEffect(() => {
     const id = setTimeout(() => setEntering(false), FADE_MS);
@@ -99,7 +94,7 @@ export function StreetScreen({
   const open = useCallback(
     (next: Pending) => {
       // ドラッグの終わりに出る click は無視する
-      if (pending || dragged.current) return;
+      if (pending || dragged.current || frozen) return;
       held.current = 0;
       playSe('fade');
       setPending(next);
@@ -108,7 +103,7 @@ export function StreetScreen({
         else onOpenPuzzle(next.puzzleId);
       }, FADE_MS);
     },
-    [pending, onTalk, onOpenPuzzle],
+    [pending, onTalk, onOpenPuzzle, frozen],
   );
 
   /** カメラを動かす */
@@ -144,6 +139,7 @@ export function StreetScreen({
   /** キーボード操作 */
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      if (frozen) return;
       if (e.key === 'ArrowLeft' || e.key === 'a') held.current = -1;
       else if (e.key === 'ArrowRight' || e.key === 'd') held.current = 1;
       else if (e.key === ' ' || e.key === 'Enter') {
@@ -156,7 +152,7 @@ export function StreetScreen({
         }
         const z = street.puzzles.find((v) => Math.abs(v.x - c) < FOCUS_RANGE);
         if (z) open({ kind: 'puzzle', puzzleId: z.puzzleId });
-      } else if (e.key === 'Escape') onBackToMap();
+      }
     };
     const up = (e: KeyboardEvent) => {
       if (
@@ -172,12 +168,12 @@ export function StreetScreen({
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [npcs, street.puzzles, open, onBackToMap]);
+  }, [npcs, street.puzzles, open, frozen]);
 
   /** 画面をつかんで見わたす。矢印ボタンと併用できる。 */
   const surface = {
     onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
-      if (e.button !== 0 || pending) return;
+      if (e.button !== 0 || pending || frozen) return;
       // ここでは まだ setPointerCapture しない。
       // 押した時点で捕まえると click の宛先を奪ってしまい、
       // 人やナゾのボタンが押せなくなる。
@@ -245,7 +241,11 @@ export function StreetScreen({
       : null;
 
   return (
-    <div className={`street${grabbing ? ' street--grabbing' : ''}`}>
+    <div
+      className={`street${grabbing ? ' street--grabbing' : ''}${
+        frozen ? ' street--frozen' : ''
+      }`}
+    >
       <StreetScene bg={street.bg} cameraT={cameraT} surface={surface}>
         {/* 立っている人 */}
         {npcs.map((npc) => {
@@ -309,27 +309,6 @@ export function StreetScreen({
         className={`street__sight${action ? ' street__sight--on' : ''}`}
         aria-hidden="true"
       />
-
-      {/* 上部バー */}
-      <div className="street__topbar">
-        <button type="button" className="iconbtn" onClick={onBackToMap} title="地図へ戻る">
-          ↰
-        </button>
-        <span className="street__place">{place?.name}</span>
-      </div>
-
-      {/* 右下：メインメニューへ */}
-      <button
-        type="button"
-        className="main__corner main__corner--br"
-        onClick={onOpenMainMenu}
-        title="メインメニューへ"
-      >
-        <span className="main__corner-icon" aria-hidden="true">
-          🧳
-        </span>
-        <span className="main__corner-label">メインメニュー</span>
-      </button>
 
       {/* 下部：見わたす操作 */}
       <div className="street__controls">

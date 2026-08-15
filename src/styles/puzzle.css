@@ -413,3 +413,173 @@
     animation: none;
   }
 }
+
+/* ---- ウミガメのスープ：はい／いいえの手がかり ---- */
+.cluebox {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  background: rgba(90, 120, 150, 0.1);
+  border: 1.5px solid #9fb4c4;
+  border-radius: 10px;
+}
+
+.cluebox__head {
+  margin: 0 0 6px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #3f6180;
+}
+
+.cluelist {
+  margin: 0 0 8px;
+  padding: 0 0 0 1.2em;
+  display: grid;
+  gap: 6px;
+}
+
+.cluelist li {
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.cluelist__q {
+  display: block;
+  font-weight: 800;
+  color: #3f6180;
+}
+
+.cluelist__a {
+  display: block;
+  color: var(--ink);
+}
+
+.cluebox__more {
+  width: 100%;
+  padding: 7px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  background: #4f7c9e;
+  border: 2px solid #38607e;
+  border-radius: 8px;
+}
+
+.cluebox__more:active {
+  transform: translateY(1px);
+}
+
+.cluebox__done {
+  margin: 0;
+  font-size: 0.64rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* ---- 並べかえ ---- */
+.answer__orderhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.answer__reset {
+  padding: 3px 10px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  background: var(--cream-dim);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+}
+
+.answer__reset:disabled {
+  opacity: 0.45;
+}
+
+.answer__order {
+  display: grid;
+  gap: 5px;
+}
+
+.orderitem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.4;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+}
+
+.orderitem:hover {
+  border-color: var(--orange);
+}
+
+.orderitem--on {
+  background: rgba(226, 112, 28, 0.12);
+  border-color: var(--orange);
+}
+
+.orderitem__no {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  background: var(--cream-dim);
+  border-radius: 50%;
+}
+
+.orderitem--on .orderitem__no {
+  color: #fff;
+  background: var(--orange);
+}
+
+/* ---- 二次元パズル（時計塔の窓） ---- */
+.answer__grid {
+  display: grid;
+  gap: 6px;
+}
+
+.lampgrid {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  background: #6f5a41;
+  border-radius: 8px;
+}
+
+.lampcell {
+  aspect-ratio: 1 / 0.85;
+  padding: 0;
+  background: #4a3a2a;
+  border: 2px solid #3a2c1e;
+  border-radius: 4px;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.lampcell:hover {
+  background: #5f4b36;
+}
+
+.lampcell--on {
+  background: #f0c86a;
+  border-color: #c9a04a;
+  box-shadow: 0 0 10px rgba(240, 200, 106, 0.75);
+}
+
+/* 言葉で答えるときは左そろえのほうが読みやすい */
+.answer__num input[type='text'] {
+  text-align: left;
+  font-size: 0.95rem;
+}

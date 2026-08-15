@@ -3,21 +3,21 @@ import type { GameState, Place } from '../types';
 import { PLACES, getPlace } from '../data/places';
 import { TownMap } from '../components/TownMap';
 import { solvedCount } from '../state/gameState';
+import { playSe } from '../audio/audio';
 
 interface Props {
   state: GameState;
-  /** 場所を選んだとき（街並みへ） */
+  /** 場所を選んだとき（その街並みへ移る） */
   onEnterPlace: (place: Place) => void;
-  /** 右下ボタン: メインメニューへ戻る */
-  onOpenMainMenu: () => void;
+  /** 地図を閉じる */
+  onClose: () => void;
 }
 
-/** メイン画面（写真3枚目の下側）。町のマップから街並みやナゾへ入っていく。 */
-export function MainScreen({
-  state,
-  onEnterPlace,
-  onOpenMainMenu,
-}: Props) {
+/**
+ * 地図。左上の「地図」アイコンから開く、地点を移すための画面。
+ * かつてはこれが土台の画面だったが、いまは街並みの上にかぶせて出す。
+ */
+export function MapOverlay({ state, onEnterPlace, onClose }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
 
   const here = getPlace(state.placeId);
@@ -25,6 +25,7 @@ export function MainScreen({
   const visited =
     selectedPlace != null &&
     state.clearedScenarios.includes(selectedPlace.mainScenarioId);
+  const isHere = selectedPlace?.id === state.placeId;
 
   /** 次に行くとよい場所（まだ本筋を読んでいない、開放済みの場所） */
   const nextPlace = PLACES.find(
@@ -34,30 +35,38 @@ export function MainScreen({
   );
 
   const hint = selectedPlace
-    ? visited
-      ? `${selectedPlace.name}：再訪して話を聞ける`
-      : `${selectedPlace.name}へ向かおう`
+    ? isHere
+      ? `${selectedPlace.name}：いま滞在中の場所`
+      : visited
+        ? `${selectedPlace.name}：再訪して話を聞ける`
+        : `${selectedPlace.name}へ向かおう`
     : nextPlace
       ? `${nextPlace.name}を調べよう`
       : '物語は完結した。町を巡り、残るナゾを解こう';
 
   return (
-    <div className="main">
-      {/* 上部バー：解いたナゾの数と現在地 */}
-      <div className="main__topbar">
-        <div className="main__counter">
-          <span className="main__counter-label">解いたナゾ</span>
-          <span className="main__counter-value">
+    <div className="mapview">
+      <div className="mapview__topbar">
+        <div className="mapview__counter">
+          <span className="mapview__counter-label">解いたナゾ</span>
+          <span className="mapview__counter-value">
             {String(solvedCount(state)).padStart(3, '0')}
           </span>
         </div>
-        <div className="main__place">
-          <span className="main__place-ruby">{here?.ruby}</span>
-          <span className="main__place-name">{here?.name}</span>
-        </div>
+        <h1 className="mapview__title">地図</h1>
+        <button
+          type="button"
+          className="iconbtn"
+          onClick={() => {
+            playSe('click');
+            onClose();
+          }}
+          title="地図を閉じる"
+        >
+          ✕
+        </button>
       </div>
 
-      {/* マップ本体 */}
       <TownMap
         places={PLACES}
         openPlaces={state.openPlaces}
@@ -67,26 +76,15 @@ export function MainScreen({
         onSelect={setSelected}
       />
 
-      {/* 右下：メインメニューへ戻るボタン */}
-      <button
-        type="button"
-        className="main__corner main__corner--br"
-        onClick={onOpenMainMenu}
-        title="メインメニューへ"
-      >
-        <span className="main__corner-icon" aria-hidden="true">
-          🧳
-        </span>
-        <span className="main__corner-label">メインメニュー</span>
-      </button>
-
-      {/* 下部：ヒント / 移動ボタン */}
-      <div className="main__hintbar">
-        <p className="main__hint">{hint}</p>
-        {selectedPlace && (
+      <div className="mapview__hintbar">
+        <p className="mapview__hint">
+          <span className="mapview__here">現在地：{here?.name}</span>
+          {hint}
+        </p>
+        {selectedPlace && !isHere && (
           <button
             type="button"
-            className="main__go"
+            className="mapview__go"
             onClick={() => {
               setSelected(null);
               onEnterPlace(selectedPlace);

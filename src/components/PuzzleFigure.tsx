@@ -231,6 +231,115 @@ export function PuzzleFigure({ id }: Props) {
             </text>
           </g>
         )}
+
+        {id === 'riddle' && (
+          <g>
+            {/* 街道の道しるべ */}
+            <rect x="150" y="46" width="12" height="76" fill="#8a6f45" />
+            <path d="M52 34 L150 34 L150 60 L52 60 L40 47 Z" fill="#d8bf90" />
+            <path d="M162 66 L262 66 L274 79 L262 92 L162 92 Z" fill="#c9ab7b" />
+            <text x="100" y="53" textAnchor="middle" fontSize="13" fontWeight="800" fill="#6b5230">
+              朝 → 昼 → 夜
+            </text>
+            <text x="214" y="85" textAnchor="middle" fontSize="13" fontWeight="800" fill="#6b5230">
+              4 → 2 → 3 本
+            </text>
+            <text x="52" y="112" textAnchor="middle" fontSize="22" fontWeight="800" fill="#c2551e">
+              ？
+            </text>
+          </g>
+        )}
+
+        {id === 'flower' && (
+          <g>
+            {/* 門と、その向こうの丘に咲く花 */}
+            <rect x="96" y="30" width="12" height="86" fill="#8c6a4a" />
+            <rect x="152" y="30" width="12" height="86" fill="#8c6a4a" />
+            <rect x="88" y="22" width="84" height="12" fill="#7a5b3e" />
+            <path d="M0 116 L320 116" stroke="#a98d5f" strokeWidth="5" />
+            <path d="M198 116 Q248 66 298 116 Z" fill="#9db785" />
+            {[228, 252, 274].map((x, i) => (
+              <g key={x}>
+                <path d={`M${x} 116 L${x} ${98 - i * 4}`} stroke="#5f8a4a" strokeWidth="2.5" />
+                <circle cx={x} cy={94 - i * 4} r="6" fill="#d98fae" />
+                <circle cx={x} cy={94 - i * 4} r="2.4" fill="#f4e2c6" />
+              </g>
+            ))}
+            <text x="126" y="112" textAnchor="middle" fontSize="11" fontWeight="700" fill="#6b5230">
+              門（通った者なし）
+            </text>
+          </g>
+        )}
+
+        {id === 'lamps' && (
+          <g>
+            {/* 4 階 4 列の窓 */}
+            <rect x="96" y="12" width="128" height="106" rx="4" fill="#c3ab84" />
+            {Array.from({ length: 16 }, (_, n) => {
+              const r = Math.floor(n / 4);
+              const c = n % 4;
+              const lit = r === c;
+              return (
+                <rect
+                  key={n}
+                  x={106 + c * 30}
+                  y={20 + r * 25}
+                  width="20"
+                  height="17"
+                  rx="2"
+                  fill={lit ? '#f0c86a' : '#6f5a41'}
+                  stroke="#5c422c"
+                  strokeWidth="1.5"
+                />
+              );
+            })}
+            <text x="46" y="70" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
+              各階に一つ
+            </text>
+            <text x="278" y="70" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
+              各列に一つ
+            </text>
+          </g>
+        )}
+
+        {id === 'timeline' && (
+          <g>
+            {/* 夜の出来事の帯 */}
+            <path d="M22 66 L298 66" stroke="#b79a6f" strokeWidth="4" strokeLinecap="round" />
+            <path d="M298 66 L286 60 L286 72 Z" fill="#b79a6f" />
+            {[
+              [46, '9時'],
+              [110, '10時'],
+              [174, '？'],
+              [238, '10時半'],
+              [286, '11時'],
+            ].map(([x, label], i) => (
+              <g key={i}>
+                <circle
+                  cx={x as number}
+                  cy={66}
+                  r={label === '？' ? 9 : 7}
+                  fill={label === '？' ? '#c2551e' : '#c9a04a'}
+                  stroke="#fff"
+                  strokeWidth="2"
+                />
+                <text
+                  x={x as number}
+                  y={46}
+                  textAnchor="middle"
+                  fontSize="11"
+                  fontWeight="800"
+                  fill="#8a6f45"
+                >
+                  {label as string}
+                </text>
+              </g>
+            ))}
+            <text x="160" y="104" textAnchor="middle" fontSize="11" fontWeight="700" fill="#8a6f45">
+              早い順に並べかえる
+            </text>
+          </g>
+        )}
       </svg>
     </div>
   );

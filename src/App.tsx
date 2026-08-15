@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, Place, ScreenId, Settings } from './types';
 import { getScenario } from './data/scenarios';
 import { getStreet } from './data/streets';
+import { getPlace } from './data/places';
 import { getPuzzle } from './data/puzzles';
-import { MainScreen } from './screens/MainScreen';
+import { MapOverlay } from './screens/MapOverlay';
 import { StreetScreen } from './screens/StreetScreen';
 import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
+import { Hud } from './components/Hud';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setSe, unlock } from './audio/audio';
 import {
@@ -32,12 +34,14 @@ interface Result {
 
 export function App() {
   const [state, setState] = useState<GameState>(createInitialState);
-  const [screen, setScreen] = useState<ScreenId>('main');
-  /** 街並みに戻れるように、いま入っている街並みを覚えておく */
-  const [streetId, setStreetId] = useState<string | null>(null);
-  /** メインメニュー・メニュー画面を「閉じる」で戻る先 */
-  const [returnTo, setReturnTo] = useState<ScreenId>('main');
-  /** 街並みごとの立ち位置。会話に入って戻ってもその続きから歩けるように覚えておく */
+  /** 遊びの土台は街並み。地図・メインメニューはこの上にかぶせて出す。 */
+  const [screen, setScreen] = useState<ScreenId>('street');
+  const [streetId, setStreetId] = useState<string>(() => createInitialState().streetId);
+  /** 地図を開いているか */
+  const [mapOpen, setMapOpen] = useState(false);
+  /** メインメニューを「閉じる」で戻る先 */
+  const [returnTo, setReturnTo] = useState<ScreenId>('street');
+  /** 街並みごとのカメラ位置。会話に入って戻ってもその続きから見渡せるように覚えておく */
   const streetPos = useRef<Record<string, number>>({});
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
@@ -61,11 +65,12 @@ export function App() {
     return () => clearInterval(id);
   }, [booting]);
 
-  /** マップから街並みへ入る。入りなおしたときは道の入口から。 */
+  /** 地図から別の場所へ移る。入りなおしたときは道の入口から。 */
   const enterPlace = useCallback((place: Place) => {
     setState((s) => ({ ...s, placeId: place.id }));
     delete streetPos.current[place.streetId];
     setStreetId(place.streetId);
+    setMapOpen(false);
     setScreen('street');
   }, []);
 
@@ -75,7 +80,7 @@ export function App() {
     setScreen('scenario');
   }, []);
 
-  /** 会話を読み終えた／やめた。どちらも街並みへ戻る。 */
+  /** 会話を読み終えた／中断した。どちらも街並みへ戻る。 */
   const endScenario = useCallback(
     (finished: boolean) => {
       const sc = scenarioId ? getScenario(scenarioId) : null;
@@ -93,9 +98,9 @@ export function App() {
         }
       }
       setScenarioId(null);
-      setScreen(streetId ? 'street' : 'main');
+      setScreen('street');
     },
-    [scenarioId, state.clearedScenarios, streetId],
+    [scenarioId, state.clearedScenarios],
   );
 
   /** 街並みでナゾを押した */
@@ -106,34 +111,40 @@ export function App() {
   }, []);
 
   /** メインメニューを開く（戻り先を覚えておく） */
-  const openOverlayScreen = useCallback(
-    (next: 'mainMenu') => {
-      setReturnTo((prev) => (screen === 'mainMenu' ? prev : screen));
-      setScreen(next);
-    },
-    [screen],
-  );
+  const openMainMenu = useCallback(() => {
+    playSe('click');
+    setMapOpen(false);
+    setReturnTo((prev) => (screen === 'mainMenu' ? prev : screen));
+    setScreen('mainMenu');
+  }, [screen]);
 
-  const backFromOverlay = useCallback(() => {
-    setScreen(returnTo === 'mainMenu' ? 'main' : returnTo);
+  const closeMainMenu = useCallback(() => {
+    setScreen(returnTo === 'mainMenu' ? 'street' : returnTo);
   }, [returnTo]);
 
+  /** セーブ用に、いまいる街並みとカメラ位置も含めた状態を組み立てる */
+  const buildSave = useCallback(
+    (): GameState => ({
+      ...state,
+      streetId,
+      streetX: streetPos.current[streetId] ?? getStreet(streetId)?.startX ?? 0.06,
+    }),
+    [state, streetId],
+  );
+
   const scenario = scenarioId ? getScenario(scenarioId) : null;
-  const street = streetId ? getStreet(streetId) : null;
+  const street = getStreet(streetId);
   const puzzle = puzzleId ? getPuzzle(puzzleId) : null;
+  const place = getPlace(state.placeId);
+
+  /** 地図とメインメニューのアイコンを出す場面か */
+  const showHud = !booting && (screen === 'street' || mapOpen);
 
   return (
     <div className={`app app--${settings.screenSize}`}>
       <div className="device">
-        {screen === 'main' && (
-          <MainScreen
-            state={state}
-            onEnterPlace={enterPlace}
-            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
-          />
-        )}
-
-        {screen === 'street' && street && (
+        {/* 街並みは常に土台として置いておく（地図はこの上にかぶさる） */}
+        {(screen === 'street' || mapOpen) && street && (
           <StreetScreen
             key={street.id}
             street={street}
@@ -144,11 +155,7 @@ export function App() {
             }}
             onTalk={talkTo}
             onOpenPuzzle={openPuzzle}
-            onBackToMap={() => {
-              setStreetId(null);
-              setScreen('main');
-            }}
-            onOpenMainMenu={() => openOverlayScreen('mainMenu')}
+            frozen={mapOpen}
           />
         )}
 
@@ -169,7 +176,7 @@ export function App() {
             onSolved={() => setState((s) => applyPuzzleSolved(s, puzzle))}
             onQuit={() => {
               setPuzzleId(null);
-              setScreen(streetId ? 'street' : 'main');
+              setScreen('street');
             }}
           />
         )}
@@ -178,29 +185,56 @@ export function App() {
           <MainMenuScreen
             state={state}
             settings={settings}
+            buildSave={buildSave}
             onChangeSettings={setSettings}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
-            onClose={backFromOverlay}
+            onClose={closeMainMenu}
           />
         )}
 
-        {result && (
-          <ResultOverlay result={result} onClose={() => setResult(null)} />
+        {mapOpen && (
+          <MapOverlay
+            state={state}
+            onEnterPlace={enterPlace}
+            onClose={() => setMapOpen(false)}
+          />
         )}
+
+        {showHud && (
+          <Hud
+            onOpenMap={() => {
+              playSe('click');
+              setMapOpen((v) => !v);
+            }}
+            onOpenMenu={openMainMenu}
+            placeName={mapOpen ? undefined : place?.name}
+          />
+        )}
+
+        {result && <ResultOverlay result={result} onClose={() => setResult(null)} />}
 
         {booting && (
           <BootOverlay
             onNewGame={() => {
               unlock();
               playSe('click');
-              setState(createInitialState());
+              const fresh = createInitialState();
+              streetPos.current = {};
+              setState(fresh);
+              setStreetId(fresh.streetId);
+              setScreen('street');
               setBooting(false);
             }}
             onContinue={() => {
               unlock();
               playSe('click');
               const saved = loadGame();
-              if (saved) setState(saved);
+              if (saved) {
+                setState(saved);
+                setStreetId(saved.streetId);
+                streetPos.current = { [saved.streetId]: saved.streetX };
+              }
+              setScreen('street');
               setBooting(false);
             }}
           />
@@ -270,7 +304,7 @@ function BootOverlay({
           ナゾ解き事件簿
         </h1>
         <p className="boot__lead">
-          町の時計が十三回鳴る夜、町の宝が消える――
+          町の時計が十三回鳴る夜、町の宝が消える——
         </p>
         <div className="boot__buttons">
           <button type="button" className="boot__btn" onClick={onNewGame}>
@@ -285,9 +319,7 @@ function BootOverlay({
             続きから
           </button>
         </div>
-        {!canContinue && (
-          <p className="boot__note">※ セーブデータはまだありません</p>
-        )}
+        {!canContinue && <p className="boot__note">※ セーブデータはまだない</p>}
       </div>
     </div>
   );

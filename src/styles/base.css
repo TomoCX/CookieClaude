@@ -150,3 +150,70 @@ button:disabled {
 .iconbtn--gear:hover {
   background: #66702f;
 }
+
+/* ---- 常に出ている操作（左上：地図／右上：メインメニュー） ---- */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  pointer-events: none;
+}
+
+.hud__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px 6px 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--cream);
+  background: rgba(64, 42, 25, 0.88);
+  border: 2px solid var(--wood-dark);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  pointer-events: auto;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.hud__btn:hover {
+  background: var(--wood);
+}
+
+.hud__btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.hud__btn--menu {
+  margin-left: auto;
+}
+
+.hud__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+}
+
+.hud__place {
+  align-self: center;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--cream);
+  background: rgba(64, 42, 25, 0.7);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+@media (max-width: 380px) {
+  /* 幅が足りないときは文字を落としてアイコンだけにする */
+  .hud__label {
+    display: none;
+  }
+}
