@@ -9,8 +9,10 @@ interface Props {
   onSelect: (id: string | null) => void;
 }
 
-/** 町の俯瞰図。エリアごとにピンが立つ。
-    ナゾは地図ではなく、それぞれのシーンの中に置いてある。 */
+/**
+ * 町の俯瞰図。行けるようになったエリアにだけピンが立つ。
+ * ナゾは地図ではなく、それぞれのシーンの中に置いてある。
+ */
 export function TownMap({
   areas,
   openAreas,
@@ -105,42 +107,57 @@ export function TownMap({
         </g>
       </svg>
 
-      {/* 行き先ピン */}
-      {areas.map((p) => {
-        const open = openAreas.includes(p.id);
-        const cleared = clearedScenarios.includes(p.mainScenarioId);
-        const isHere = p.id === currentAreaId;
-        const isSelected = p.id === selectedId;
-        const cls = [
-          'pin',
-          open ? 'pin--open' : 'pin--locked',
-          cleared ? 'pin--cleared' : '',
-          isHere ? 'pin--here' : '',
-          isSelected ? 'pin--selected' : '',
-        ]
-          .filter(Boolean)
-          .join(' ');
+      {/*
+        行き先ピン。
+        まだ開いていないエリアは、影も名前も出さない（存在を伏せる）。
+        いまいるエリアだけは、形も色も変えて一目で分かるようにする。
+      */}
+      {areas
+        .filter((area) => openAreas.includes(area.id))
+        .map((area) => {
+          const cleared = clearedScenarios.includes(area.mainScenarioId);
+          const isHere = area.id === currentAreaId;
+          const isSelected = area.id === selectedId;
+          const cls = ['pin', 'pin--open']
+            .concat(cleared ? 'pin--cleared' : [])
+            .concat(isHere ? 'pin--here' : [])
+            .concat(isSelected ? 'pin--selected' : [])
+            .join(' ');
 
-        return (
-          <button
-            key={p.id}
-            type="button"
-            className={cls}
-            style={{ left: `${p.x}%`, top: `${p.y}%` }}
-            disabled={!open}
-            aria-label={open ? p.name : '未到達の地点'}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(isSelected ? null : p.id);
-            }}
-          >
-            <span className="pin__marker" aria-hidden="true">
-              <i className="pin__glyph">{open ? (cleared ? '✓' : '!') : '?'}</i>
-            </span>
-            <span className="pin__name">{open ? p.name : '？？？'}</span>
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={area.id}
+              type="button"
+              className={cls}
+              style={{ left: `${area.x}%`, top: `${area.y}%` }}
+              aria-label={isHere ? `${area.name}（現在地）` : area.name}
+              aria-current={isHere ? 'location' : undefined}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(isSelected ? null : area.id);
+              }}
+            >
+              {isHere && (
+                <span className="pin__here" aria-hidden="true">
+                  現在地
+                </span>
+              )}
+              <span className="pin__marker" aria-hidden="true">
+                {/* いまいる場所は、探偵の帽子を置いて他と区別する */}
+                {isHere ? (
+                  <svg viewBox="0 0 24 24" className="pin__hat">
+                    <path d="M6.5 15.5 Q4 15 3 14.2 L3 16 Q7 18.4 12 18.4 Q17 18.4 21 16 L21 14.2 Q20 15 17.5 15.5 Z" />
+                    <path d="M7.6 6.4 Q7.2 4.6 9 4.4 L15 4.4 Q16.8 4.6 16.4 6.4 L15.6 15.4 Q12 16.3 8.4 15.4 Z" />
+                    <rect x="7.2" y="11.4" width="9.6" height="2.6" rx="0.6" opacity="0.45" />
+                  </svg>
+                ) : (
+                  <i className="pin__glyph">{cleared ? '✓' : '!'}</i>
+                )}
+              </span>
+              <span className="pin__name">{area.name}</span>
+            </button>
+          );
+        })}
     </div>
   );
 }

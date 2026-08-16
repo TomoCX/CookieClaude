@@ -6,6 +6,14 @@ import type { Area } from '../types';
  * エリアそのものは背景を持たない。絵を持つのはシーンのほうで、
  * どのシーンがどのエリアに属するかは `scenes.ts` の `areaId` で決まる。
  * ここに書くのは「地図の上での見えかた」と「入口のシーン」だけ。
+ *
+ * 開放の段取り:
+ * - 街道の馬車止め・町の入り口・大門広場 … 最初から自由に行き来できる
+ * - 時計塔・まんげつ亭 … 広場の本筋（sc_plaza）を読むと開く
+ * - 裏路地 … 時計塔の本筋（sc_clocktower）を読むと開く
+ *
+ * まだ開いていないエリアは、地図に影も出さない（`TownMap`）。
+ * 開いた瞬間に初めて姿を現す。
  */
 export const AREAS: Area[] = [
   {
@@ -26,8 +34,7 @@ export const AREAS: Area[] = [
     y: 74,
     entrySceneId: 'scn_gate_front',
     mainScenarioId: 'sc_gate',
-    // 御者との会話（sc_coach）を読むと開く。最初から開けてしまうと
-    // 幕開けを飛ばして町に入れてしまう。
+    openFromStart: true,
   },
   {
     id: 'plaza',
@@ -37,6 +44,7 @@ export const AREAS: Area[] = [
     y: 60,
     entrySceneId: 'scn_plaza_fountain',
     mainScenarioId: 'sc_plaza',
+    openFromStart: true,
   },
   {
     id: 'inn',

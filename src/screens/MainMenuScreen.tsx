@@ -39,6 +39,10 @@ interface Props {
   onRestore: (next: GameState) => void;
   /** 自由記入メモが変わったとき */
   onChangeMemo: (memo: string) => void;
+  /** 開発者モードが入っているか */
+  devOn: boolean;
+  /** 開発者モードを出入りする */
+  onToggleDev: () => void;
   /** 閉じる（前の画面に戻る） */
   onClose: () => void;
 }
@@ -54,6 +58,8 @@ export function MainMenuScreen({
   onRestore,
   onChangeSettings,
   onChangeMemo,
+  devOn,
+  onToggleDev,
   onClose,
 }: Props) {
   const [panel, setPanel] = useState<Panel>(null);
@@ -125,7 +131,16 @@ export function MainMenuScreen({
               />
               <TrunkItem icon="💾" label="バックアップ" onClick={() => setPanel('backup')} />
               <TrunkItem icon="⚙" label="設定" onClick={() => setPanel('settings')} />
-              <TrunkItem icon="？" label="？？？" locked />
+              {/* 中身を足すための道具箱。Ctrl + Shift + D でも出入りできる。 */}
+              <TrunkItem
+                icon="🛠"
+                label="開発"
+                on={devOn}
+                onClick={() => {
+                  onToggleDev();
+                  onClose();
+                }}
+              />
             </div>
           </>
         ) : (
@@ -165,21 +180,23 @@ interface TrunkItemProps {
   badge?: number;
   /** まだ使えない道具 */
   locked?: boolean;
+  /** いま入っている道具（開発者モードなど）は灯して見せる */
+  on?: boolean;
   onClick?: () => void;
 }
 
 /** トランクに並ぶ道具ひとつ */
-function TrunkItem({ icon, label, badge, locked, onClick }: TrunkItemProps) {
+function TrunkItem({ icon, label, badge, locked, on, onClick }: TrunkItemProps) {
   return (
     <button
       type="button"
-      className={`titem${locked ? ' titem--locked' : ''}`}
+      className={`titem${locked ? ' titem--locked' : ''}${on ? ' titem--on' : ''}`}
       onClick={() => {
         playSe('click');
         onClick?.();
       }}
       disabled={locked}
-      title={locked ? 'まだ使用できない' : label}
+      title={locked ? 'まだ使用できない' : on ? `${label}（いま入っている）` : label}
     >
       <span className="titem__icon" aria-hidden="true">
         {icon}

@@ -478,3 +478,13 @@
   background: var(--wood-dark);
   border-color: #2b1b0e;
 }
+
+/* いま入っている道具（開発者モードなど）は、灯して見せる */
+.titem--on {
+  background: #3f4620;
+  border-color: #8fb05f;
+}
+
+.titem--on .titem__label {
+  color: #cfe6a6;
+}

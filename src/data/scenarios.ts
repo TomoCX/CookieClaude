@@ -13,7 +13,6 @@ export const SCENARIOS: Scenario[] = [
     bg: 'highway',
     kind: 'main',
     coin: 2,
-    unlocks: ['gate'],
     lines: [
       {
         text: '朝もやの立ちこめる街道。乗合馬車が、ゆっくりと速度を落として止まった。',
@@ -74,7 +73,6 @@ export const SCENARIOS: Scenario[] = [
     bg: 'gate',
     kind: 'main',
     coin: 3,
-    unlocks: ['plaza'],
     note: {
       id: 'note_gatekeeper',
       title: '門番モーリスの証言',

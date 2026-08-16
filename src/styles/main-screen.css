@@ -28,6 +28,7 @@
 }
 
 .pin__marker {
+  position: relative;
   width: 30px;
   height: 30px;
   display: grid;
@@ -43,11 +44,18 @@
   transition: transform 0.14s ease;
 }
 
-/* ピンは 45 度傾けているので、中の文字は戻しておく */
-.pin__glyph {
+/* ピンは 45 度傾けているので、中身は戻しておく */
+.pin__glyph,
+.pin__hat {
   display: block;
   font-style: normal;
   transform: rotate(45deg);
+}
+
+.pin__hat {
+  width: 19px;
+  height: 19px;
+  fill: var(--cream);
 }
 
 .pin__name {
@@ -69,21 +77,73 @@
   background: #5d8a4a;
 }
 
-.pin--locked {
-  opacity: 0.62;
-}
+/* ---- いまいるエリア ---- */
 
-.pin--locked .pin__marker {
-  background: #8b8172;
+/*
+ * ほかのピンと見分けがつくよう、三つ変えている。
+ * 形（帽子の絵）・色（濃い橙）・広がる輪。さらに上に「現在地」と出す。
+ */
+.pin--here {
+  z-index: 2;
 }
 
 .pin--here .pin__marker {
+  background: var(--orange-deep);
+  border-color: var(--gold);
+  border-width: 3px;
   animation: pin-bounce 1.4s ease-in-out infinite;
+}
+
+/* 外側へ広がる輪。ピンの位置そのものを目で追えるようにする。 */
+.pin--here .pin__marker::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--orange);
+  border-radius: 50%;
+  animation: pin-ripple 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+.pin__here {
+  padding: 1px 7px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--orange-deep);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.pin--here .pin__name {
+  color: #fff;
+  background: var(--orange-deep);
+  border-color: var(--gold);
+}
+
+@keyframes pin-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
 }
 
 .pin--selected .pin__marker {
   background: var(--gold);
   transform: rotate(-45deg) scale(1.2);
+}
+
+/* 選んでいても、いまいる場所の色は保つ */
+.pin--here.pin--selected .pin__marker {
+  background: var(--orange-deep);
 }
 
 .pin--selected .pin__name {

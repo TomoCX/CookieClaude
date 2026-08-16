@@ -14,6 +14,7 @@ import { ResultOverlay, type Result } from './screens/ResultOverlay';
 import { PickupToast } from './screens/panels/CollectionPanel';
 import { Hud } from './components/Hud';
 import { DevTools } from './dev/DevTools';
+import { toggleDevMode, useDevFlags } from './dev/devFlags';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setSe, unlock } from './audio/audio';
 import { setEffectSettings } from './effects/runtime';
@@ -54,6 +55,7 @@ export function App() {
   const [pickup, setPickup] = useState<{ itemId: string; areaId: string } | null>(null);
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
+  const devFlags = useDevFlags();
 
   // 設定を覚えておき、音とエフェクトにもすぐ反映する
   useEffect(() => {
@@ -236,6 +238,8 @@ export function App() {
             onRestore={startWith}
             onChangeSettings={setSettings}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
+            devOn={devFlags.on}
+            onToggleDev={toggleDevMode}
             onClose={closeMainMenu}
           />
         )}

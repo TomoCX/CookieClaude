@@ -260,8 +260,13 @@ export function SceneScreen({
   /** 出口の矢印を出すか。見わたさないシーンでは隠す理由がないので常に出す。 */
   const showExits = walkable ? moveMode : true;
 
-  /** 下のバーに出す案内 */
+  /**
+   * 画面のまんなかに来ているもの。
+   * 人は姿と名札で押せると分かるので、下のバーには出さない。
+   * 物体のほうは見ただけでは押せると分かりにくいので、ボタンを出す。
+   */
   const focus = focusAt(cam.center);
+  const action = focus?.kind === 'puzzle' ? focus : null;
 
   /** 背景の上に並べるもの。street でも view でも中身は同じ。 */
   const actors = (
@@ -346,10 +351,10 @@ export function SceneScreen({
         view={walkable ? VIEW : 1}
       />
 
-      {/* 画面のまんなかをさす目じるし */}
+      {/* 画面のまんなかをさす目じるし。下のボタンと連動させる。 */}
       {walkable && (
         <div
-          className={`scene__sight${focus ? ' scene__sight--on' : ''}`}
+          className={`scene__sight${action ? ' scene__sight--on' : ''}`}
           aria-hidden="true"
         />
       )}
@@ -385,9 +390,9 @@ export function SceneScreen({
           <p className="scene__tip scene__tip--move">
             三角の矢印を押すと、その方向の場所へ移る。
           </p>
-        ) : focus ? (
-          <button type="button" className="scene__talk" onClick={() => open(focus)}>
-            {focus.label}
+        ) : action ? (
+          <button type="button" className="scene__talk" onClick={() => open(action)}>
+            {action.label}
           </button>
         ) : (
           <p className="scene__tip">
