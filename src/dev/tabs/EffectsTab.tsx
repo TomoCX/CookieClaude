@@ -46,7 +46,10 @@ export function EffectsTab() {
                         <strong>{e.name}</strong>
                         <code>{e.id}</code>
                       </span>
-                      <span className="dev__row-note">{e.note}</span>
+                      <span className="dev__row-note">
+                        {e.note}
+                        {e.sceneKinds && ` ／ ${e.sceneKinds.join(' · ')} のみ`}
+                      </span>
                       <button
                         type="button"
                         className={`dev__chip dev__chip--slim${on ? ' dev__chip--on' : ''}`}

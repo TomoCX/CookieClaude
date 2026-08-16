@@ -94,15 +94,16 @@ interface Props {
   surface?: HTMLAttributes<HTMLDivElement>;
   /** 建物より手前、人物より奥に挟むもの（エフェクトの差し込み口） */
   back?: ReactNode;
-  /** 道の上に置くもの（人物など） */
+  /** 道の上に置くもの（人・ナゾ・キラキラ・出口） */
   children: ReactNode;
 }
 
 /**
- * 街並み。奥・中・手前の 3 層をちがう速さで動かして、道を進んでいる感じを出す。
+ * street シーンの背景。
+ * 奥・中・手前の 3 層をちがう速さで動かして、道を進んでいる感じを出す。
  * 手前の層は横幅 300%、その中の座標がそのまま「道の 0〜1」になる。
  */
-export function StreetScene({ bg, cameraT, surface, back, children }: Props) {
+export function StreetBackdrop({ bg, cameraT, surface, back, children }: Props) {
   const pal = PALETTES[bg];
   const t = Math.min(Math.max(cameraT, 0), 1);
 

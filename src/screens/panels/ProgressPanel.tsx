@@ -1,5 +1,5 @@
 import type { GameState } from '../../types';
-import { getPlace } from '../../data/places';
+import { getArea } from '../../data/areas';
 import { PUZZLES } from '../../data/puzzles';
 import { MAIN_SCENARIOS } from '../../data/scenarios';
 import {
@@ -19,7 +19,7 @@ interface Props {
 /** 進行状況。メインメニューのタブから開く。 */
 export function ProgressPanel({ state }: Props) {
   const time = formatPlayTime(state.playSeconds);
-  const here = getPlace(state.placeId);
+  const here = getArea(state.areaId);
   const percent = progressPercent(state);
 
   return (

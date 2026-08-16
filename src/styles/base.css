@@ -191,15 +191,26 @@ button:disabled {
   color: var(--gold);
 }
 
+/* 現在地は「エリア名」＋その下に小さく「シーン名」 */
 .hud__place {
   align-self: center;
-  padding: 4px 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 3px 12px;
   font-size: 0.7rem;
   font-weight: 800;
+  line-height: 1.2;
   color: var(--cream);
   background: rgba(64, 42, 25, 0.7);
   border-radius: 999px;
   pointer-events: none;
+}
+
+.hud__scene {
+  font-size: 0.86em;
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0.75;
 }
 
 @media (max-width: 380px) {

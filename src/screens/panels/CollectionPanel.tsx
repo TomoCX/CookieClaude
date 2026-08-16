@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { GameState } from '../../types';
 import { ITEMS, getItem } from '../../data/items';
-import { getPlace } from '../../data/places';
+import { getArea } from '../../data/areas';
 import { formatPlayTime } from '../../state/gameState';
 import { ItemArt } from '../../components/ItemIcon';
 
@@ -70,7 +70,7 @@ export function CollectionPanel({ state }: Props) {
                   <dl className="collection__meta">
                     <div>
                       <dt>拾った場所</dt>
-                      <dd>{getPlace(got.placeId)?.name ?? '不明'}</dd>
+                      <dd>{getArea(got.areaId)?.name ?? '不明'}</dd>
                     </div>
                     <div>
                       <dt>拾った時点</dt>
@@ -95,7 +95,7 @@ export function CollectionPanel({ state }: Props) {
 }
 
 /** 拾った直後に出す小さな知らせ */
-export function PickupToast({ itemId, placeId }: { itemId: string; placeId: string }) {
+export function PickupToast({ itemId, areaId }: { itemId: string; areaId: string }) {
   const item = getItem(itemId);
   if (!item) return null;
   return (
@@ -104,7 +104,7 @@ export function PickupToast({ itemId, placeId }: { itemId: string; placeId: stri
       <div className="pickup__body">
         <span className="pickup__head">拾った</span>
         <strong className="pickup__name">{item.name}</strong>
-        <span className="pickup__place">{getPlace(placeId)?.name}</span>
+        <span className="pickup__place">{getArea(areaId)?.name}</span>
       </div>
     </div>
   );

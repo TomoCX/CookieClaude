@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { CHARACTERS } from '../../data/characters';
 import { ITEMS } from '../../data/items';
-import { PLACES } from '../../data/places';
+import { AREAS } from '../../data/areas';
 import { PUZZLES } from '../../data/puzzles';
 import { SCENARIOS, MAIN_SCENARIOS } from '../../data/scenarios';
-import { STREETS } from '../../data/streets';
+import { SCENES } from '../../data/scenes';
 import { checkContent } from '../../data/registry';
 import { TOTAL_PICARAT } from '../../state/gameState';
 
@@ -18,14 +18,18 @@ export function InspectTab() {
   const problems = useMemo(() => checkContent(), []);
 
   const counts = [
-    { label: '場所', n: PLACES.length },
-    { label: '街並み', n: STREETS.length },
-    { label: '出口', n: STREETS.reduce((s, t) => s + t.exits.length, 0) },
+    { label: 'エリア', n: AREAS.length },
+    {
+      label: 'シーン',
+      n: SCENES.length,
+      note: `見わたす ${SCENES.filter((s) => s.kind === 'street').length}`,
+    },
+    { label: '出口', n: SCENES.reduce((n, s) => n + s.exits.length, 0) },
     { label: '登場人物', n: Object.keys(CHARACTERS).length },
     { label: '会話', n: SCENARIOS.length, note: `本筋 ${MAIN_SCENARIOS.length}` },
     { label: 'ナゾ', n: PUZZLES.length, note: `${TOTAL_PICARAT} ピカラット` },
     { label: 'アイテム', n: ITEMS.length },
-    { label: '立っている人', n: STREETS.reduce((s, t) => s + t.npcs.length, 0) },
+    { label: '立っている人', n: SCENES.reduce((n, s) => n + s.npcs.length, 0) },
   ];
 
   return (

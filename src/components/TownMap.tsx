@@ -1,21 +1,21 @@
-import type { Place } from '../types';
+import type { Area } from '../types';
 
 interface Props {
-  places: Place[];
-  openPlaces: string[];
+  areas: Area[];
+  openAreas: string[];
   clearedScenarios: string[];
-  currentPlaceId: string;
+  currentAreaId: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
 }
 
-/** メイン画面のマップ。町の俯瞰図に行き先ピンが並ぶ。
-    ナゾはマップではなく、それぞれの街並みの中に置いてある。 */
+/** 町の俯瞰図。エリアごとにピンが立つ。
+    ナゾは地図ではなく、それぞれのシーンの中に置いてある。 */
 export function TownMap({
-  places,
-  openPlaces,
+  areas,
+  openAreas,
   clearedScenarios,
-  currentPlaceId,
+  currentAreaId,
   selectedId,
   onSelect,
 }: Props) {
@@ -106,10 +106,10 @@ export function TownMap({
       </svg>
 
       {/* 行き先ピン */}
-      {places.map((p) => {
-        const open = openPlaces.includes(p.id);
+      {areas.map((p) => {
+        const open = openAreas.includes(p.id);
         const cleared = clearedScenarios.includes(p.mainScenarioId);
-        const isHere = p.id === currentPlaceId;
+        const isHere = p.id === currentAreaId;
         const isSelected = p.id === selectedId;
         const cls = [
           'pin',

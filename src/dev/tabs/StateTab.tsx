@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { DevApi } from '../../types';
 import { ITEMS } from '../../data/items';
-import { PLACES } from '../../data/places';
+import { AREAS } from '../../data/areas';
 import { PUZZLES } from '../../data/puzzles';
 import { SCENARIOS } from '../../data/scenarios';
-import { createInitialState, healSave } from '../../state/gameState';
+import { createInitialState, reviveSave } from '../../state/gameState';
 import { copyText } from '../copy';
 
 /**
@@ -17,11 +17,11 @@ export function StateTab({ api }: { api: DevApi }) {
   const [draft, setDraft] = useState('');
   const [msg, setMsg] = useState('');
 
-  /** すべて開いた状態にする（会話・ナゾ・アイテム・場所） */
+  /** すべて開いた状態にする（会話・ナゾ・アイテム・エリア） */
   const openAll = () => {
     setState({
       ...state,
-      openPlaces: PLACES.map((p) => p.id),
+      openAreas: AREAS.map((a) => a.id),
       clearedScenarios: SCENARIOS.map((s) => s.id),
       foundPuzzles: PUZZLES.map((p) => p.id),
       solvedPuzzles: PUZZLES.map((p) => p.id),
@@ -29,7 +29,7 @@ export function StateTab({ api }: { api: DevApi }) {
       charms: SCENARIOS.flatMap((s) => (s.charm ? [s.charm] : [])),
       collected: ITEMS.map((i) => ({
         itemId: i.id,
-        placeId: state.placeId,
+        areaId: state.areaId,
         atSeconds: state.playSeconds,
       })),
     });
@@ -111,9 +111,8 @@ export function StateTab({ api }: { api: DevApi }) {
           disabled={draft.trim() === ''}
           onClick={() => {
             try {
-              const parsed = JSON.parse(draft) as Record<string, unknown>;
-              // 足りない項目は初期値で埋め、街並みと現在地の食い違いも直す
-              setState(healSave({ ...createInitialState(), ...parsed }));
+              // 足りない項目は初期値で埋め、古い呼び名や食い違いも直す
+              setState(reviveSave(JSON.parse(draft) as Record<string, unknown>));
               setMsg('読みこんだ。');
             } catch {
               setMsg('JSON として読めなかった。');

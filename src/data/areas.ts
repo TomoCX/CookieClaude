@@ -1,14 +1,20 @@
-import type { Place } from '../types';
+import type { Area } from '../types';
 
-/** メイン画面（マップ）に並ぶ場所 */
-export const PLACES: Place[] = [
+/**
+ * エリア。地図の上に並ぶ区画。
+ *
+ * エリアそのものは背景を持たない。絵を持つのはシーンのほうで、
+ * どのシーンがどのエリアに属するかは `scenes.ts` の `areaId` で決まる。
+ * ここに書くのは「地図の上での見えかた」と「入口のシーン」だけ。
+ */
+export const AREAS: Area[] = [
   {
     id: 'coach',
     name: '街道の馬車止め',
     ruby: 'かいどうのばしゃどめ',
     x: 6,
     y: 88,
-    streetId: 'st_coach',
+    entrySceneId: 'scn_coach_stop',
     mainScenarioId: 'sc_coach',
     openFromStart: true,
   },
@@ -18,7 +24,7 @@ export const PLACES: Place[] = [
     ruby: 'まちのいりぐち',
     x: 16,
     y: 74,
-    streetId: 'st_gate',
+    entrySceneId: 'scn_gate_front',
     mainScenarioId: 'sc_gate',
     // 御者との会話（sc_coach）を読むと開く。最初から開けてしまうと
     // 幕開けを飛ばして町に入れてしまう。
@@ -29,7 +35,7 @@ export const PLACES: Place[] = [
     ruby: 'だいもんひろば',
     x: 44,
     y: 60,
-    streetId: 'st_plaza',
+    entrySceneId: 'scn_plaza_fountain',
     mainScenarioId: 'sc_plaza',
   },
   {
@@ -38,7 +44,7 @@ export const PLACES: Place[] = [
     ruby: 'まんげつてい',
     x: 24,
     y: 38,
-    streetId: 'st_inn',
+    entrySceneId: 'scn_inn_hall',
     mainScenarioId: 'sc_inn',
   },
   {
@@ -47,7 +53,7 @@ export const PLACES: Place[] = [
     ruby: 'とけいとう',
     x: 72,
     y: 30,
-    streetId: 'st_clocktower',
+    entrySceneId: 'scn_tower_foot',
     mainScenarioId: 'sc_clocktower',
   },
   {
@@ -56,12 +62,12 @@ export const PLACES: Place[] = [
     ruby: 'うらろじ',
     x: 84,
     y: 68,
-    streetId: 'st_alley',
+    entrySceneId: 'scn_alley_back',
     mainScenarioId: 'sc_alley',
   },
 ];
 
-/** id から場所を取得する */
-export function getPlace(id: string): Place | undefined {
-  return PLACES.find((p) => p.id === id);
+/** id からエリアを取得する */
+export function getArea(id: string): Area | undefined {
+  return AREAS.find((a) => a.id === id);
 }

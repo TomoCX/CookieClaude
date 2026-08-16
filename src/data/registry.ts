@@ -1,19 +1,19 @@
 import { CHARACTERS } from './characters';
 import { ITEMS } from './items';
-import { PLACES } from './places';
+import { AREAS } from './areas';
 import { PUZZLES } from './puzzles';
 import { SCENARIOS } from './scenarios';
-import { STREETS } from './streets';
+import { SCENES } from './scenes';
 import { CAST, STORY_BEATS } from './story';
 
 /**
- * 中身（場所・街並み・人物・会話・ナゾ・アイテム）のつながりを検査する。
+ * 中身（エリア・シーン・人物・会話・ナゾ・アイテム）のつながりを検査する。
  *
  * データを足すときに id を書きまちがえても、画面が黙って壊れるだけで
  * 原因が分かりにくい。そこで起動時に一度だけ通しで見て、
  * おかしなところをコンソールに並べる。
  *
- * 追加のしかたは README の「中身を足す」を参照。
+ * 追加のしかたは docs/DEVELOPMENT.md を参照。
  */
 export function checkContent(): string[] {
   const problems: string[] = [];
@@ -28,97 +28,123 @@ export function checkContent(): string[] {
     }
   };
 
-  const placeIds = new Set(PLACES.map((p) => p.id));
-  const streetIds = new Set(STREETS.map((s) => s.id));
+  const areaIds = new Set(AREAS.map((p) => p.id));
+  const sceneIds = new Set(SCENES.map((s) => s.id));
   const scenarioIds = new Set(SCENARIOS.map((s) => s.id));
   const puzzleIds = new Set(PUZZLES.map((p) => p.id));
   const itemIds = new Set(ITEMS.map((i) => i.id));
 
-  dup('場所', PLACES.map((p) => p.id));
-  dup('街並み', STREETS.map((s) => s.id));
+  dup('エリア', AREAS.map((a) => a.id));
+  dup('シーン', SCENES.map((sc) => sc.id));
   dup('会話', SCENARIOS.map((s) => s.id));
   dup('ナゾ', PUZZLES.map((p) => p.id));
   dup('アイテム', ITEMS.map((i) => i.id));
   dup('ナゾ番号', PUZZLES.map((p) => String(p.no)));
 
-  /* ---- 場所と街並みの対応 ---- */
-  for (const place of PLACES) {
-    if (!streetIds.has(place.streetId)) {
-      say(`場所「${place.name}」: 街並み ${place.streetId} が無い`);
+  /* ---- エリアとシーンの対応 ---- */
+  for (const area of AREAS) {
+    if (!sceneIds.has(area.entrySceneId)) {
+      say(`エリア「${area.name}」: 入口のシーン ${area.entrySceneId} が無い`);
     }
-    if (!scenarioIds.has(place.mainScenarioId)) {
-      say(`場所「${place.name}」: 本筋の会話 ${place.mainScenarioId} が無い`);
+    const entry = SCENES.find((sc) => sc.id === area.entrySceneId);
+    if (entry && entry.areaId !== area.id) {
+      say(`エリア「${area.name}」: 入口のシーン ${entry.id} は別のエリア（${entry.areaId}）のもの`);
     }
-  }
-  for (const street of STREETS) {
-    if (!placeIds.has(street.placeId)) {
-      say(`街並み ${street.id}: 場所 ${street.placeId} が無い`);
+    if (!scenarioIds.has(area.mainScenarioId)) {
+      say(`エリア「${area.name}」: 本筋の会話 ${area.mainScenarioId} が無い`);
     }
-    const back = PLACES.find((p) => p.id === street.placeId);
-    if (back && back.streetId !== street.id) {
-      say(`街並み ${street.id}: 場所「${back.name}」の行き先と食い違う`);
-    }
-    if (street.startX < 0 || street.startX > 1) {
-      say(`街並み ${street.id}: startX が 0〜1 の外`);
+    if (SCENES.every((sc) => sc.areaId !== area.id)) {
+      say(`エリア「${area.name}」: 属するシーンが一つも無い`);
     }
   }
 
-  /* ---- 街並みの中身 ---- */
+  /* ---- シーンの中身 ---- */
   const usedScenarios = new Set<string>();
   const usedPuzzles = new Set<string>();
   const usedItems = new Set<string>();
 
-  for (const street of STREETS) {
-    dup(`街並み ${street.id} の人`, street.npcs.map((n) => n.id));
-    dup(`街並み ${street.id} のナゾ`, street.puzzles.map((p) => p.id));
-    dup(`街並み ${street.id} のキラキラ`, street.sparkles.map((s) => s.id));
+  for (const scene of SCENES) {
+    const where = `${scene.id}（${scene.name}）`;
+    if (!areaIds.has(scene.areaId)) {
+      say(`シーン ${where}: エリア ${scene.areaId} が無い`);
+    }
+    if (!scene.name) say(`シーン ${scene.id}: 名前が空`);
+    // 同じエリアの中で名前が重なると、現在地の表示で見分けられなくなる
+    const twin = SCENES.find(
+      (o) => o !== scene && o.areaId === scene.areaId && o.name === scene.name,
+    );
+    if (twin) say(`シーン ${where}: 同じエリアの ${twin.id} と名前が同じ`);
 
-    for (const npc of street.npcs) {
+    if (scene.kind === 'street') {
+      if (scene.startX < 0 || scene.startX > 1) say(`シーン ${where}: startX が 0〜1 の外`);
+    } else if (scene.kind === 'closeup' && scene.npcs.length > 0) {
+      // 拡大図に人を立たせても、身体が画面からはみ出して意味をなさない
+      say(`シーン ${where}: closeup には人を置かない`);
+    }
+
+    dup(`シーン ${scene.id} の人`, scene.npcs.map((n) => n.id));
+    dup(`シーン ${scene.id} のナゾ`, scene.puzzles.map((p) => p.id));
+    dup(`シーン ${scene.id} のキラキラ`, scene.sparkles.map((k) => k.id));
+    dup(`シーン ${scene.id} の出口`, scene.exits.map((e) => e.id));
+
+    /** 見わたさないシーンでは、縦位置も書いておかないと重なってしまう */
+    const needsY = scene.kind !== 'street';
+
+    for (const npc of scene.npcs) {
       if (!CHARACTERS[npc.characterId]) {
-        say(`${street.id}/${npc.id}: 登場人物 ${npc.characterId} が無い`);
+        say(`${scene.id}/${npc.id}: 登場人物 ${npc.characterId} が無い`);
       }
       if (!scenarioIds.has(npc.scenarioId)) {
-        say(`${street.id}/${npc.id}: 会話 ${npc.scenarioId} が無い`);
+        say(`${scene.id}/${npc.id}: 会話 ${npc.scenarioId} が無い`);
       }
       if (npc.requiresScenario && !scenarioIds.has(npc.requiresScenario)) {
-        say(`${street.id}/${npc.id}: 条件の会話 ${npc.requiresScenario} が無い`);
+        say(`${scene.id}/${npc.id}: 条件の会話 ${npc.requiresScenario} が無い`);
       }
-      if (npc.x < 0 || npc.x > 1) say(`${street.id}/${npc.id}: x が 0〜1 の外`);
+      if (npc.x < 0 || npc.x > 1) say(`${scene.id}/${npc.id}: x が 0〜1 の外`);
+      if (needsY && npc.y == null) say(`${scene.id}/${npc.id}: ${scene.kind} では y も要る`);
       usedScenarios.add(npc.scenarioId);
     }
 
-    for (const sp of street.puzzles) {
+    for (const sp of scene.puzzles) {
       if (!puzzleIds.has(sp.puzzleId)) {
-        say(`${street.id}/${sp.id}: ナゾ ${sp.puzzleId} が無い`);
+        say(`${scene.id}/${sp.id}: ナゾ ${sp.puzzleId} が無い`);
       }
-      if (sp.x < 0 || sp.x > 1) say(`${street.id}/${sp.id}: x が 0〜1 の外`);
+      if (sp.x < 0 || sp.x > 1) say(`${scene.id}/${sp.id}: x が 0〜1 の外`);
+      if (needsY && sp.y == null) say(`${scene.id}/${sp.id}: ${scene.kind} では y も要る`);
       if (usedPuzzles.has(sp.puzzleId)) {
         say(`ナゾ ${sp.puzzleId} が二か所に置かれている`);
       }
       usedPuzzles.add(sp.puzzleId);
     }
 
-    dup(`街並み ${street.id} の出口`, street.exits.map((e) => e.id));
-    for (const ex of street.exits) {
-      if (!streetIds.has(ex.to)) {
-        say(`${street.id}/${ex.id}: 行き先の街並み ${ex.to} が無い`);
+    for (const ex of scene.exits) {
+      const dest = SCENES.find((t) => t.id === ex.to);
+      if (!dest) {
+        say(`${scene.id}/${ex.id}: 行き先のシーン ${ex.to} が無い`);
+        continue;
       }
-      if (ex.to === street.id) say(`${street.id}/${ex.id}: 自分自身へ向かっている`);
-      if (ex.x < 0 || ex.x > 1) say(`${street.id}/${ex.id}: x が 0〜1 の外`);
-      if (ex.y < 0 || ex.y > 1) say(`${street.id}/${ex.id}: y が 0〜1 の外`);
+      if (ex.to === scene.id) say(`${scene.id}/${ex.id}: 自分自身へ向かっている`);
+      if (ex.x < 0 || ex.x > 1) say(`${scene.id}/${ex.id}: x が 0〜1 の外`);
+      if (ex.y < 0 || ex.y > 1) say(`${scene.id}/${ex.id}: y が 0〜1 の外`);
       // 行き来できないと詰むので、戻り道があるかも見ておく
-      const back = STREETS.find((t) => t.id === ex.to);
-      if (back && !back.exits.some((e) => e.to === street.id)) {
-        say(`${street.id} → ${ex.to} の戻り道が無い`);
+      if (!dest.exits.some((e) => e.to === scene.id)) {
+        say(`${scene.id} → ${ex.to} の戻り道が無い`);
+      }
+      // 覗きこんだ先は同じエリアの中。別エリアへ潜ると現在地が飛んで分かりにくい。
+      if (ex.dir === 'into' && dest.areaId !== scene.areaId) {
+        say(`${scene.id}/${ex.id}: into の行き先は同じエリアのシーンにする`);
+      }
+      if (ex.dir === 'back' && dest.areaId !== scene.areaId) {
+        say(`${scene.id}/${ex.id}: back の行き先は同じエリアのシーンにする`);
       }
     }
 
-    for (const sk of street.sparkles) {
+    for (const sk of scene.sparkles) {
       if (!itemIds.has(sk.itemId)) {
-        say(`${street.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
+        say(`${scene.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
       }
-      if (sk.x < 0 || sk.x > 1) say(`${street.id}/${sk.id}: x が 0〜1 の外`);
-      if (sk.y < 0 || sk.y > 1) say(`${street.id}/${sk.id}: y が 0〜1 の外`);
+      if (sk.x < 0 || sk.x > 1) say(`${scene.id}/${sk.id}: x が 0〜1 の外`);
+      if (sk.y < 0 || sk.y > 1) say(`${scene.id}/${sk.id}: y が 0〜1 の外`);
       if (usedItems.has(sk.itemId)) {
         say(`アイテム ${sk.itemId} が二か所に落ちている`);
       }
@@ -126,52 +152,51 @@ export function checkContent(): string[] {
     }
   }
 
-  /* ---- どこからも行けない街並みが無いか ---- */
+  /* ---- どこからも行けないシーンが無いか ---- */
   const reachable = new Set<string>();
-  const start = STREETS[0];
+  const start = SCENES[0];
   if (start) {
     const queue = [start.id];
     while (queue.length > 0) {
       const id = queue.shift()!;
       if (reachable.has(id)) continue;
       reachable.add(id);
-      const here = STREETS.find((t) => t.id === id);
+      const here = SCENES.find((t) => t.id === id);
       for (const ex of here?.exits ?? []) queue.push(ex.to);
     }
   }
-  for (const street of STREETS) {
-    if (!reachable.has(street.id)) {
-      say(`街並み ${street.id} へは、出口をたどって行き着けない`);
+  for (const scene of SCENES) {
+    if (!reachable.has(scene.id)) {
+      say(`シーン ${scene.id}（${scene.name}）へは、出口をたどって行き着けない`);
     }
   }
 
-  /* ---- 場所の開きかた ---- */
-  // 会話で開く場所を最初から開けてしまうと、幕開けを飛ばして先へ行けてしまう。
-  // 逆に、どこからも開かれない場所は永久に行けない。
+  /* ---- エリアの開きかた ---- */
+  // 会話で開くエリアを最初から開けてしまうと、幕開けを飛ばして先へ行けてしまう。
+  // 逆に、どこからも開かれないエリアは永久に行けない。
   const unlockedBy = new Map<string, string[]>();
   for (const sc of SCENARIOS) {
     for (const id of sc.unlocks ?? []) {
       unlockedBy.set(id, [...(unlockedBy.get(id) ?? []), sc.title]);
     }
   }
-  const fromStart = PLACES.filter((p) => p.openFromStart);
-  if (fromStart.length === 0) say('最初から行ける場所が一つも無い');
-  for (const place of PLACES) {
-    const by = unlockedBy.get(place.id);
-    if (place.openFromStart && by) {
-      say(`場所「${place.name}」: 最初から開いているのに、会話「${by[0]}」でも開かれる`);
+  if (AREAS.every((a) => !a.openFromStart)) say('最初から行けるエリアが一つも無い');
+  for (const area of AREAS) {
+    const by = unlockedBy.get(area.id);
+    if (area.openFromStart && by) {
+      say(`エリア「${area.name}」: 最初から開いているのに、会話「${by[0]}」でも開かれる`);
     }
-    if (!place.openFromStart && !by) {
-      say(`場所「${place.name}」: 最初から開いておらず、開放する会話も無い`);
+    if (!area.openFromStart && !by) {
+      say(`エリア「${area.name}」: 最初から開いておらず、開放する会話も無い`);
     }
   }
 
   /* ---- 置き忘れ ---- */
   for (const p of PUZZLES) {
-    if (!usedPuzzles.has(p.id)) say(`ナゾ「${p.title}」がどの街並みにも置かれていない`);
+    if (!usedPuzzles.has(p.id)) say(`ナゾ「${p.title}」がどのシーンにも置かれていない`);
   }
   for (const i of ITEMS) {
-    if (!usedItems.has(i.id)) say(`アイテム「${i.name}」がどの街並みにも落ちていない`);
+    if (!usedItems.has(i.id)) say(`アイテム「${i.name}」がどのシーンにも落ちていない`);
   }
   for (const s of SCENARIOS) {
     if (!usedScenarios.has(s.id)) say(`会話「${s.title}」を始める人がいない`);
@@ -180,7 +205,7 @@ export function checkContent(): string[] {
   /* ---- 会話の中身 ---- */
   for (const sc of SCENARIOS) {
     for (const id of sc.unlocks ?? []) {
-      if (!placeIds.has(id)) say(`会話「${sc.title}」: 開放する場所 ${id} が無い`);
+      if (!areaIds.has(id)) say(`会話「${sc.title}」: 開放するエリア ${id} が無い`);
     }
     for (const line of sc.lines) {
       if (line.speaker && !CHARACTERS[line.speaker]) {

@@ -3,15 +3,17 @@ interface Props {
   onOpenMap: () => void;
   /** 右上：メインメニューを開く */
   onOpenMenu: () => void;
-  /** 現在地の名前 */
-  placeName?: string;
+  /** いまいるエリアの名前 */
+  areaName?: string;
+  /** いま見ているシーンの名前 */
+  sceneName?: string;
 }
 
 /**
  * 画面の上に常に出ている操作。
  * 左上が地図（地点の移動）、右上がメインメニュー。
  */
-export function Hud({ onOpenMap, onOpenMenu, placeName }: Props) {
+export function Hud({ onOpenMap, onOpenMenu, areaName, sceneName }: Props) {
   return (
     <div className="hud">
       <button type="button" className="hud__btn hud__btn--map" onClick={onOpenMap}>
@@ -32,7 +34,12 @@ export function Hud({ onOpenMap, onOpenMenu, placeName }: Props) {
         <span className="hud__label">地図</span>
       </button>
 
-      {placeName && <span className="hud__place">{placeName}</span>}
+      {areaName && (
+        <span className="hud__place">
+          {areaName}
+          {sceneName && <em className="hud__scene">{sceneName}</em>}
+        </span>
+      )}
 
       <button type="button" className="hud__btn hud__btn--menu" onClick={onOpenMenu}>
         <svg viewBox="0 0 24 24" className="hud__icon" aria-hidden="true">

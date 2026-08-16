@@ -1,22 +1,22 @@
 import type { DevApi } from '../../types';
-import { PLACES, getPlace } from '../../data/places';
-import { STREETS } from '../../data/streets';
+import { AREAS } from '../../data/areas';
+import { SCENES, scenesOfArea } from '../../data/scenes';
 import { SCENARIOS } from '../../data/scenarios';
 import { PUZZLES, puzzleNo } from '../../data/puzzles';
 
 /**
  * 中身へ飛ぶ。
- * 書いたばかりの会話やナゾを、その場所まで歩かずに確かめるための欄。
+ * 書いたばかりのシーン・会話・ナゾを、そこまで歩かずに確かめるための欄。
  */
 export function JumpTab({ api }: { api: DevApi }) {
   const { state, setState } = api;
 
-  /** その場所の開放を入り切りする */
-  const togglePlace = (id: string) => {
-    const open = state.openPlaces.includes(id);
+  /** そのエリアの開放を入り切りする */
+  const toggleArea = (id: string) => {
+    const open = state.openAreas.includes(id);
     setState({
       ...state,
-      openPlaces: open ? state.openPlaces.filter((v) => v !== id) : [...state.openPlaces, id],
+      openAreas: open ? state.openAreas.filter((v) => v !== id) : [...state.openAreas, id],
     });
   };
 
@@ -47,42 +47,53 @@ export function JumpTab({ api }: { api: DevApi }) {
 
   return (
     <div className="dev__body">
-      <h3 className="dev__head">街並み</h3>
-      <ul className="dev__list">
-        {STREETS.map((s) => {
-          const place = getPlace(s.placeId);
-          const here = api.streetId === s.id;
-          return (
-            <li key={s.id} className={`dev__row${here ? ' dev__row--here' : ''}`}>
-              <span className="dev__row-main">
-                <strong>{place?.name ?? s.placeId}</strong>
-                <code>{s.id}</code>
-              </span>
-              <span className="dev__row-note">
-                人 {s.npcs.length} ／ ナゾ {s.puzzles.length} ／ 品 {s.sparkles.length} ／ 出口{' '}
-                {s.exits.length}
-              </span>
-              <button type="button" className="dev__go" onClick={() => api.goToStreet(s.id)}>
-                {here ? '入りなおす' : '飛ぶ'}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <h3 className="dev__head">シーン</h3>
+      <p className="dev__note">
+        エリアごとにまとめてある。シーン {SCENES.length} 面 ／ エリア {AREAS.length} 区画。
+      </p>
+      {AREAS.map((area) => (
+        <div key={area.id} className="dev__slot">
+          <h4 className="dev__slot-head">
+            {area.name} <code>{area.id}</code>
+          </h4>
+          <ul className="dev__list">
+            {scenesOfArea(area.id).map((sc) => {
+              const here = api.sceneId === sc.id;
+              const isEntry = area.entrySceneId === sc.id;
+              return (
+                <li key={sc.id} className={`dev__row${here ? ' dev__row--here' : ''}`}>
+                  <span className="dev__row-main">
+                    <strong>{sc.name}</strong>
+                    <code>{sc.id}</code>
+                  </span>
+                  <span className="dev__row-note">
+                    {sc.kind}
+                    {isEntry && ' ／ 入口'} ／ 人 {sc.npcs.length} ／ ナゾ {sc.puzzles.length} ／
+                    品 {sc.sparkles.length} ／ 出口 {sc.exits.length}
+                  </span>
+                  <button type="button" className="dev__go" onClick={() => api.goToScene(sc.id)}>
+                    {here ? '入りなおす' : '飛ぶ'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
 
-      <h3 className="dev__head">場所の開放</h3>
+      <h3 className="dev__head">エリアの開放</h3>
       <div className="dev__chips">
-        {PLACES.map((p) => {
-          const open = state.openPlaces.includes(p.id);
+        {AREAS.map((area) => {
+          const open = state.openAreas.includes(area.id);
           return (
             <button
-              key={p.id}
+              key={area.id}
               type="button"
               className={`dev__chip${open ? ' dev__chip--on' : ''}`}
-              onClick={() => togglePlace(p.id)}
+              onClick={() => toggleArea(area.id)}
               title={open ? '閉じる' : '開く'}
             >
-              {p.name}
+              {area.name}
             </button>
           );
         })}

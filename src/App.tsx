@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { GameState, Place, ScreenId, Settings } from './types';
+import type { Area, GameState, ScreenId, Settings } from './types';
 import { getScenario } from './data/scenarios';
-import { getStreet, streetStartX } from './data/streets';
-import { getPlace } from './data/places';
+import { getScene, sceneStartX } from './data/scenes';
+import { getArea } from './data/areas';
 import { getPuzzle } from './data/puzzles';
 import { MapOverlay } from './screens/MapOverlay';
-import { StreetScreen } from './screens/StreetScreen';
+import { SceneScreen } from './screens/SceneScreen';
 import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
@@ -34,24 +34,24 @@ const PICKUP_TOAST_MS = 2400;
 /**
  * 画面のルーティングと進行状況。
  *
- * 遊びの土台は街並み画面で、地図とメインメニューはその上にかぶせて出す。
- * 会話とナゾ解きだけは街並みと入れ替わる。
+ * 遊びの土台はシーン画面で、地図とメインメニューはその上にかぶせて出す。
+ * 会話とナゾ解きだけはシーンと入れ替わる。
  */
 export function App() {
   const [state, setState] = useState<GameState>(createInitialState);
-  const [screen, setScreen] = useState<ScreenId>('street');
-  const [streetId, setStreetId] = useState<string>(() => createInitialState().streetId);
+  const [screen, setScreen] = useState<ScreenId>('scene');
+  const [sceneId, setSceneId] = useState<string>(() => createInitialState().sceneId);
   /** 地図を開いているか */
   const [mapOpen, setMapOpen] = useState(false);
   /** メインメニューを「閉じる」で戻る先 */
-  const [returnTo, setReturnTo] = useState<ScreenId>('street');
-  /** 街並みごとのカメラ位置。会話に入って戻ってもその続きから見渡せるように覚えておく */
-  const streetPos = useRef<Record<string, number>>({});
+  const [returnTo, setReturnTo] = useState<ScreenId>('scene');
+  /** シーンごとのカメラ位置。会話に入って戻ってもその続きから見わたせるように覚えておく */
+  const scenePos = useRef<Record<string, number>>({});
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   /** アイテムを拾った直後に出す知らせ */
-  const [pickup, setPickup] = useState<{ itemId: string; placeId: string } | null>(null);
+  const [pickup, setPickup] = useState<{ itemId: string; areaId: string } | null>(null);
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
 
@@ -80,29 +80,30 @@ export function App() {
   }, [booting]);
 
   /**
-   * 街並みを移る。地図からの移動と、靴の矢印からの移動の両方がここを通る。
+   * シーンを移る。地図からの移動と、矢印からの移動の両方がここを通る。
+   * 行き先が別のエリアなら、現在地のエリアもそこで移る。
    * 入りなおすときは道の入口から見わたす。
    */
-  const goToStreet = useCallback((id: string) => {
-    const street = getStreet(id);
-    if (!street) return;
-    setState((s) => ({ ...s, placeId: street.placeId }));
-    delete streetPos.current[id];
-    setStreetId(id);
+  const goToScene = useCallback((id: string) => {
+    const scene = getScene(id);
+    if (!scene) return;
+    setState((s) => ({ ...s, areaId: scene.areaId }));
+    delete scenePos.current[id];
+    setSceneId(id);
     setMapOpen(false);
-    setScreen('street');
+    setScreen('scene');
   }, []);
 
-  /** 地図から別の場所へ移る */
-  const enterPlace = useCallback((place: Place) => goToStreet(place.streetId), [goToStreet]);
+  /** 地図から別のエリアへ移る（そのエリアの入口シーンに立つ） */
+  const enterArea = useCallback((area: Area) => goToScene(area.entrySceneId), [goToScene]);
 
-  /** 街並みで人に話しかけた */
+  /** シーンで人に話しかけた */
   const talkTo = useCallback((id: string) => {
     setScenarioId(id);
     setScreen('scenario');
   }, []);
 
-  /** 会話を読み終えた／中断した。どちらも街並みへ戻る。 */
+  /** 会話を読み終えた／中断した。どちらもシーンへ戻る。 */
   const endScenario = useCallback(
     (finished: boolean) => {
       const sc = scenarioId ? getScenario(scenarioId) : null;
@@ -121,7 +122,7 @@ export function App() {
         }
       }
       setScenarioId(null);
-      setScreen('street');
+      setScreen('scene');
     },
     [scenarioId, state.clearedScenarios],
   );
@@ -129,14 +130,14 @@ export function App() {
   /** キラキラを押してアイテムを拾った */
   const pickUpItem = useCallback(
     (itemId: string) => {
-      const placeId = state.placeId;
-      setState((s) => applyPickup(s, itemId, placeId));
-      setPickup({ itemId, placeId });
+      const areaId = state.areaId;
+      setState((s) => applyPickup(s, itemId, areaId));
+      setPickup({ itemId, areaId });
     },
-    [state.placeId],
+    [state.areaId],
   );
 
-  /** 街並みでナゾを押した */
+  /** シーンでナゾを押した */
   const openPuzzle = useCallback((id: string) => {
     setState((s) => applyPuzzleFound(s, id));
     setPuzzleId(id);
@@ -152,55 +153,55 @@ export function App() {
   }, [screen]);
 
   const closeMainMenu = useCallback(() => {
-    setScreen(returnTo === 'mainMenu' ? 'street' : returnTo);
+    setScreen(returnTo === 'mainMenu' ? 'scene' : returnTo);
   }, [returnTo]);
 
   /** その進行状況で遊びはじめる。「最初から」「続きから」「復元」で共通。 */
   const startWith = useCallback((next: GameState) => {
     setState(next);
-    setStreetId(next.streetId);
-    streetPos.current = { [next.streetId]: next.streetX };
+    setSceneId(next.sceneId);
+    scenePos.current = { [next.sceneId]: next.sceneX };
     setScenarioId(null);
     setPuzzleId(null);
     setMapOpen(false);
-    setScreen('street');
+    setScreen('scene');
   }, []);
 
-  /** セーブ用に、いまいる街並みとカメラ位置も含めた状態を組み立てる */
+  /** セーブ用に、いまいるシーンとカメラ位置も含めた状態を組み立てる */
   const buildSave = useCallback(
     (): GameState => ({
       ...state,
-      streetId,
-      streetX: streetPos.current[streetId] ?? streetStartX(streetId),
+      sceneId,
+      sceneX: scenePos.current[sceneId] ?? sceneStartX(sceneId),
     }),
-    [state, streetId],
+    [state, sceneId],
   );
 
   const scenario = scenarioId ? getScenario(scenarioId) : null;
-  const street = getStreet(streetId);
+  const scene = getScene(sceneId);
   const puzzle = puzzleId ? getPuzzle(puzzleId) : null;
-  const place = getPlace(state.placeId);
+  const area = getArea(state.areaId);
 
   /** 地図とメインメニューのアイコンを出す場面か */
-  const showHud = !booting && (screen === 'street' || mapOpen);
+  const showHud = !booting && (screen === 'scene' || mapOpen);
 
   return (
     <div className={`app app--${settings.screenSize}`}>
       <div className="device">
-        {/* 街並みは常に土台として置いておく（地図はこの上にかぶさる） */}
-        {(screen === 'street' || mapOpen) && street && (
-          <StreetScreen
-            key={street.id}
-            street={street}
+        {/* シーンは常に土台として置いておく（地図はこの上にかぶさる） */}
+        {(screen === 'scene' || mapOpen) && scene && (
+          <SceneScreen
+            key={scene.id}
+            scene={scene}
             state={state}
-            initialX={streetPos.current[street.id] ?? street.startX}
+            initialX={scenePos.current[scene.id] ?? sceneStartX(scene.id)}
             onMove={(x) => {
-              streetPos.current[street.id] = x;
+              scenePos.current[scene.id] = x;
             }}
             onTalk={talkTo}
             onOpenPuzzle={openPuzzle}
             onPickup={pickUpItem}
-            onGoTo={goToStreet}
+            onGoTo={goToScene}
             frozen={mapOpen}
           />
         )}
@@ -222,7 +223,7 @@ export function App() {
             onSolved={() => setState((s) => applyPuzzleSolved(s, puzzle))}
             onQuit={() => {
               setPuzzleId(null);
-              setScreen('street');
+              setScreen('scene');
             }}
           />
         )}
@@ -242,7 +243,7 @@ export function App() {
         {mapOpen && (
           <MapOverlay
             state={state}
-            onEnterPlace={enterPlace}
+            onEnterArea={enterArea}
             onClose={() => setMapOpen(false)}
           />
         )}
@@ -254,19 +255,20 @@ export function App() {
               setMapOpen((v) => !v);
             }}
             onOpenMenu={openMainMenu}
-            placeName={mapOpen ? undefined : place?.name}
+            areaName={mapOpen ? undefined : area?.name}
+            sceneName={mapOpen ? undefined : scene?.name}
           />
         )}
 
-        {pickup && <PickupToast itemId={pickup.itemId} placeId={pickup.placeId} />}
+        {pickup && <PickupToast itemId={pickup.itemId} areaId={pickup.areaId} />}
 
         {/* 中身を足すための道具箱。Ctrl + Shift + D で出入りする。 */}
         <DevTools
           api={{
             state,
             setState,
-            streetId,
-            goToStreet,
+            sceneId,
+            goToScene,
             playScenario: talkTo,
             openPuzzle,
           }}

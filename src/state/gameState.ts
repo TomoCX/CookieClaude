@@ -1,14 +1,16 @@
 import type { GameState, Puzzle, Scenario } from '../types';
-import { PLACES, getPlace } from '../data/places';
-import { getStreet, streetStartX } from '../data/streets';
+import { AREAS, getArea } from '../data/areas';
+import { getScene, sceneStartX } from '../data/scenes';
 import { MAIN_SCENARIOS } from '../data/scenarios';
 import { PUZZLES, picaratFor } from '../data/puzzles';
 
-const SAVE_KEY = 'cookieclaude.save.v2';
+const SAVE_KEY = 'cookieclaude.save.v3';
+/** 「エリア・シーン」に言いかえる前の保存 */
+const OLD_SAVE_KEY = 'cookieclaude.save.v2';
 
 /** 物語の出発点 */
-const START_PLACE_ID = 'coach';
-const START_STREET_ID = 'st_coach';
+const START_AREA_ID = 'coach';
+const START_SCENE_ID = 'scn_coach_stop';
 
 /** 最初から始めるときの状態 */
 export function createInitialState(): GameState {
@@ -16,10 +18,10 @@ export function createInitialState(): GameState {
     picarat: 0,
     coin: 10,
     playSeconds: 0,
-    placeId: START_PLACE_ID,
-    streetId: START_STREET_ID,
-    streetX: streetStartX(START_STREET_ID),
-    openPlaces: PLACES.filter((p) => p.openFromStart).map((p) => p.id),
+    areaId: START_AREA_ID,
+    sceneId: START_SCENE_ID,
+    sceneX: sceneStartX(START_SCENE_ID),
+    openAreas: AREAS.filter((a) => a.openFromStart).map((a) => a.id),
     clearedScenarios: [],
     foundPuzzles: [],
     solvedPuzzles: [],
@@ -76,15 +78,15 @@ export function formatPlayTime(seconds: number): { h: string; m: string } {
 export function applyScenarioClear(state: GameState, sc: Scenario): GameState {
   if (state.clearedScenarios.includes(sc.id)) return state;
 
-  const openPlaces = [...state.openPlaces];
+  const openAreas = [...state.openAreas];
   for (const id of sc.unlocks ?? []) {
-    if (!openPlaces.includes(id)) openPlaces.push(id);
+    if (!openAreas.includes(id)) openAreas.push(id);
   }
 
   return {
     ...state,
     coin: state.coin + sc.coin,
-    openPlaces,
+    openAreas,
     clearedScenarios: [...state.clearedScenarios, sc.id],
     notes: sc.note ? [...state.notes, sc.note] : state.notes,
     charms: sc.charm ? [...state.charms, sc.charm] : state.charms,
@@ -95,15 +97,12 @@ export function applyScenarioClear(state: GameState, sc: Scenario): GameState {
 export function applyPickup(
   state: GameState,
   itemId: string,
-  placeId: string,
+  areaId: string,
 ): GameState {
   if (state.collected.some((c) => c.itemId === itemId)) return state;
   return {
     ...state,
-    collected: [
-      ...state.collected,
-      { itemId, placeId, atSeconds: state.playSeconds },
-    ],
+    collected: [...state.collected, { itemId, areaId, atSeconds: state.playSeconds }],
   };
 }
 
@@ -153,20 +152,20 @@ export function applyPuzzleSolved(state: GameState, puzzle: Puzzle): GameState {
 export function healSave(state: GameState): GameState {
   const healed: GameState = { ...state };
 
-  // 街並みを持たない古い保存や、現在地と食い違う保存は、現在地から引き直す。
+  // シーンを持たない古い保存や、現在地と食い違う保存は、エリアから引き直す。
   // （そのままだと「現在地は大門広場なのに、いるのは馬車止め」になってしまう）
-  const street = getStreet(healed.streetId);
-  if (!street || street.placeId !== healed.placeId) {
-    healed.streetId = getPlace(healed.placeId)?.streetId ?? START_STREET_ID;
-    healed.streetX = streetStartX(healed.streetId);
+  const scene = getScene(healed.sceneId);
+  if (!scene || scene.areaId !== healed.areaId) {
+    healed.sceneId = getArea(healed.areaId)?.entrySceneId ?? START_SCENE_ID;
+    healed.sceneX = sceneStartX(healed.sceneId);
   }
   // 見渡していた位置がおかしい保存も直す
-  if (!Number.isFinite(healed.streetX) || healed.streetX < 0 || healed.streetX > 1) {
-    healed.streetX = streetStartX(healed.streetId);
+  if (!Number.isFinite(healed.sceneX) || healed.sceneX < 0 || healed.sceneX > 1) {
+    healed.sceneX = sceneStartX(healed.sceneId);
   }
   // 配列であるべき項目が壊れていたら空にしておく
   const lists = [
-    'openPlaces',
+    'openAreas',
     'clearedScenarios',
     'foundPuzzles',
     'solvedPuzzles',
@@ -183,6 +182,47 @@ export function healSave(state: GameState): GameState {
   return healed;
 }
 
+/**
+ * 「場所・街並み」と呼んでいたころの保存を、いまの言いかたに移しかえる。
+ * 呼び名を変えただけで中身は同じなので、読めるかぎりは読む。
+ */
+function migrateOldNames(raw: Record<string, unknown>): Record<string, unknown> {
+  if (raw.areaId != null) return raw;
+  const moved = { ...raw };
+  if (typeof raw.placeId === 'string') moved.areaId = raw.placeId;
+  if (Array.isArray(raw.openPlaces)) moved.openAreas = raw.openPlaces;
+  // 街並みの id は付けかたごと変わったので、エリアの入口シーンから引き直す
+  if (typeof moved.areaId === 'string') {
+    moved.sceneId = getArea(moved.areaId)?.entrySceneId;
+    moved.sceneX = typeof raw.streetX === 'number' ? raw.streetX : undefined;
+  }
+  if (Array.isArray(raw.collected)) {
+    moved.collected = raw.collected.map((c) => {
+      const item = c as { itemId?: string; placeId?: string; areaId?: string; atSeconds?: number };
+      return {
+        itemId: item.itemId,
+        areaId: item.areaId ?? item.placeId,
+        atSeconds: item.atSeconds ?? 0,
+      };
+    });
+  }
+  delete moved.placeId;
+  delete moved.openPlaces;
+  delete moved.streetId;
+  delete moved.streetX;
+  return moved;
+}
+
+/** 読みこんだ生のデータを、欠けを埋めたうえで進行状況に仕立てる */
+export function reviveSave(raw: Record<string, unknown>): GameState {
+  const moved = migrateOldNames(raw);
+  // 未定義の項目を初期値で上書きしてしまわないよう、落としてから重ねる
+  for (const key of Object.keys(moved)) {
+    if (moved[key] === undefined) delete moved[key];
+  }
+  return healSave({ ...createInitialState(), ...moved } as GameState);
+}
+
 /** localStorage へ保存する。成功したら true */
 export function saveGame(state: GameState): boolean {
   try {
@@ -196,11 +236,10 @@ export function saveGame(state: GameState): boolean {
 /** localStorage から読み込む。無ければ null */
 export function loadGame(): GameState | null {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = localStorage.getItem(SAVE_KEY) ?? localStorage.getItem(OLD_SAVE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<GameState>;
     // 保存データが古い / 壊れている場合に備えて初期値で埋める
-    return healSave({ ...createInitialState(), ...parsed });
+    return reviveSave(JSON.parse(raw) as Record<string, unknown>);
   } catch {
     return null;
   }
@@ -209,7 +248,9 @@ export function loadGame(): GameState | null {
 /** セーブデータがあるか */
 export function hasSave(): boolean {
   try {
-    return localStorage.getItem(SAVE_KEY) !== null;
+    return (
+      localStorage.getItem(SAVE_KEY) !== null || localStorage.getItem(OLD_SAVE_KEY) !== null
+    );
   } catch {
     return false;
   }

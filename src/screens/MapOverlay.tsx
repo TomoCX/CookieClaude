@@ -1,47 +1,49 @@
 import { useState } from 'react';
-import type { GameState, Place } from '../types';
-import { PLACES, getPlace } from '../data/places';
+import type { Area, GameState } from '../types';
+import { AREAS, getArea } from '../data/areas';
+import { scenesOfArea } from '../data/scenes';
 import { TownMap } from '../components/TownMap';
 import { solvedCount } from '../state/gameState';
 import { playSe } from '../audio/audio';
 
 interface Props {
   state: GameState;
-  /** 場所を選んだとき（その街並みへ移る） */
-  onEnterPlace: (place: Place) => void;
+  /** エリアを選んだとき（その入口シーンへ移る） */
+  onEnterArea: (area: Area) => void;
   /** 地図を閉じる */
   onClose: () => void;
 }
 
 /**
- * 地図。左上の「地図」アイコンから開く、地点を移すための画面。
- * かつてはこれが土台の画面だったが、いまは街並みの上にかぶせて出す。
+ * 地図。左上の「地図」アイコンから開く、エリアを移すための画面。
+ * 選んだエリアの入口シーンへ飛ぶ。かつてはこれが土台の画面だったが、
+ * いまはシーンの上にかぶせて出す。
  */
-export function MapOverlay({ state, onEnterPlace, onClose }: Props) {
+export function MapOverlay({ state, onEnterArea, onClose }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
 
-  const here = getPlace(state.placeId);
-  const selectedPlace = selected ? getPlace(selected) : null;
+  const here = getArea(state.areaId);
+  const selectedArea = selected ? getArea(selected) : null;
   const visited =
-    selectedPlace != null &&
-    state.clearedScenarios.includes(selectedPlace.mainScenarioId);
-  const isHere = selectedPlace?.id === state.placeId;
+    selectedArea != null && state.clearedScenarios.includes(selectedArea.mainScenarioId);
+  const isHere = selectedArea?.id === state.areaId;
+  /** そのエリアにいくつシーンがあるか（複数あるなら地図にも出す） */
+  const sceneCount = selectedArea ? scenesOfArea(selectedArea.id).length : 0;
 
-  /** 次に行くとよい場所（まだ本筋を読んでいない、開放済みの場所） */
-  const nextPlace = PLACES.find(
-    (p) =>
-      state.openPlaces.includes(p.id) &&
-      !state.clearedScenarios.includes(p.mainScenarioId),
+  /** 次に行くとよいエリア（まだ本筋を読んでいない、開放済みのエリア） */
+  const nextArea = AREAS.find(
+    (a) =>
+      state.openAreas.includes(a.id) && !state.clearedScenarios.includes(a.mainScenarioId),
   );
 
-  const hint = selectedPlace
+  const hint = selectedArea
     ? isHere
-      ? `${selectedPlace.name}：いま滞在中の場所`
+      ? `${selectedArea.name}：いま滞在中のエリア`
       : visited
-        ? `${selectedPlace.name}：再訪して話を聞ける`
-        : `${selectedPlace.name}へ向かおう`
-    : nextPlace
-      ? `${nextPlace.name}を調べよう`
+        ? `${selectedArea.name}：再訪して話を聞ける`
+        : `${selectedArea.name}へ向かおう`
+    : nextArea
+      ? `${nextArea.name}を調べよう`
       : '物語は完結した。町を巡り、残るナゾを解こう';
 
   return (
@@ -68,10 +70,10 @@ export function MapOverlay({ state, onEnterPlace, onClose }: Props) {
       </div>
 
       <TownMap
-        places={PLACES}
-        openPlaces={state.openPlaces}
+        areas={AREAS}
+        openAreas={state.openAreas}
         clearedScenarios={state.clearedScenarios}
-        currentPlaceId={state.placeId}
+        currentAreaId={state.areaId}
         selectedId={selected}
         onSelect={setSelected}
       />
@@ -80,14 +82,17 @@ export function MapOverlay({ state, onEnterPlace, onClose }: Props) {
         <p className="mapview__hint">
           <span className="mapview__here">現在地：{here?.name}</span>
           {hint}
+          {sceneCount > 1 && (
+            <span className="mapview__scenes">シーン {sceneCount} 面</span>
+          )}
         </p>
-        {selectedPlace && !isHere && (
+        {selectedArea && !isHere && (
           <button
             type="button"
             className="mapview__go"
             onClick={() => {
               setSelected(null);
-              onEnterPlace(selectedPlace);
+              onEnterArea(selectedArea);
             }}
           >
             {visited ? '再訪する' : 'ここへ行く'} ▶

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { EffectSketch, EffectSlot } from '../types';
+import type { EffectSketch, EffectSlot, SceneKind } from '../types';
 import { activeEffects, effectStrength, subscribeEffects } from '../effects/runtime';
 
 /** 一コマで進める時間の上限（タブを戻したときに飛ばないように） */
@@ -9,8 +9,10 @@ const MAX_DPR = 2;
 
 interface Props {
   slot: EffectSlot;
-  /** 街並みのカメラ位置（0〜1）。奥行きのあるエフェクトが使う。 */
+  /** street シーンのカメラ位置（0〜1）。奥行きのあるエフェクトが使う。 */
   cameraT?: number;
+  /** いまのシーンの種類。屋外だけのエフェクトを絞るのに使う。 */
+  sceneKind?: SceneKind;
 }
 
 /**
@@ -22,7 +24,7 @@ interface Props {
  * エフェクトそのものは `src/effects/` にあり、この部品は
  * 「大きさ・時間・指の位置を渡して、毎コマ呼ぶ」だけを受けもつ。
  */
-export function EffectLayer({ slot, cameraT = 0 }: Props) {
+export function EffectLayer({ slot, cameraT = 0, sceneKind }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   /** 毎コマ読むだけなので、描きなおしを起こさないよう ref で渡す */
   const cameraRef = useRef(cameraT);
@@ -37,7 +39,7 @@ export function EffectLayer({ slot, cameraT = 0 }: Props) {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const sketches: EffectSketch[] = activeEffects(slot).map((e) => e.create());
+    const sketches: EffectSketch[] = activeEffects(slot, sceneKind).map((e) => e.create());
     if (sketches.length === 0) {
       // 最後の一つを切ったときは、描き終わったコマが残ってしまう。
       // ループを回さないので、ここで一度だけ消しておく。
@@ -124,7 +126,7 @@ export function EffectLayer({ slot, cameraT = 0 }: Props) {
       document.removeEventListener('pointerleave', onPointerOut);
       for (const s of sketches) s.teardown?.();
     };
-  }, [slot, revision]);
+  }, [slot, sceneKind, revision]);
 
   return <canvas ref={canvasRef} className="fx" aria-hidden="true" />;
 }

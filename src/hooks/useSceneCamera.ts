@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent } from 'react';
 
 /**
- * 街並みのカメラ。
+ * street シーンのカメラ。
  *
- * 街並み画面は「道の 0〜1 のどこを見ているか」だけで表せる。
+ * 道を見わたす画面は「道の 0〜1 のどこを見ているか」だけで表せる。
  * その一点を、次の三つの入力から動かす。
  *
  * - ◀ ▶ の押しっぱなしとキーボード（`hold` / `setHeld`）
@@ -34,7 +34,7 @@ export function clampCenter(x: number): number {
   return Math.min(MAX_C, Math.max(MIN_C, x));
 }
 
-export interface StreetCamera {
+export interface SceneCamera {
   /** いま見ている道の位置（MIN_C〜MAX_C） */
   center: number;
   /** 背景の層をずらすための 0〜1 */
@@ -45,7 +45,7 @@ export interface StreetCamera {
   grabbing: boolean;
   /** 直前の操作がドラッグだったか。クリックを打ち消すのに使う。 */
   dragged: React.RefObject<boolean>;
-  /** 街並みの地の部分に広げる、ドラッグ用の handler */
+  /** シーンの地の部分に広げる、ドラッグ用の handler */
   surface: HTMLAttributes<HTMLDivElement>;
   /** ◀ ▶ ボタン用の handler */
   hold: (dir: 1 | -1) => HTMLAttributes<HTMLButtonElement>;
@@ -68,12 +68,12 @@ interface Options {
   locked: boolean;
 }
 
-export function useStreetCamera({
+export function useSceneCamera({
   initialX,
   onMove,
   frozen,
   locked,
-}: Options): StreetCamera {
+}: Options): SceneCamera {
   const [center, setCenter] = useState(() => clampCenter(initialX));
   const [grabbing, setGrabbing] = useState(false);
   /** ◀ ▶ で押されている向き */

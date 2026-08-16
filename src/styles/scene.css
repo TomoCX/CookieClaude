@@ -1,6 +1,6 @@
-/* ---- 街並み画面（マップから入った先） ---- */
+/* ---- シーン画面（遊びの土台） ---- */
 
-.street {
+.scene {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -16,7 +16,7 @@
   touch-action: pan-y;
 }
 
-.street--grabbing .street__world {
+.scene--grabbing .street__world {
   cursor: grabbing;
 }
 
@@ -25,7 +25,7 @@
   inset: 0;
 }
 
-/* 3 つの層。手前ほど 大きく動く。 */
+/* street シーンの背景。3 つの層は手前ほど大きく動く。 */
 .street__layer {
   position: absolute;
   top: 0;
@@ -147,7 +147,7 @@
 }
 
 /* 下部の操作 */
-.street__controls {
+.scene__controls {
   position: absolute;
   left: 0;
   right: 0;
@@ -161,7 +161,7 @@
   background: linear-gradient(transparent, rgba(48, 32, 18, 0.72) 42%);
 }
 
-.street__walk {
+.scene__walk {
   flex-shrink: 0;
   width: 42px;
   height: 42px;
@@ -176,16 +176,16 @@
   touch-action: none;
 }
 
-.street__walk:hover {
+.scene__walk:hover {
   background: var(--wood);
 }
 
-.street__walk:active {
+.scene__walk:active {
   transform: translateY(2px);
   box-shadow: none;
 }
 
-.street__talk {
+.scene__talk {
   flex: 1;
   padding: 11px 12px;
   font-size: 0.78rem;
@@ -198,7 +198,7 @@
   animation: talk-pulse 1.6s ease-in-out infinite;
 }
 
-.street__talk:active {
+.scene__talk:active {
   transform: translateY(2px);
   box-shadow: none;
 }
@@ -214,12 +214,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .street__talk {
+  .scene__talk {
     animation: none;
   }
 }
 
-.street__tip {
+.scene__tip {
   flex: 1;
   margin: 0;
   padding: 8px 10px;
@@ -231,8 +231,8 @@
 }
 
 /* 地図などがかぶさっている間は、街並みの操作を隠す */
-.street--frozen .street__controls,
-.street--frozen .street__sight {
+.scene--frozen .scene__controls,
+.scene--frozen .scene__sight {
   opacity: 0;
   pointer-events: none;
 }
@@ -312,7 +312,7 @@
 }
 
 /* 画面の まんなかを さす目じるし（カメラ＝自分の目線） */
-.street__sight {
+.scene__sight {
   position: absolute;
   left: 50%;
   bottom: 21%;
@@ -327,13 +327,13 @@
   pointer-events: none;
 }
 
-.street__sight--on {
+.scene__sight--on {
   opacity: 1;
   background: radial-gradient(ellipse, rgba(226, 112, 28, 0.55), transparent 70%);
 }
 
 /* 出入りの フェード。JS の FADE_MS と そろえること。 */
-.street__fade {
+.scene__fade {
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -343,13 +343,13 @@
   transition: opacity 380ms ease;
 }
 
-.street__fade--on {
+.scene__fade--on {
   opacity: 1;
   pointer-events: all;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .street__fade {
+  .scene__fade {
     transition-duration: 120ms;
   }
 }
@@ -408,7 +408,7 @@
   }
 }
 
-.street--frozen .sparkle {
+.scene--frozen .sparkle {
   pointer-events: none;
 }
 
@@ -543,7 +543,7 @@
 }
 
 /* 靴のアイコン（操作バーの右はし＝画面の右下） */
-.street__shoe {
+.scene__shoe {
   flex-shrink: 0;
   width: 46px;
   height: 42px;
@@ -556,27 +556,79 @@
   box-shadow: var(--shadow-soft);
 }
 
-.street__shoe > svg {
+.scene__shoe > svg {
   width: 26px;
   height: 20px;
 }
 
-.street__shoe:hover {
+.scene__shoe:hover {
   background: var(--wood);
 }
 
-.street__shoe:active {
+.scene__shoe:active {
   transform: translateY(2px);
   box-shadow: none;
 }
 
-.street__shoe--on {
+.scene__shoe--on {
   color: #fff;
   background: var(--orange);
   border-color: var(--orange-deep);
 }
 
-.street__tip--move {
+.scene__tip--move {
   color: #fff;
   background: rgba(184, 80, 15, 0.85);
+}
+
+/* ---- view・closeup シーン（一枚絵） ---- */
+
+.viewscene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #1b1820;
+}
+
+.viewscene__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* closeup は まわりを 落として、一点を 見ている 感じにする */
+.viewscene__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 62% at 50% 48%,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.34) 74%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+}
+
+/*
+ * 置いたものを並べる面。
+ * street と違って層に分かれていないので、この面そのものが 0〜1 の座標系になる。
+ */
+.viewscene__stage {
+  position: absolute;
+  inset: 0;
+}
+
+/* 見わたさないシーンでは、人とナゾも y で置く */
+.walker--placed,
+.streetpuzzle--placed {
+  bottom: auto;
+  transform: translate(-50%, -50%);
+}
+
+/* 一枚絵のシーンは操作バーが細いので、案内だけを中央に置く */
+.scene--view .scene__controls,
+.scene--closeup .scene__controls {
+  justify-content: center;
 }

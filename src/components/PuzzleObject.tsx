@@ -1,7 +1,7 @@
-import type { StreetPuzzle } from '../types';
+import type { ScenePuzzle } from '../types';
 
 interface Props {
-  look: StreetPuzzle['look'];
+  look: ScenePuzzle['look'];
   solved: boolean;
 }
 

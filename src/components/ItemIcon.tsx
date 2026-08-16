@@ -129,6 +129,43 @@ export function ItemArt({ icon, className }: Props) {
           <rect x="20" y="30" width="12" height="2" rx="1" fill="#8a7a5e" />
         </g>
       )}
+      {icon === 'chain' && (
+        <g>
+          {/* 斜めに垂れた鎖。端の一輪だけ ねじ切れて 開いている。 */}
+          {[0, 1, 2, 3].map((i) => (
+            <ellipse
+              key={i}
+              cx={13 + i * 7}
+              cy={16 + i * 6}
+              rx="4.6"
+              ry="3.2"
+              transform={`rotate(-40 ${13 + i * 7} ${16 + i * 6})`}
+              fill="none"
+              stroke={i % 2 ? '#8d8574' : '#a9a091'}
+              strokeWidth="2.6"
+            />
+          ))}
+          <path
+            d="M38 40 A4.6 3.2 0 1 1 42 34"
+            transform="rotate(-40 40 37)"
+            fill="none"
+            stroke="#8d8574"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+          />
+          <path d="M10 34 Q16 38 22 36" stroke="#6f8898" strokeWidth="1.6" fill="none" opacity="0.6" />
+        </g>
+      )}
+      {icon === 'pin' && (
+        <g>
+          {/* 横から見た画鋲。刺さっていた深さぶん、針が長く出ている。 */}
+          <ellipse cx="24" cy="16" rx="11" ry="4" fill="#b8623a" />
+          <path d="M13 16 Q24 22 35 16 L35 18 Q24 24 13 18 Z" fill="#8f4525" />
+          <path d="M23 20 L25 20 L24.4 40 L23.6 40 Z" fill="#9a9284" />
+          <path d="M23.6 40 L24.4 40 L24 44 Z" fill="#6d6558" />
+          <path d="M17 14 Q22 11 27 13" stroke="#d99b78" strokeWidth="1.8" fill="none" opacity="0.7" />
+        </g>
+      )}
     </svg>
   );
 }

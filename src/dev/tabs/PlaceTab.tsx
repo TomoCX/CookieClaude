@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { DevApi } from '../../types';
-import { getStreet } from '../../data/streets';
+import { getScene } from '../../data/scenes';
 import { setDevFlags, useDevFlags, usePickedSpot } from '../devFlags';
 import { copyText } from '../copy';
 
@@ -14,32 +14,35 @@ const KINDS = [
 
 type Kind = (typeof KINDS)[number]['id'];
 
-/** 街並みの中の連番。すでにある id とぶつからないところから始める。 */
-function nextIndex(streetId: string, kind: Kind): number {
-  const street = getStreet(streetId);
-  if (!street) return 1;
+/** シーンの中の連番。すでにある id とぶつからないところから始める。 */
+function nextIndex(sceneId: string, kind: Kind): number {
+  const scene = getScene(sceneId);
+  if (!scene) return 1;
   const lists: Record<Kind, { id: string }[]> = {
-    npc: street.npcs,
-    puzzle: street.puzzles,
-    sparkle: street.sparkles,
-    exit: street.exits,
+    npc: scene.npcs,
+    puzzle: scene.puzzles,
+    sparkle: scene.sparkles,
+    exit: scene.exits,
   };
   return lists[kind].length + 1;
 }
 
 /** 貼りつけられる一行を組み立てる */
-function snippet(kind: Kind, streetId: string, x: number, y: number): string {
-  const short = streetId.replace(/^st_/, '');
-  const n = nextIndex(streetId, kind);
+function snippet(kind: Kind, sceneId: string, x: number, y: number): string {
+  const short = sceneId.replace(/^scn_/, '');
+  const n = nextIndex(sceneId, kind);
   const fx = x.toFixed(2);
   const fy = y.toFixed(2);
+  // 見わたすシーンでは、人とナゾは道の上に立つので y を書かない
+  const walkable = getScene(sceneId)?.kind === 'street';
+  const yPart = walkable ? '' : `, y: ${fy}`;
   switch (kind) {
     case 'npc':
-      return `{ id: 'npc_${short}_${n}', characterId: '???', x: ${fx}, scenarioId: '???' },`;
+      return `{ id: 'npc_${short}_${n}', characterId: '???', x: ${fx}${yPart}, scenarioId: '???' },`;
     case 'puzzle':
-      return `{ id: 'sp_${short}_${n}', puzzleId: '???', x: ${fx}, look: 'clock' },`;
+      return `{ id: 'pzs_${short}_${n}', puzzleId: '???', x: ${fx}${yPart}, look: 'clock' },`;
     case 'sparkle':
-      return `{ id: 'sk_${short}_${n}', itemId: '???', x: ${fx}, y: ${fy} },`;
+      return `{ id: 'skl_${short}_${n}', itemId: '???', x: ${fx}, y: ${fy} },`;
     case 'exit':
       return `{ id: 'ex_${short}_${n}', to: '???', dir: 'far', x: ${fx}, y: ${fy} },`;
   }
@@ -47,7 +50,7 @@ function snippet(kind: Kind, streetId: string, x: number, y: number): string {
 
 /**
  * 配置。
- * 街並みを直接クリックして座標を読みとり、`src/data/streets.ts` に
+ * シーンを直接クリックして座標を読みとり、`src/data/scenes.ts` に
  * そのまま貼れる一行にして返す。目分量で 0〜1 を書かずに済ませるための欄。
  */
 export function PlaceTab({ api }: { api: DevApi }) {
@@ -56,12 +59,12 @@ export function PlaceTab({ api }: { api: DevApi }) {
   const [kind, setKind] = useState<Kind>('sparkle');
   const [copied, setCopied] = useState(false);
 
-  const line = spot ? snippet(kind, api.streetId, spot.x, spot.y) : '';
+  const line = spot ? snippet(kind, api.sceneId, spot.x, spot.y) : '';
   const field = KINDS.find((k) => k.id === kind)?.field;
 
   return (
     <div className="dev__body">
-      <h3 className="dev__head">街並みの上での道具</h3>
+      <h3 className="dev__head">シーンの上での道具</h3>
 
       <label className="dev__switch">
         <input
@@ -71,7 +74,7 @@ export function PlaceTab({ api }: { api: DevApi }) {
         />
         <span>
           <strong>座標をひろう</strong>
-          街並みをクリックすると、その位置の x と y を読みとる
+          シーンをクリックすると、その位置の x と y を読みとる
         </span>
       </label>
 
@@ -90,14 +93,14 @@ export function PlaceTab({ api }: { api: DevApi }) {
       <h3 className="dev__head">拾った座標</h3>
       {!spot ? (
         <p className="dev__note">
-          「座標をひろう」を入れてから、街並みの置きたいところをクリックする。
+          「座標をひろう」を入れてから、シーンの置きたいところをクリックする。
           （このまま操作できるよう、引き出しは閉じてかまわない）
         </p>
       ) : (
         <>
           <p className="dev__coords">
             x <strong>{spot.x.toFixed(3)}</strong> ／ y <strong>{spot.y.toFixed(3)}</strong>
-            <span className="dev__count-note">{api.streetId}</span>
+            <span className="dev__count-note">{api.sceneId}</span>
           </p>
 
           <div className="dev__chips">
@@ -128,11 +131,11 @@ export function PlaceTab({ api }: { api: DevApi }) {
             {copied && <span className="dev__ok">写した</span>}
           </div>
           <p className="dev__note">
-            <code>src/data/streets.ts</code> の <code>{api.streetId}</code> の{' '}
+            <code>src/data/scenes.ts</code> の <code>{api.sceneId}</code> の{' '}
             <code>{field}</code> に貼り、<code>???</code> を埋める。
-            {kind === 'npc' && ' 人は x だけを見るので、y は使わない。'}
-            {kind === 'puzzle' && ' ナゾも x だけを見る。look は clock / sundial / pocketwatch。'}
-            {kind === 'exit' && ' 出口は行き帰りの両方を書くこと。dir は far / near / left / right。'}
+            {kind === 'puzzle' && ' look は clock / sundial / pocketwatch。'}
+            {kind === 'exit' &&
+              ' 出口は行き帰りの両方を書くこと。dir は far / near / left / right / into / back。'}
           </p>
         </>
       )}

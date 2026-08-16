@@ -1,4 +1,4 @@
-import type { Effect, EffectSlot } from '../types';
+import type { Effect, EffectSlot, SceneKind } from '../types';
 import { EFFECTS } from './registry';
 
 /**
@@ -60,7 +60,15 @@ export function resetEffectOverrides(): void {
   notify();
 }
 
-/** その場所で、いま動かすことになっているエフェクト */
-export function activeEffects(slot: EffectSlot): Effect[] {
-  return EFFECTS.filter((e) => e.slot === slot && isEffectOn(e.id));
+/**
+ * その場所で、いま動かすことになっているエフェクト。
+ * sceneKind を渡すと、その種類のシーンで動くものだけに絞る。
+ */
+export function activeEffects(slot: EffectSlot, sceneKind?: SceneKind): Effect[] {
+  return EFFECTS.filter(
+    (e) =>
+      e.slot === slot &&
+      isEffectOn(e.id) &&
+      (sceneKind == null || e.sceneKinds == null || e.sceneKinds.includes(sceneKind)),
+  );
 }

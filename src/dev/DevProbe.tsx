@@ -1,57 +1,57 @@
-import type { Street } from '../types';
+import type { Scene } from '../types';
 import { getCharacter } from '../data/characters';
 import { getItem } from '../data/items';
 import { getPuzzle } from '../data/puzzles';
 import { setPickedSpot, useDevFlags, usePickedSpot } from './devFlags';
 
 /**
- * 街並みの上に重ねる、置き場所のための道具。
+ * シーンの上に重ねる、置き場所のための道具。
  *
- * - 座標をひろう: クリックした点を「道の 0〜1」に直して覚える
+ * - 座標をひろう: クリックした点を「シーンの中の 0〜1」に直して覚える
  * - 置き場所を見せる: いま置いてあるものに目じるしと座標を出す
  *
  * どちらも開発者モードのときだけ現れる。
  */
 interface Props {
-  street: Street;
-  /** いま見ている道の位置（カメラのまんなか） */
+  scene: Scene;
+  /** いま見ている位置（カメラのまんなか） */
   center: number;
-  /** 画面に見えている道の幅 */
+  /** 画面に見えている幅。見わたさないシーンでは 1（全体が見えている） */
   view: number;
 }
 
-export function DevProbe({ street, center, view }: Props) {
+export function DevProbe({ scene, center, view }: Props) {
   const flags = useDevFlags();
   const picked = usePickedSpot();
   if (!flags.on || (!flags.probe && !flags.guides)) return null;
 
-  /** 道の座標を、いまの画面の中の位置（0〜1）に直す */
+  /** シーンの座標を、いまの画面の中の位置（0〜1）に直す */
   const toScreen = (x: number): number => (x - (center - view / 2)) / view;
 
   const marks = flags.guides
     ? [
-        ...street.npcs.map((n) => ({
+        ...scene.npcs.map((n) => ({
           key: n.id,
           kind: '人',
           x: n.x,
-          y: 0.62,
+          y: n.y ?? 0.62,
           label: getCharacter(n.characterId)?.name ?? n.characterId,
         })),
-        ...street.puzzles.map((p) => ({
+        ...scene.puzzles.map((p) => ({
           key: p.id,
           kind: 'ナゾ',
           x: p.x,
-          y: 0.7,
+          y: p.y ?? 0.7,
           label: getPuzzle(p.puzzleId)?.title ?? p.puzzleId,
         })),
-        ...street.sparkles.map((s) => ({
+        ...scene.sparkles.map((s) => ({
           key: s.id,
           kind: '品',
           x: s.x,
           y: s.y,
           label: getItem(s.itemId)?.name ?? s.itemId,
         })),
-        ...street.exits.map((e) => ({
+        ...scene.exits.map((e) => ({
           key: e.id,
           kind: '出口',
           x: e.x,
@@ -69,7 +69,7 @@ export function DevProbe({ street, center, view }: Props) {
         const rect = e.currentTarget.getBoundingClientRect();
         const fx = (e.clientX - rect.left) / rect.width;
         const fy = (e.clientY - rect.top) / rect.height;
-        // 画面の中の位置を、道ぜんたいの 0〜1 に直す
+        // 画面の中の位置を、シーンぜんたいの 0〜1 に直す
         setPickedSpot({
           x: Math.min(1, Math.max(0, center - view / 2 + fx * view)),
           y: Math.min(1, Math.max(0, fy)),

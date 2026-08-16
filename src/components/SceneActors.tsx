@@ -1,12 +1,12 @@
-import type { Character, ExitDir, Npc, StreetPuzzle } from '../types';
+import type { Character, ExitDir, Npc, ScenePuzzle } from '../types';
 import { CharacterArt } from './CharacterSprite';
 import { PuzzleObject } from './PuzzleObject';
 
 /**
- * 道の上に置かれるもの。
+ * シーンの上に置かれるもの。
  *
- * どれも「手前の層（横幅 300%）の中の 0〜1」を left に置きなおすだけの
- * 小さな部品なので、街並み画面から切り出してここにまとめている。
+ * どれも「シーンの中の 0〜1」を left / top に置きなおすだけの小さな部品。
+ * street でも view でも同じものを使う（親のほうが座標の意味を決める）。
  */
 
 /** 立っている人 */
@@ -15,10 +15,13 @@ export function NpcMarker({
   character,
   talked,
   isMain,
+  fixedY,
   onClick,
 }: {
   npc: Npc;
   character: Character;
+  /** view・closeup のときだけ、縦位置も指定する */
+  fixedY?: number;
   /** その人の会話を読み終えているか */
   talked: boolean;
   /** 本筋の会話か（立ち話なら false） */
@@ -28,10 +31,13 @@ export function NpcMarker({
   return (
     <button
       type="button"
-      className={`walker walker--npc${talked ? ' walker--talked' : ''}`}
+      className={`walker walker--npc${talked ? ' walker--talked' : ''}${
+        fixedY == null ? '' : ' walker--placed'
+      }`}
       style={
         {
           left: `${npc.x * 100}%`,
+          top: fixedY == null ? undefined : `${fixedY * 100}%`,
           '--walker-scale': character.scale ?? 1,
         } as React.CSSProperties
       }
@@ -54,19 +60,27 @@ export function PuzzleMarker({
   spot,
   title,
   solved,
+  fixedY,
   onClick,
 }: {
-  spot: StreetPuzzle;
+  spot: ScenePuzzle;
   /** まだ見つけていないナゾは名前を伏せる */
   title: string;
   solved: boolean;
+  /** view・closeup のときだけ、縦位置も指定する */
+  fixedY?: number;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className={`streetpuzzle${solved ? ' streetpuzzle--solved' : ''}`}
-      style={{ left: `${spot.x * 100}%` }}
+      className={`streetpuzzle${solved ? ' streetpuzzle--solved' : ''}${
+        fixedY == null ? '' : ' streetpuzzle--placed'
+      }`}
+      style={{
+        left: `${spot.x * 100}%`,
+        top: fixedY == null ? undefined : `${fixedY * 100}%`,
+      }}
       onClick={onClick}
       title={solved ? '解いたナゾ' : 'ナゾ！'}
     >
@@ -87,6 +101,8 @@ const ARROW_ROTATION: Record<ExitDir, number> = {
   near: 180,
   left: -90,
   right: 90,
+  into: 180, // 足もとや壁を「覗きこむ」ので、下向き
+  back: 0, // もとのシーンへ「もどる」ので、上向き
 };
 
 /** 矢印に添える言葉 */
@@ -95,6 +111,8 @@ const ARROW_LABEL: Record<ExitDir, string> = {
   near: '手前へ',
   left: '左へ',
   right: '右へ',
+  into: '調べる',
+  back: 'もどる',
 };
 
 /** 隣の街並みへの矢印。靴のアイコンを押しているあいだだけ出す。 */
@@ -171,7 +189,7 @@ export function ShoeButton({ on, onClick }: { on: boolean; onClick: () => void }
   return (
     <button
       type="button"
-      className={`street__shoe${on ? ' street__shoe--on' : ''}`}
+      className={`scene__shoe${on ? ' scene__shoe--on' : ''}`}
       aria-pressed={on}
       title={on ? '移動をやめる' : '別の場所へ移動する'}
       onClick={onClick}

@@ -1,5 +1,5 @@
 import type { GameState } from '../types';
-import { createInitialState, healSave } from './gameState';
+import { reviveSave } from './gameState';
 
 /**
  * セーブデータを一本のテキストに書きだす／読みこむ。
@@ -13,7 +13,9 @@ import { createInitialState, healSave } from './gameState';
  */
 
 /** コードの版。中身の形を変えたら上げること。 */
-const CODE_TAG = 'CC1';
+const CODE_TAG = 'CC2';
+/** 「場所・街並み」と呼んでいたころの版。読みこみだけ受けつける。 */
+const OLD_CODE_TAGS = ['CC1'];
 
 /* ---- base64url ---- */
 
@@ -84,7 +86,7 @@ export function decodeSave(input: string): DecodeResult {
   if (!found) return { ok: false, reason: 'コードが見つからない。全文を貼りつけてほしい。' };
 
   const [tag, body, sum] = found[0].split('.');
-  if (tag !== CODE_TAG) {
+  if (tag !== CODE_TAG && !OLD_CODE_TAGS.includes(tag ?? '')) {
     return { ok: false, reason: `対応していない版のコード（${tag}）。` };
   }
   if (!body || !sum) return { ok: false, reason: 'コードの形が壊れている。' };
@@ -93,12 +95,12 @@ export function decodeSave(input: string): DecodeResult {
   }
 
   try {
-    const parsed = JSON.parse(fromBase64Url(body)) as Partial<GameState>;
+    const parsed = JSON.parse(fromBase64Url(body)) as Record<string, unknown>;
     if (typeof parsed !== 'object' || parsed === null) {
       return { ok: false, reason: '中身を読み取れなかった。' };
     }
-    // 欠けている項目は初期値で埋め、現在地と街並みの食い違いも直す
-    return { ok: true, state: healSave({ ...createInitialState(), ...parsed }) };
+    // 欠けている項目は初期値で埋め、古い呼び名や食い違いも直す
+    return { ok: true, state: reviveSave(parsed) };
   } catch {
     return { ok: false, reason: '中身を読み取れなかった。' };
   }

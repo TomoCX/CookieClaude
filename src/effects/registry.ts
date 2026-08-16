@@ -14,7 +14,8 @@ export const EFFECTS: Effect[] = [
   {
     id: 'fx_motes',
     name: '陽だまりの塵',
-    slot: 'street.back',
+    slot: 'scene.back',
+    sceneKinds: ['street'],
     note: '空気中の細かな粒。見わたすと手前のものほど大きく流れる。',
     enabled: true,
     create: createMotes,
@@ -22,7 +23,8 @@ export const EFFECTS: Effect[] = [
   {
     id: 'fx_leaves',
     name: 'メープルの落ち葉',
-    slot: 'street.front',
+    slot: 'scene.front',
+    sceneKinds: ['street'],
     note: '舞い落ちる楓の葉。指を近づけると風を受けて押しのけられる。',
     enabled: true,
     create: createLeaves,
@@ -39,8 +41,8 @@ export const EFFECTS: Effect[] = [
 
 /** 差しこめる場所の一覧（開発者モードの案内に使う） */
 export const EFFECT_SLOTS: { id: EffectSlot; label: string }[] = [
-  { id: 'street.back', label: '街並み・奥（空と建物の上、人より奥）' },
-  { id: 'street.front', label: '街並み・手前（何よりも手前）' },
+  { id: 'scene.back', label: 'シーン・奥（背景の上、人より奥）' },
+  { id: 'scene.front', label: 'シーン・手前（何よりも手前）' },
   { id: 'scenario.front', label: '会話・手前' },
   { id: 'puzzle.front', label: 'ナゾ解き・手前' },
   { id: 'menu.back', label: 'メインメニュー・奥' },
