@@ -76,14 +76,22 @@ export function App() {
     return () => clearInterval(id);
   }, [booting]);
 
-  /** 地図から別の場所へ移る。入りなおしたときは道の入口から。 */
-  const enterPlace = useCallback((place: Place) => {
-    setState((s) => ({ ...s, placeId: place.id }));
-    delete streetPos.current[place.streetId];
-    setStreetId(place.streetId);
+  /** 街並みを移る。入りなおすときは道の入口から見わたす。 */
+  const goToStreet = useCallback((id: string) => {
+    const street = getStreet(id);
+    if (!street) return;
+    setState((s) => ({ ...s, placeId: street.placeId }));
+    delete streetPos.current[id];
+    setStreetId(id);
     setMapOpen(false);
     setScreen('street');
   }, []);
+
+  /** 地図から別の場所へ移る */
+  const enterPlace = useCallback(
+    (place: Place) => goToStreet(place.streetId),
+    [goToStreet],
+  );
 
   /** 街並みで人に話しかけた */
   const talkTo = useCallback((id: string) => {
@@ -187,6 +195,7 @@ export function App() {
             onTalk={talkTo}
             onOpenPuzzle={openPuzzle}
             onPickup={pickUpItem}
+            onGoTo={goToStreet}
             frozen={mapOpen}
           />
         )}

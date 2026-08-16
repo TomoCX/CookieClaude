@@ -98,6 +98,21 @@ export function checkContent(): string[] {
       usedPuzzles.add(sp.puzzleId);
     }
 
+    dup(`街並み ${street.id} の出口`, street.exits.map((e) => e.id));
+    for (const ex of street.exits) {
+      if (!streetIds.has(ex.to)) {
+        say(`${street.id}/${ex.id}: 行き先の街並み ${ex.to} が無い`);
+      }
+      if (ex.to === street.id) say(`${street.id}/${ex.id}: 自分自身へ向かっている`);
+      if (ex.x < 0 || ex.x > 1) say(`${street.id}/${ex.id}: x が 0〜1 の外`);
+      if (ex.y < 0 || ex.y > 1) say(`${street.id}/${ex.id}: y が 0〜1 の外`);
+      // 行き来できないと詰むので、戻り道があるかも見ておく
+      const back = STREETS.find((t) => t.id === ex.to);
+      if (back && !back.exits.some((e) => e.to === street.id)) {
+        say(`${street.id} → ${ex.to} の戻り道が無い`);
+      }
+    }
+
     for (const sk of street.sparkles) {
       if (!itemIds.has(sk.itemId)) {
         say(`${street.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
@@ -108,6 +123,25 @@ export function checkContent(): string[] {
         say(`アイテム ${sk.itemId} が二か所に落ちている`);
       }
       usedItems.add(sk.itemId);
+    }
+  }
+
+  /* ---- どこからも行けない街並みが無いか ---- */
+  const reachable = new Set<string>();
+  const start = STREETS[0];
+  if (start) {
+    const queue = [start.id];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      if (reachable.has(id)) continue;
+      reachable.add(id);
+      const here = STREETS.find((t) => t.id === id);
+      for (const ex of here?.exits ?? []) queue.push(ex.to);
+    }
+  }
+  for (const street of STREETS) {
+    if (!reachable.has(street.id)) {
+      say(`街並み ${street.id} へは、出口をたどって行き着けない`);
     }
   }
 

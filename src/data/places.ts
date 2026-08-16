@@ -20,7 +20,8 @@ export const PLACES: Place[] = [
     y: 74,
     streetId: 'st_gate',
     mainScenarioId: 'sc_gate',
-    openFromStart: true,
+    // 御者との会話（sc_coach）を読むと開く。最初から開けてしまうと
+    // 幕開けを飛ばして町に入れてしまう。
   },
   {
     id: 'plaza',

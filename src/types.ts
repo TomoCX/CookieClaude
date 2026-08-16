@@ -148,6 +148,24 @@ export interface StreetSparkle {
   y: number;
 }
 
+/** 出口の向き。奥へ、手前へ、左へ、右へ。 */
+export type ExitDir = 'far' | 'near' | 'left' | 'right';
+
+/**
+ * 隣の街並みへの出口。
+ * 靴のアイコンを押すと、この位置に三角の矢印が出る。
+ */
+export interface StreetExit {
+  id: string;
+  /** 行き先の街並み（Street.id） */
+  to: string;
+  dir: ExitDir;
+  /** 街並みの中での位置（0〜1） */
+  x: number;
+  /** 画面の高さに対する位置（0 が上、1 が下） */
+  y: number;
+}
+
 /** 街並みに置かれた「時計のような物体」。押すとナゾが始まる。 */
 export interface StreetPuzzle {
   id: string;
@@ -171,6 +189,8 @@ export interface Street {
   puzzles: StreetPuzzle[];
   /** 落ちている収集アイテム */
   sparkles: StreetSparkle[];
+  /** 隣の街並みへの出口 */
+  exits: StreetExit[];
   /** 入ってきたときのカメラの位置（0〜1） */
   startX: number;
 }

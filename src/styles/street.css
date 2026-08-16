@@ -411,3 +411,172 @@
 .street--frozen .sparkle {
   pointer-events: none;
 }
+
+/* ---- 隣の街並みへの出口（靴のアイコンで出る三角の矢印） ---- */
+.exit {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  animation: exit-in 0.22s ease;
+}
+
+@keyframes exit-in {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+.exit__arrow {
+  width: 46px;
+  height: 40px;
+  fill: var(--orange);
+  stroke: #fff;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+  animation: exit-bob 1.5s ease-in-out infinite;
+}
+
+.exit__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 9px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--ink);
+  background: rgba(246, 236, 212, 0.96);
+  border: 1.5px solid var(--wood);
+  border-radius: 999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.exit__label em {
+  font-size: 0.52rem;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--orange-deep);
+}
+
+.exit:hover:not(:disabled) .exit__arrow {
+  scale: 1.14;
+}
+
+.exit--locked {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.exit--locked .exit__arrow {
+  fill: #8b8172;
+  animation: none;
+}
+
+/* 向きごとに、動く方向をそろえる */
+@keyframes exit-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
+}
+
+.exit--near .exit__arrow {
+  animation-name: exit-bob-near;
+}
+
+@keyframes exit-bob-near {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 5px;
+  }
+}
+
+.exit--left .exit__arrow {
+  animation-name: exit-bob-left;
+}
+
+@keyframes exit-bob-left {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: -5px 0;
+  }
+}
+
+.exit--right .exit__arrow {
+  animation-name: exit-bob-right;
+}
+
+@keyframes exit-bob-right {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 5px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exit,
+  .exit__arrow {
+    animation: none;
+  }
+}
+
+/* 靴のアイコン（操作バーの右はし＝画面の右下） */
+.street__shoe {
+  flex-shrink: 0;
+  width: 46px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--cream);
+  background: rgba(64, 42, 25, 0.86);
+  border: 2px solid var(--wood-dark);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.street__shoe > svg {
+  width: 26px;
+  height: 20px;
+}
+
+.street__shoe:hover {
+  background: var(--wood);
+}
+
+.street__shoe:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.street__shoe--on {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.street__tip--move {
+  color: #fff;
+  background: rgba(184, 80, 15, 0.85);
+}

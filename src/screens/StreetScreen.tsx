@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { GameState, Street, StreetPuzzle } from '../types';
+import type { ExitDir, GameState, Street, StreetPuzzle } from '../types';
 import { getCharacter } from '../data/characters';
+import { getPlace } from '../data/places';
 import { getPuzzle } from '../data/puzzles';
+import { getStreet } from '../data/streets';
 import { getScenario } from '../data/scenarios';
 import { CharacterArt } from '../components/CharacterSprite';
 import { StreetScene } from '../components/StreetScene';
@@ -21,11 +23,30 @@ const MAX_C = 1 - VIEW / 2;
 const FADE_MS = 380;
 /** これ以上指が動いたら、クリックではなくドラッグとみなす */
 const DRAG_SLOP = 5;
+/** 靴を押したとき、行き先へカメラを寄せる速さ（1 秒あたりの道の割合） */
+const GLIDE_SPEED = 0.9;
 
 /** クリックしたものをどう開くか */
 type Pending =
   | { kind: 'talk'; scenarioId: string }
-  | { kind: 'puzzle'; puzzleId: string };
+  | { kind: 'puzzle'; puzzleId: string }
+  | { kind: 'move'; streetId: string };
+
+/** 矢印の向きごとの回転角（三角は上向きに描いてある） */
+const ARROW_ROTATION: Record<ExitDir, number> = {
+  far: 0,
+  near: 180,
+  left: -90,
+  right: 90,
+};
+
+/** 矢印に添える言葉 */
+const ARROW_LABEL: Record<ExitDir, string> = {
+  far: '奥へ',
+  near: '手前へ',
+  left: '左へ',
+  right: '右へ',
+};
 
 interface Props {
   street: Street;
@@ -40,6 +61,8 @@ interface Props {
   onOpenPuzzle: (puzzleId: string) => void;
   /** キラキラを押してアイテムを拾った */
   onPickup: (itemId: string) => void;
+  /** 隣の街並みへ移った */
+  onGoTo: (streetId: string) => void;
   /** 地図などがかぶさっている間は操作を受けつけない */
   frozen?: boolean;
 }
@@ -57,6 +80,7 @@ export function StreetScreen({
   onTalk,
   onOpenPuzzle,
   onPickup,
+  onGoTo,
   frozen = false,
 }: Props) {
   const [center, setCenter] = useState(() =>
@@ -76,6 +100,10 @@ export function StreetScreen({
   /** 直前の操作がドラッグだったか。人やナゾのクリックを打ち消すのに使う。 */
   const dragged = useRef(false);
   const [grabbing, setGrabbing] = useState(false);
+  /** 靴のアイコンで出す、行き先の矢印を表示しているか */
+  const [moveMode, setMoveMode] = useState(false);
+  /** カメラを自動で寄せる先。寄せ終えたら null に戻す。 */
+  const glide = useRef<number | null>(null);
 
 
   useEffect(() => {
@@ -116,10 +144,11 @@ export function StreetScreen({
       setPending(next);
       setTimeout(() => {
         if (next.kind === 'talk') onTalk(next.scenarioId);
-        else onOpenPuzzle(next.puzzleId);
+        else if (next.kind === 'puzzle') onOpenPuzzle(next.puzzleId);
+        else onGoTo(next.streetId);
       }, FADE_MS);
     },
-    [pending, onTalk, onOpenPuzzle, frozen],
+    [pending, onTalk, onOpenPuzzle, onGoTo, frozen],
   );
 
   /** カメラを動かす */
@@ -140,13 +169,39 @@ export function StreetScreen({
       const dt = Math.min((now - prev) / 1000, 0.05);
       prev = now;
       if (held.current !== 0) {
+        glide.current = null;
         panRef.current(centerRef.current + held.current * PAN_SPEED * dt);
+      } else if (glide.current !== null) {
+        const to = glide.current;
+        const gap = to - centerRef.current;
+        if (Math.abs(gap) < 0.004) {
+          glide.current = null;
+          panRef.current(to);
+        } else {
+          const step = Math.sign(gap) * Math.min(GLIDE_SPEED * dt, Math.abs(gap));
+          panRef.current(centerRef.current + step);
+        }
       }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, []);
+
+  /** 隣の街並みへの出口。行き先の名前と、いま行けるかどうかを添える。 */
+  const exits = useMemo(
+    () =>
+      street.exits.map((ex) => {
+        const dest = getStreet(ex.to);
+        const place = dest ? getPlace(dest.placeId) : undefined;
+        return {
+          ...ex,
+          name: place?.name ?? '？？？',
+          open: place ? state.openPlaces.includes(place.id) : false,
+        };
+      }),
+    [street.exits, state.openPlaces],
+  );
 
   /** 画面のまんなかに来ているもの */
   const focusNpc = npcs.find((n) => Math.abs(n.x - center) < FOCUS_RANGE);
@@ -200,6 +255,7 @@ export function StreetScreen({
       };
       dragged.current = false;
       held.current = 0;
+      glide.current = null;
     },
     onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
       const d = drag.current;
@@ -240,6 +296,22 @@ export function StreetScreen({
       held.current = 0;
     },
   });
+
+  /**
+   * 靴を押したときに寄せる先。
+   * すでに出口が見えていれば動かさず、見えていなければ
+   * いちばん近い出口が画面に入る位置を返す。
+   */
+  const nearestExitCenter = (): number | null => {
+    if (exits.length === 0) return null;
+    const half = VIEW / 2;
+    const inView = exits.some((ex) => Math.abs(ex.x - centerRef.current) < half * 0.9);
+    if (inView) return null;
+    const near = exits.reduce((best, ex) =>
+      Math.abs(ex.x - centerRef.current) < Math.abs(best.x - centerRef.current) ? ex : best,
+    );
+    return Math.min(MAX_C, Math.max(MIN_C, near.x));
+  };
 
   /** 下のバーに出す案内 */
   const action = focusNpc
@@ -318,6 +390,31 @@ export function StreetScreen({
             </button>
           );
         })}
+        {/* 行き先の矢印（靴のアイコンを押しているあいだだけ出す） */}
+        {moveMode &&
+          exits.map((ex) => (
+            <button
+              key={ex.id}
+              type="button"
+              className={`exit exit--${ex.dir}${ex.open ? '' : ' exit--locked'}`}
+              style={{ left: `${ex.x * 100}%`, top: `${ex.y * 100}%` }}
+              disabled={!ex.open}
+              title={ex.open ? `${ex.name}へ移動する` : 'まだ行けない'}
+              onClick={() => open({ kind: 'move', streetId: ex.to })}
+            >
+              <svg viewBox="0 0 40 34" className="exit__arrow" aria-hidden="true">
+                <path
+                  d="M20 2 L37 30 L3 30 Z"
+                  transform={`rotate(${ARROW_ROTATION[ex.dir]} 20 18)`}
+                />
+              </svg>
+              <span className="exit__label">
+                <em>{ARROW_LABEL[ex.dir]}</em>
+                {ex.open ? ex.name : '？？？'}
+              </span>
+            </button>
+          ))}
+
         {/* 落ちているキラキラ */}
         {sparkles.map((sp) => (
           <button
@@ -368,7 +465,11 @@ export function StreetScreen({
           ▶
         </button>
 
-        {action ? (
+        {moveMode ? (
+          <p className="street__tip street__tip--move">
+            三角の矢印を押すと、その方向の場所へ移る。
+          </p>
+        ) : action ? (
           <button type="button" className="street__talk" onClick={action.run}>
             {action.label}
           </button>
@@ -377,6 +478,28 @@ export function StreetScreen({
             ◀ ▶ かドラッグで道を見わたす。人やナゾをクリックすると中に入れる。
           </p>
         )}
+
+        <button
+          type="button"
+          className={`street__shoe${moveMode ? ' street__shoe--on' : ''}`}
+          aria-pressed={moveMode}
+          title={moveMode ? '移動をやめる' : '別の場所へ移動する'}
+          onClick={() => {
+            playSe('click');
+            const next = !moveMode;
+            setMoveMode(next);
+            glide.current = next ? nearestExitCenter() : null;
+          }}
+        >
+          <svg viewBox="0 0 32 24" aria-hidden="true">
+            <path
+              d="M3 17 L3 8 Q3 6 5 6 L9 6 Q11 6 12 8 L14 11 Q16 13 20 14 L26 15 Q29 16 29 18 L29 19 Q29 20 27 20 L5 20 Q3 20 3 18 Z"
+              fill="currentColor"
+            />
+            <path d="M3 17 L29 18.6" stroke="#3a2617" strokeWidth="1.6" fill="none" />
+            <path d="M9 7 L11 11 M13 10 L15 13" stroke="#3a2617" strokeWidth="1.4" fill="none" />
+          </svg>
+        </button>
       </div>
 
       {/* 出入りのフェード */}
