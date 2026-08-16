@@ -234,7 +234,3 @@ export function flagOn(id: string, state: GameState): boolean {
   return def ? testNeeds(def.needs, state) : false;
 }
 
-/** いま立っているフラグの id をすべて返す */
-export function activeFlags(state: GameState): string[] {
-  return FLAGS.filter((f) => testNeeds(f.needs, state)).map((f) => f.id);
-}

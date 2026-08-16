@@ -57,10 +57,10 @@
   box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
-/* 道具は 3 列 × 3 段。列を広げすぎず、ますの中で真ん中に置く。 */
+/* 道具は 5 列 × 2 段。列を広げすぎず、ますの中で真ん中に置く。 */
 .trunk__row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   justify-items: center;
   gap: 8px;
 }
@@ -73,7 +73,7 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-  max-width: 132px;
+  max-width: 112px;
   padding: 11px 4px 9px;
   background: rgba(246, 236, 212, 0.92);
   border: 2px solid var(--wood-dark);
@@ -320,32 +320,6 @@
 
 .indexlist__item--cleared .indexlist__row:hover {
   background: rgba(226, 112, 28, 0.08);
-}
-
-.indexlist__detail {
-  padding: 8px 10px 10px;
-  border-top: 1.5px dotted var(--line);
-}
-
-.indexlist__q {
-  margin: 0 0 8px;
-  font-size: 0.66rem;
-  line-height: 1.6;
-  white-space: pre-line;
-  color: var(--ink-soft);
-}
-
-.indexlist__detail h4 {
-  margin: 0 0 3px;
-  font-size: 0.66rem;
-  color: var(--orange-deep);
-}
-
-.indexlist__detail p {
-  margin: 0;
-  font-size: 0.68rem;
-  line-height: 1.6;
-  color: var(--ink);
 }
 
 .indexlist__no {

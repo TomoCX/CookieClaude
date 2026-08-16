@@ -1,0 +1,628 @@
+/* ---- ホームページ：RE:PRESS RECORDS（頁を持つポータル） ---- */
+
+/*
+ * 白地に黒、罫線は細く、写真のかわりに面と輪郭。
+ * 頁が入れ子になるので、見出し・戻る・並びの形は使い回す。
+ */
+.rec {
+  min-height: 100%;
+  font-family: 'Helvetica Neue', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  color: #1b1b1b;
+  background: #fbfaf8;
+}
+
+/* 上の帯 */
+.rec__head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(251, 250, 248, 0.94);
+  border-bottom: 1px solid #1b1b1b;
+  backdrop-filter: blur(6px);
+}
+
+.rec__logo {
+  display: grid;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.12em;
+  text-align: left;
+  color: #1b1b1b;
+  background: none;
+  border: 0;
+}
+
+.rec__logo em {
+  font-size: 0.5rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: #7a7a7a;
+}
+
+.rec__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.rec__navlink {
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6a6a6a;
+  background: none;
+  border: 0;
+}
+
+.rec__navlink:hover {
+  color: #1b1b1b;
+}
+
+.rec__navlink--on {
+  color: #1b1b1b;
+  border-bottom: 2px solid #1b1b1b;
+}
+
+.rec__cart {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  padding: 4px 9px;
+  font-family: inherit;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #1b1b1b;
+  background: none;
+  border: 1px solid #1b1b1b;
+  border-radius: 999px;
+}
+
+.rec__cart span {
+  min-width: 1.15rem;
+  padding: 0 3px;
+  font-size: 0.54rem;
+  text-align: center;
+  color: #fbfaf8;
+  background: #b7b7b7;
+  border-radius: 999px;
+}
+
+.rec__cart--on span {
+  background: #c2452a;
+}
+
+.rec__main {
+  padding: 18px 14px 30px;
+}
+
+/* 幕開け */
+.rec-hero {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) 1fr;
+  gap: 18px;
+  align-items: center;
+  padding-bottom: 26px;
+  border-bottom: 1px solid #ddd8d0;
+}
+
+.rec-hero__art {
+  width: 100%;
+}
+
+.rec-hero__tag {
+  margin: 0;
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #c2452a;
+}
+
+.rec-hero__title {
+  margin: 4px 0 2px;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.rec-hero__meta {
+  margin: 0 0 8px;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: #7a7a7a;
+}
+
+.rec-hero__note {
+  margin: 0 0 12px;
+  max-width: 26rem;
+}
+
+/* 見出しつきの区画 */
+.rec-section {
+  padding: 22px 0;
+  border-bottom: 1px solid #ddd8d0;
+}
+
+.rec-section__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.rec-section__head {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.rec-section__more {
+  font-family: inherit;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #6a6a6a;
+  background: none;
+  border: 0;
+}
+
+.rec-section__more:hover {
+  color: #c2452a;
+}
+
+/* 頁の見出し */
+.rec-pagehead {
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #1b1b1b;
+}
+
+.rec-pagehead h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.rec-pagehead p {
+  margin: 2px 0 0;
+  font-size: 0.6rem;
+  color: #7a7a7a;
+}
+
+/* お知らせの並び */
+.rec-newslist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rec-newsrow {
+  border-bottom: 1px solid #e6e1d9;
+}
+
+.rec-newsrow button {
+  display: grid;
+  grid-template-columns: 5.4rem 4.6rem 1fr;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 2px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+.rec-newsrow button:hover {
+  background: #f4f1eb;
+}
+
+.rec-newsrow__date {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: #7a7a7a;
+}
+
+.rec-newsrow__title {
+  font-weight: 600;
+}
+
+/* 区分の札 */
+.rec-tag {
+  padding: 2px 6px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-align: center;
+  color: #fbfaf8;
+  border-radius: 3px;
+}
+
+.rec-tag--release { background: #c2452a; }
+.rec-tag--live { background: #2f6b8a; }
+.rec-tag--media { background: #6b5a8a; }
+.rec-tag--goods { background: #5f7a4a; }
+.rec-tag--apparel { background: #5f7a4a; }
+.rec-tag--music { background: #c2452a; }
+.rec-tag--print { background: #8a6b45; }
+
+/* 絞りこみ */
+.rec__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.rec__filter {
+  padding: 4px 11px;
+  font-family: inherit;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6a6a6a;
+  background: none;
+  border: 1px solid #d4cec4;
+  border-radius: 999px;
+}
+
+.rec__filter--on {
+  color: #fbfaf8;
+  background: #1b1b1b;
+  border-color: #1b1b1b;
+}
+
+/* 記事 */
+.rec-article__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 0.6rem;
+  color: #7a7a7a;
+}
+
+.rec-article__title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.rec-article__p {
+  margin: 0 0 12px;
+  max-width: 34rem;
+}
+
+.rec-back {
+  margin-bottom: 12px;
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6a6a6a;
+  background: none;
+  border: 0;
+}
+
+.rec-back:hover {
+  color: #c2452a;
+}
+
+.rec__sub {
+  margin: 18px 0 6px;
+  padding-bottom: 3px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  border-bottom: 1px solid #ddd8d0;
+}
+
+/* 作品 */
+.rec-discs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 14px;
+}
+
+.rec-disc {
+  display: grid;
+  gap: 2px;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+.rec-disc:hover .rec-jacket {
+  transform: translateY(-3px);
+}
+
+.rec-disc__kind {
+  margin-top: 6px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #c2452a;
+}
+
+.rec-disc__title {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.rec-disc__date {
+  font-size: 0.56rem;
+  color: #7a7a7a;
+}
+
+.rec-jacket,
+.rec-goodsart {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.18s ease;
+}
+
+.rec-release {
+  display: grid;
+  grid-template-columns: minmax(120px, 190px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.rec-tracks {
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: 0.7rem;
+}
+
+.rec-tracks li {
+  padding: 2px 0;
+  border-bottom: 1px dotted #e0dbd2;
+}
+
+/* 売り場 */
+.rec-goods {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.rec-goodscard {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #e6e1d9;
+}
+
+.rec-goodscard--out {
+  opacity: 0.62;
+}
+
+.rec-goodscard__body {
+  display: grid;
+  gap: 3px;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+.rec-goodscard__art {
+  display: block;
+}
+
+.rec-goodscard__name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.rec-goodscard__price {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #c2452a;
+}
+
+.rec-goodscard__out {
+  margin: 0;
+  padding: 5px 0;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-align: center;
+  color: #8a8a8a;
+  border: 1px dashed #cfc9bf;
+}
+
+.rec-price {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #c2452a;
+}
+
+/* かご */
+.rec-cart {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.rec-cart li {
+  display: grid;
+  grid-template-columns: 42px 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #e6e1d9;
+}
+
+.rec-cart__art {
+  display: block;
+}
+
+.rec-cart__name {
+  font-weight: 600;
+}
+
+.rec-cart__qty,
+.rec-cart__price {
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.rec-cart__price {
+  font-weight: 800;
+}
+
+.rec-cart__drop {
+  font-family: inherit;
+  font-size: 0.56rem;
+  color: #8a8a8a;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+}
+
+.rec-cart__total {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.rec-cart__total strong {
+  font-size: 1.05rem;
+  color: #c2452a;
+}
+
+/* 連絡先 */
+.rec-contact {
+  margin: 0;
+}
+
+.rec-contact > div {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #e6e1d9;
+}
+
+.rec-contact dt {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #7a7a7a;
+}
+
+.rec-contact dd {
+  margin: 0;
+}
+
+/* ボタン */
+.rec__button {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fbfaf8;
+  background: #1b1b1b;
+  border: 1px solid #1b1b1b;
+}
+
+.rec__button:hover:not(:disabled) {
+  color: #1b1b1b;
+  background: #fbfaf8;
+}
+
+.rec__button:disabled {
+  opacity: 0.45;
+}
+
+.rec__button--slim {
+  padding: 5px 10px;
+  font-size: 0.56rem;
+}
+
+.rec__empty,
+.rec__note {
+  margin: 12px 0;
+  font-size: 0.62rem;
+  color: #7a7a7a;
+}
+
+/* 下の帯 */
+.rec__foot {
+  padding: 20px 14px 26px;
+  text-align: center;
+  color: #cfcac2;
+  background: #1b1b1b;
+}
+
+.rec__foot-logo {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  color: #fbfaf8;
+}
+
+.rec__foot-links {
+  margin: 6px 0 0;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+}
+
+.rec__foot-copy {
+  margin: 8px 0 0;
+  font-size: 0.54rem;
+  color: #8a857e;
+}
+
+.rec__foot-note {
+  margin: 10px auto 0;
+  max-width: 30rem;
+  font-size: 0.52rem;
+  line-height: 1.7;
+  color: #8a857e;
+}
+
+/* 狭い画面 */
+@media (max-width: 620px) {
+  .rec-hero,
+  .rec-release {
+    grid-template-columns: 1fr;
+  }
+
+  .rec-newsrow button {
+    grid-template-columns: 5.4rem 4.6rem;
+  }
+
+  .rec-newsrow__title {
+    grid-column: 1 / -1;
+  }
+}

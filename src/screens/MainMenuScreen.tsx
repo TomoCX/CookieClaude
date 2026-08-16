@@ -4,6 +4,9 @@ import { SettingsPanel } from './panels/SettingsPanel';
 import { ProgressPanel } from './panels/ProgressPanel';
 import { CollectionPanel } from './panels/CollectionPanel';
 import { AchievementsPanel } from './panels/AchievementsPanel';
+import { AccountPanel } from './panels/AccountPanel';
+import { SiteIcon } from '../sites/SiteIcon';
+import { SITES } from '../sites/registry';
 import { BackupPanel } from './panels/BackupPanel';
 import { NotesPanel } from './panels/NotesPanel';
 import { StoryPanel } from './panels/StoryPanel';
@@ -30,6 +33,7 @@ type Panel =
   | 'settings'
   | 'collection'
   | 'achievements'
+  | 'account'
   | 'backup'
   | null;
 
@@ -48,6 +52,8 @@ interface Props {
   devOn: boolean;
   /** 開発者モードを出入りする */
   onToggleDev: () => void;
+  /** ゲームの外のホームページを開く（SiteDef.id） */
+  onOpenSite: (id: string) => void;
   /** 閉じる（前の画面に戻る） */
   onClose: () => void;
 }
@@ -65,6 +71,7 @@ export function MainMenuScreen({
   onChangeMemo,
   devOn,
   onToggleDev,
+  onOpenSite,
   onClose,
 }: Props) {
   const t = useText();
@@ -125,9 +132,6 @@ export function MainMenuScreen({
                 badge={solvedCount(state)}
                 onClick={() => setPanel('index')}
               />
-            </div>
-
-            <div className="trunk__row">
               <TrunkItem
                 icon="🏅"
                 label={t(UI.toolAchievements)}
@@ -140,11 +144,16 @@ export function MainMenuScreen({
                 badge={state.collected.length}
                 onClick={() => setPanel('collection')}
               />
-              <TrunkItem icon="🖋" label={t(UI.toolSave)} onClick={handleSave} />
             </div>
 
             <div className="trunk__row">
+              <TrunkItem icon="🖋" label={t(UI.toolSave)} onClick={handleSave} />
               <TrunkItem icon="💾" label={t(UI.toolBackup)} onClick={() => setPanel('backup')} />
+              <TrunkItem
+                icon="🪪"
+                label={t(UI.toolAccount)}
+                onClick={() => setPanel('account')}
+              />
               <TrunkItem icon="⚙" label={t(UI.toolSettings)} onClick={() => setPanel('settings')} />
               {/* 中身を足すための道具箱。Ctrl + Shift + D でも出入りできる。 */}
               <TrunkItem
@@ -157,6 +166,25 @@ export function MainMenuScreen({
                 }}
               />
             </div>
+
+            {/* ゲームとは関係のないホームページ。アイコンだけを小さく並べる。 */}
+            <div className="trunk__sites">
+              {SITES.map((site) => (
+                <button
+                  key={site.id}
+                  type="button"
+                  className="siteicon"
+                  title={`${t(site.name)}（${t(site.note)}）`}
+                  aria-label={t(site.name)}
+                  onClick={() => {
+                    playSe('click');
+                    onOpenSite(site.id);
+                  }}
+                >
+                  <SiteIcon id={site.icon} />
+                </button>
+              ))}
+            </div>
           </>
         ) : (
           <div className="panel">
@@ -167,6 +195,7 @@ export function MainMenuScreen({
             {panel === 'charms' && <CharmsPanel state={state} />}
             {panel === 'collection' && <CollectionPanel state={state} />}
             {panel === 'achievements' && <AchievementsPanel state={state} />}
+            {panel === 'account' && <AccountPanel />}
             {panel === 'backup' && <BackupPanel buildSave={buildSave} onRestore={onRestore} />}
             {panel === 'settings' && (
               <SettingsPanel settings={settings} onChange={onChangeSettings} />

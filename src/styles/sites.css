@@ -1,0 +1,95 @@
+/* ---- ホームページ（ゲームの外） ---- */
+
+/*
+ * ここにあるのは、どのサイトにも共通する外側だけ。
+ * 中身の見た目は site-*.css にそれぞれ分けてある。
+ */
+
+/* メインメニューの下に並ぶアイコン */
+.trunk__sites {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 4px;
+  margin-top: auto;
+}
+
+.siteicon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  color: rgba(246, 236, 212, 0.72);
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(246, 236, 212, 0.28);
+  border-radius: 8px;
+  transition: transform 0.12s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.siteicon:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.siteicon:active {
+  transform: translateY(0);
+}
+
+.siteicon__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* サイトを載せる枠 */
+.siteview {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  background: #fbfaf8;
+}
+
+.siteview__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  color: var(--cream);
+  background: #2b2318;
+  border-bottom: 1px solid #4a3f2e;
+}
+
+.siteview__back {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--cream);
+  background: rgba(246, 236, 212, 0.12);
+  border: 1px solid rgba(246, 236, 212, 0.3);
+  border-radius: 7px;
+}
+
+.siteview__back:hover {
+  background: rgba(246, 236, 212, 0.22);
+}
+
+.siteview__name {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: #b9ab90;
+}
+
+/* サイトの中身。外側ではなく、ここが縦に流れる。 */
+.siteview__page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

@@ -201,15 +201,6 @@
   }
 }
 
-.scenario__sub {
-  margin: 8px 0 0;
-  padding-top: 7px;
-  font-size: 0.66rem;
-  line-height: 1.4;
-  color: #d6c6a6;
-  border-top: 1px solid rgba(246, 236, 212, 0.22);
-}
-
 .scenario__next {
   position: absolute;
   right: 12px;

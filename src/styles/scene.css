@@ -200,40 +200,6 @@
   box-shadow: none;
 }
 
-.scene__talk {
-  flex: 1;
-  padding: 11px 12px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: #fff;
-  background: var(--orange);
-  border: 2px solid var(--orange-deep);
-  border-radius: 11px;
-  box-shadow: var(--shadow-soft);
-  animation: talk-pulse 1.6s ease-in-out infinite;
-}
-
-.scene__talk:active {
-  transform: translateY(2px);
-  box-shadow: none;
-}
-
-@keyframes talk-pulse {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.14);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scene__talk {
-    animation: none;
-  }
-}
-
 .scene__tip {
   flex: 1;
   margin: 0;

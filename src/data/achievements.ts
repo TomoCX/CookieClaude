@@ -170,7 +170,3 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
-/** id から実績を引く */
-export function getAchievement(id: string): Achievement | undefined {
-  return ACHIEVEMENTS.find((a) => a.id === id);
-}

@@ -8,6 +8,11 @@
 @import './settings.css';
 @import './collection.css';
 @import './achievements.css';
+@import './account.css';
+@import './sites.css';
+@import './site-circle.css';
+@import './site-bounce.css';
+@import './site-records.css';
 @import './overlay.css';
 @import './fx.css';
 @import './dev.css';

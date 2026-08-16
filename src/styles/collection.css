@@ -69,41 +69,6 @@
   color: var(--ink-soft);
 }
 
-.collection__detail {
-  padding: 8px 11px 10px;
-  border-top: 1.5px dotted var(--line);
-}
-
-.collection__flavor {
-  margin: 0 0 8px;
-  font-size: 0.68rem;
-  line-height: 1.65;
-  color: var(--ink);
-}
-
-.collection__meta {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-}
-
-.collection__meta > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.64rem;
-}
-
-.collection__meta dt {
-  color: var(--ink-soft);
-}
-
-.collection__meta dd {
-  margin: 0;
-  font-weight: 800;
-  color: var(--orange-deep);
-}
-
 /* 拾った直後の知らせ */
 .pickup {
   position: absolute;

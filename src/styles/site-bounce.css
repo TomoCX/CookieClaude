@@ -1,0 +1,367 @@
+/* ---- ホームページ：BOUNCE（一枚ものの商品ページ） ---- */
+
+/*
+ * 色は三つの変数だけで回している（--bnc-ink / --bnc-base / --bnc-deep）。
+ * 配色を選ぶボタンは、この三つを差しかえるだけ。
+ */
+.bounce {
+  --bnc-ink: #141414;
+  --bnc-base: #d8f24a;
+  --bnc-deep: #233a05;
+
+  min-height: 100%;
+  font-family: 'Arial Black', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  color: var(--bnc-base);
+  background: var(--bnc-ink);
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+.bounce section {
+  padding: 44px 20px;
+}
+
+/* 幕開け */
+.bnc-hero {
+  display: grid;
+  justify-items: center;
+  min-height: 82%;
+  padding-top: 24px !important;
+  text-align: center;
+}
+
+.bnc-hero__mark {
+  width: min(46%, 190px);
+}
+
+.bnc-hero__title {
+  display: flex;
+  gap: 0.02em;
+  margin: 6px 0 0;
+  font-size: clamp(2.6rem, 13vw, 5.4rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+}
+
+/* 一字ずつ、間を置いて落としてくる */
+.bnc-hero__title span {
+  display: inline-block;
+  animation: bnc-drop 0.62s cubic-bezier(0.2, 1.5, 0.4, 1) backwards;
+}
+
+.bnc-hero__title span:nth-child(1) { animation-delay: 0.02s; }
+.bnc-hero__title span:nth-child(2) { animation-delay: 0.08s; }
+.bnc-hero__title span:nth-child(3) { animation-delay: 0.14s; }
+.bnc-hero__title span:nth-child(4) { animation-delay: 0.2s; }
+.bnc-hero__title span:nth-child(5) { animation-delay: 0.26s; }
+.bnc-hero__title span:nth-child(6) { animation-delay: 0.32s; }
+
+@keyframes bnc-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-46px);
+  }
+}
+
+.bnc-hero__lead {
+  margin: 12px 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+.bnc-hero__scroll {
+  margin: 26px 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.4em;
+  opacity: 0.72;
+  animation: bnc-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes bnc-nudge {
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+/* 言いたいこと */
+.bnc-claims {
+  display: grid;
+  gap: 26px;
+  background: var(--bnc-base);
+  color: var(--bnc-ink);
+}
+
+.bnc-claim__value {
+  margin: 0;
+  font-size: clamp(3rem, 17vw, 6rem);
+  font-weight: 900;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+}
+
+.bnc-claim__value em {
+  font-size: 0.42em;
+  font-style: normal;
+  vertical-align: super;
+}
+
+.bnc-claim__head {
+  margin: 8px 0 4px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.bnc-claim__body {
+  margin: 0;
+  max-width: 30rem;
+  font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.8;
+}
+
+/* 見出し */
+.bnc-section__head {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 8vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.bnc-section__lead {
+  margin: 0 0 20px;
+  font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* 色を選ぶ */
+.bnc-color__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bnc-chip {
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  border: 3px solid;
+  border-radius: 999px;
+  transition: transform 0.14s ease;
+}
+
+.bnc-chip:hover {
+  transform: translateY(-2px);
+}
+
+.bnc-chip--on {
+  box-shadow: 0 0 0 3px var(--bnc-base);
+}
+
+.bnc-color__stage {
+  display: grid;
+  justify-items: center;
+  margin-top: 22px;
+  padding: 22px 0;
+  background: var(--bnc-deep);
+  border-radius: 18px;
+}
+
+.bnc-color__name {
+  margin: 4px 0 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: var(--bnc-base);
+}
+
+/* 品ぞろえ */
+.bnc-shoes {
+  background: var(--bnc-base);
+  color: var(--bnc-ink);
+}
+
+.bnc-shoes__grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.bnc-shoe {
+  padding: 14px;
+  background: var(--bnc-ink);
+  color: var(--bnc-base);
+  border-radius: 14px;
+}
+
+.bnc-shoe__art {
+  padding: 6px 0 10px;
+}
+
+.bnc-shoe__name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.bnc-shoe__use,
+.bnc-shoe__price {
+  margin: 3px 0 0;
+  font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.bnc-shoe__price {
+  font-weight: 800;
+  opacity: 1;
+}
+
+/* 締め */
+.bnc-end {
+  text-align: center;
+}
+
+.bnc-end__big {
+  margin: 0;
+  font-size: clamp(2.4rem, 15vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.bnc-end__note {
+  margin: 18px auto 0;
+  max-width: 30rem;
+  font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1.7;
+  opacity: 0.6;
+}
+
+/* 弾む球 */
+.bnc-blob {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bnc-blob--big {
+  width: min(40%, 150px);
+}
+
+.bnc-blob__shadow {
+  fill: currentColor;
+  opacity: 0.22;
+  animation: bnc-shadow 1.15s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.bnc-blob__body {
+  fill: var(--bnc-base);
+  transform-origin: 100px 152px;
+  animation: bnc-hop 1.15s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.bnc-blob__gloss {
+  fill: #fff;
+  opacity: 0.34;
+}
+
+.bnc-color__stage .bnc-blob__shadow {
+  color: var(--bnc-base);
+}
+
+@keyframes bnc-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.06, 0.9);
+  }
+
+  18% {
+    transform: translateY(-14%) scale(0.96, 1.06);
+  }
+
+  50% {
+    transform: translateY(-32%) scale(1, 1);
+  }
+
+  82% {
+    transform: translateY(-14%) scale(0.98, 1.04);
+  }
+}
+
+@keyframes bnc-shadow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.26;
+  }
+
+  50% {
+    transform: scale(0.72);
+    opacity: 0.12;
+  }
+}
+
+/* 靴 */
+.bnc-shoeart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bnc-shoeart__sole {
+  fill: currentColor;
+  opacity: 0.16;
+}
+
+.bnc-shoeart__upper {
+  fill: currentColor;
+  opacity: 0.9;
+}
+
+.bnc-shoeart__swash {
+  fill: var(--bnc-ink);
+  opacity: 0.75;
+}
+
+.bnc-shoeart__foam {
+  fill: currentColor;
+  opacity: 0.45;
+}
+
+/* 見えたら浮かびあがる */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.reveal--on {
+  opacity: 1;
+  transform: none;
+}
+
+/* 動きを減らす設定のときは、跳ねさせず、そのまま出す */
+@media (prefers-reduced-motion: reduce) {
+  .bnc-blob__body,
+  .bnc-blob__shadow,
+  .bnc-hero__scroll,
+  .bnc-hero__title span {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

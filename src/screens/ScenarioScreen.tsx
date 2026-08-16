@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DialogueChoice, Reward, Scenario } from '../types';
+import type { DialogueChoice, Scenario } from '../types';
 import { getCharacter } from '../data/characters';
 import { Background } from '../components/Background';
 import { CharacterSprite } from '../components/CharacterSprite';
@@ -237,17 +237,3 @@ export function ScenarioScreen({ scenario, onFinish, onQuit }: Props) {
   );
 }
 
-/** 選んだ分かれ道でもらえるものを、ひとまとめにする */
-export function mergeRewards(picked: DialogueChoice[]): Reward {
-  const merged: Reward = { coin: 0, unlocks: [], items: [] };
-  for (const c of picked) {
-    const g = c.gives;
-    if (!g) continue;
-    merged.coin = (merged.coin ?? 0) + (g.coin ?? 0);
-    if (g.note) merged.note = g.note;
-    if (g.charm) merged.charm = g.charm;
-    merged.unlocks = [...(merged.unlocks ?? []), ...(g.unlocks ?? [])];
-    merged.items = [...(merged.items ?? []), ...(g.items ?? [])];
-  }
-  return merged;
-}

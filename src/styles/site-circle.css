@@ -1,0 +1,314 @@
+/* ---- ホームページ：楓花幻燈団（古風な個人サイト） ---- */
+
+/*
+ * 2000 年代の個人サイトの型をなぞる。
+ * 横幅は決め打ち、余白は狭め、角は丸めない。文字は小さく、行間もつめる。
+ */
+.circle {
+  min-height: 100%;
+  padding: 14px 10px 24px;
+  font-family: 'MS PGothic', 'Hiragino Kaku Gothic ProN', meiryo, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #202020;
+  background-color: #e8e6dc;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.018) 0 6px,
+      transparent 6px 12px
+    );
+}
+
+.circle__frame {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fffef8;
+  border: 1px solid #8a8878;
+}
+
+/* 看板 */
+.circle__banner {
+  padding: 18px 16px 14px;
+  text-align: center;
+  color: #f4efe2;
+  background: linear-gradient(#4a3f63, #2f2740);
+  border-bottom: 3px double #8a8878;
+}
+
+.circle__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+}
+
+.circle__sub {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #c9c0dd;
+}
+
+/* 2 段組 */
+.circle__body {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+}
+
+.circle__menu {
+  padding: 12px 10px;
+  background: #f2efe4;
+  border-right: 1px solid #c8c4b4;
+}
+
+.circle__menu-head {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a3f63;
+}
+
+.circle__menu ul {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.circle__menu li {
+  border-bottom: 1px dotted #b9b4a2;
+}
+
+/* 昔のサイトらしく、青い下線つきのリンクに見せる */
+.circle__link {
+  display: block;
+  width: 100%;
+  padding: 5px 2px;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  text-decoration: underline;
+  color: #1a3fa0;
+  background: none;
+  border: 0;
+}
+
+.circle__link:hover {
+  color: #b3543f;
+  background: #fffbe8;
+}
+
+.circle__link--on {
+  font-weight: 700;
+  color: #202020;
+  text-decoration: none;
+}
+
+.circle__link--on::before {
+  content: '▶ ';
+  color: #4a3f63;
+}
+
+.circle__menu-note {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #6a6656;
+}
+
+.circle__main {
+  padding: 14px 16px 20px;
+}
+
+.circle__h2 {
+  margin: 0 0 8px;
+  padding: 3px 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f2740;
+  background: #ece8f2;
+  border-left: 5px solid #4a3f63;
+}
+
+.circle__h2:not(:first-child) {
+  margin-top: 20px;
+}
+
+.circle__p {
+  margin: 0 0 10px;
+}
+
+.circle__mail {
+  margin: 0;
+  font-size: 12px;
+  color: #6a6656;
+}
+
+/* 更新履歴 */
+.circle__history {
+  margin: 0;
+}
+
+.circle__history > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px dotted #c8c4b4;
+}
+
+.circle__history dt {
+  font-size: 12px;
+  color: #6a6656;
+}
+
+.circle__history dd {
+  margin: 0;
+}
+
+/* 表 */
+.circle__table {
+  width: 100%;
+  margin-bottom: 10px;
+  font-size: 12px;
+  border-collapse: collapse;
+}
+
+.circle__table th,
+.circle__table td {
+  padding: 4px 7px;
+  text-align: left;
+  border: 1px solid #b9b4a2;
+}
+
+.circle__table th {
+  color: #2f2740;
+  background: #ece8f2;
+}
+
+.circle__table tr:nth-child(even) td {
+  background: #f7f5ec;
+}
+
+/* 音楽 */
+.circle__tracks,
+.circle__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.circle__tracks li,
+.circle__links li {
+  display: grid;
+  gap: 2px 8px;
+  padding: 5px 0;
+  border-bottom: 1px dotted #c8c4b4;
+}
+
+.circle__tracks li {
+  grid-template-columns: 28px 1fr;
+}
+
+.circle__trackno {
+  font-size: 12px;
+  color: #6a6656;
+}
+
+.circle__trackname {
+  font-weight: 700;
+}
+
+.circle__tracknote,
+.circle__linknote {
+  grid-column: 2;
+  font-size: 12px;
+  color: #6a6656;
+}
+
+.circle__linkname {
+  font-weight: 700;
+  text-decoration: underline;
+  color: #1a3fa0;
+}
+
+/* 日記・掲示板 */
+.circle__entry,
+.circle__post {
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #c8c4b4;
+}
+
+.circle__entry-head,
+.circle__post-head {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a3f63;
+}
+
+.circle__post-head {
+  font-weight: 400;
+  color: #6a6656;
+}
+
+/* 下の帯 */
+.circle__footer {
+  padding: 12px 14px 14px;
+  text-align: center;
+  background: #f2efe4;
+  border-top: 3px double #8a8878;
+}
+
+.circle__counter {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+
+/* カウンタの数字だけ、機械の書体で */
+.circle__digits {
+  padding: 2px 6px;
+  font-family: ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
+  letter-spacing: 0.22em;
+  color: #d8e6a0;
+  background: #23201c;
+  border: 1px solid #8a8878;
+}
+
+.circle__copy {
+  margin: 0;
+  font-size: 11px;
+  color: #6a6656;
+}
+
+.circle__note {
+  margin: 8px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #8a8678;
+}
+
+/* 狭い画面では 1 段に落とす */
+@media (max-width: 560px) {
+  .circle__body {
+    grid-template-columns: 1fr;
+  }
+
+  .circle__menu {
+    border-right: 0;
+    border-bottom: 1px solid #c8c4b4;
+  }
+
+  .circle__menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10px;
+    margin-bottom: 8px;
+  }
+
+  .circle__menu li {
+    border-bottom: 0;
+  }
+}

@@ -296,10 +296,63 @@ export const UI = {
     'For those still locked, the dots show what is still missing — nothing more.',
   ),
 
+  /* ---- アカウント登録（雛形） ---- */
+  toolAccount: s('アカウント', 'Account'),
+  account: s('アカウント登録', 'Create an account'),
+  accountLead: s(
+    '冒険の記録を、いつか別の端末からも読めるようにするための登録欄。',
+    'Sign up so your progress can travel with you one day.',
+  ),
+  accountStub: s(
+    '※ これは画面だけの雛形。送信先はまだ無く、入力した内容はどこにも保存されない。',
+    '* A front-end mock-up. Nothing is sent anywhere, and nothing is stored.',
+  ),
+  accName: s('利用者名', 'Username'),
+  accNameHint: s('半角英数字と _ で 3〜16 文字', '3–16 characters: letters, digits, _'),
+  accMail: s('メールアドレス', 'Email address'),
+  accPass: s('パスワード', 'Password'),
+  accPassHint: s('8 文字以上', 'At least 8 characters'),
+  accConfirm: s('パスワード（確認）', 'Password (again)'),
+  accShow: s('入力した文字を見せる', 'Show what I typed'),
+  accStrength: s('強さ', 'Strength'),
+  accStrength0: s('短い', 'Too short'),
+  accStrength1: s('ふつう', 'Fair'),
+  accStrength2: s('よい', 'Good'),
+  accStrength3: s('強い', 'Strong'),
+  accStrength4: s('とても強い', 'Very strong'),
+  accSubmit: s('この内容で登録する', 'Create account'),
+  accReset: s('入力を消す', 'Clear'),
+  accBack: s('入力に戻る', 'Back to the form'),
+  accDone: s('登録の内容がそろった', 'The form is complete'),
+  accDoneLead: s(
+    '本物の登録はまだ行われていない。つなぎ先ができたら、この内容がそのまま送られる。',
+    'No account was actually created. When a server exists, this is what would be sent.',
+  ),
+  accSent: s('送るはずだった内容', 'What would have been sent'),
+  accHidden: s('（パスワードは控えない）', '(the password is never kept)'),
+  accNameEmpty: s('利用者名を入力する。', 'Please enter a username.'),
+  accNameLength: s('利用者名は 3〜16 文字にする。', 'Use between 3 and 16 characters.'),
+  accNameChars: s(
+    '利用者名に使えるのは半角英数字と _ だけ。',
+    'Only letters, digits and underscores are allowed.',
+  ),
+  accMailEmpty: s('メールアドレスを入力する。', 'Please enter an email address.'),
+  accMailShape: s('メールアドレスの形になっていない。', 'That does not look like an email address.'),
+  accPassEmpty: s('パスワードを入力する。', 'Please enter a password.'),
+  accPassShort: s('パスワードは 8 文字以上にする。', 'Use at least 8 characters.'),
+  accPassSpace: s(
+    'パスワードの前後に空白を入れない。',
+    'Remove the spaces at the start or end.',
+  ),
+  accConfirmEmpty: s('確認のためもう一度入力する。', 'Please type the password again.'),
+  accConfirmDiffer: s('パスワードが一致しない。', 'The two passwords do not match.'),
+
+  /* ---- ホームページ ---- */
+  siteBack: s('ゲームに戻る', 'Back to the game'),
+
   /* ---- 調べどころ ---- */
   examine: s('調べる', 'Examine'),
   examineClose: s('見るのをやめる', 'Stop looking'),
   gotItem: s('手に入れた', 'Obtained'),
 } as const;
 
-export type UiKey = keyof typeof UI;

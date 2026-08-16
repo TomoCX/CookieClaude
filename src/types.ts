@@ -1,5 +1,7 @@
 /** アプリ全体で使う型定義 */
 
+import type { ComponentType } from 'react';
+
 /** 画面の種類 */
 export type ScreenId =
   | 'scene' // シーン画面。遊びの土台になる画面
@@ -589,6 +591,52 @@ export interface Settings {
   /** エフェクトの強さ（0〜100） */
   effectStrength: number;
 }
+
+/* ---- アカウント登録（雛形・フロントのみ） ---- */
+
+/**
+ * アカウント登録フォームの入力。
+ *
+ * **サーバーは無い。** 送信先も、保存する場所も用意していない雛形なので、
+ * ここに入った値は画面を閉じれば消える（とくにパスワードはどこにも残さない）。
+ */
+export interface AccountForm {
+  username: string;
+  email: string;
+  password: string;
+  /** 確認用。password と一致するかだけを見る。 */
+  passwordConfirm: string;
+}
+
+/** 入力の項目名。検査の結果を項目ごとに持つときの鍵にする。 */
+export type AccountField = keyof AccountForm;
+
+/** 項目ごとの言い分。空なら通っている。 */
+export type AccountErrors = Partial<Record<AccountField, LocalizedText>>;
+
+/* ---- ホームページ（ゲームの外） ---- */
+
+/**
+ * メインメニューの下に並ぶ、ゲームとは別のホームページ。
+ *
+ * 遊びの側とはつながっていない「おまけ」で、それぞれ作りも挙動も違う
+ * （静かな個人サイト、動く商品ページ、頁を持つポータル）。
+ * 一覧は `src/sites/registry.ts`。
+ */
+export interface SiteDef {
+  id: string;
+  /** アイコンに添える名前（吹き出しに出る） */
+  name: LocalizedText;
+  /** どんなサイトか。開発者と、アイコンの吹き出しの両方で使う。 */
+  note: LocalizedText;
+  /** アイコンの絵 */
+  icon: SiteIconId;
+  /** 画面いっぱいに出す中身。枠（SiteOverlay）がそのまま描く。 */
+  page: ComponentType;
+}
+
+/** ホームページのアイコンの絵 */
+export type SiteIconId = 'lantern' | 'bounce' | 'disc';
 
 /* ---- 開発者モード ---- */
 

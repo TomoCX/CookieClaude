@@ -23,6 +23,8 @@ import { ResultOverlay, type Result } from './screens/ResultOverlay';
 import { PickupToast } from './screens/panels/CollectionPanel';
 import { Hud } from './components/Hud';
 import { DevTools } from './dev/DevTools';
+import { SiteOverlay } from './sites/SiteOverlay';
+import { getSite } from './sites/registry';
 import { toggleDevMode, useDevFlags } from './dev/devFlags';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setBgmTrack, setSe, unlock } from './audio/audio';
@@ -77,9 +79,12 @@ export function App() {
   const [pickup, setPickup] = useState<{ itemId: string; areaId: string } | null>(null);
   /** 解放した実績の順番待ち。先頭の一枚だけを画面の上に出す。 */
   const [awards, setAwards] = useState<Achievement[]>([]);
+  /** 開いているホームページ（ゲームの外のおまけ）。閉じているときは null。 */
+  const [siteId, setSiteId] = useState<string | null>(null);
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const devFlags = useDevFlags();
+  const site = getSite(siteId);
 
   // 設定を覚えておき、音とエフェクトにもすぐ反映する
   useEffect(() => {
@@ -333,6 +338,7 @@ export function App() {
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
             devOn={devFlags.on}
             onToggleDev={toggleDevMode}
+            onOpenSite={setSiteId}
             onClose={closeMainMenu}
           />
         )}
@@ -379,6 +385,9 @@ export function App() {
             openPuzzle,
           }}
         />
+
+        {/* ゲームの外のホームページ。開いているあいだは、これだけが見えている。 */}
+        {site && <SiteOverlay site={site} onClose={() => setSiteId(null)} />}
 
         {result && <ResultOverlay result={result} onClose={() => setResult(null)} />}
 

@@ -1,0 +1,186 @@
+/* ---- アカウント登録（雛形・フロントのみ） ---- */
+
+.acc {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.acc__field {
+  display: grid;
+  gap: 4px;
+}
+
+.acc__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.acc__hint {
+  font-size: 0.56rem;
+  font-weight: 600;
+  font-style: normal;
+  color: var(--ink-soft);
+}
+
+.acc__input {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.acc__input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.acc__field--bad .acc__input {
+  border-color: #b3543f;
+  background: #fff3ec;
+}
+
+.acc__error {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #a2452f;
+}
+
+/* パスワードの強さ */
+.acc__meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.56rem;
+  color: var(--ink-soft);
+}
+
+.acc__meter em {
+  font-style: normal;
+}
+
+.acc__meter-bar {
+  position: relative;
+  flex: 1;
+  height: 5px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.09);
+  border-radius: 999px;
+}
+
+.acc__meter-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  transition: width 0.18s ease, background 0.18s ease;
+}
+
+.acc__meter-bar--0::after {
+  width: 8%;
+  background: #b3543f;
+}
+
+.acc__meter-bar--1::after {
+  width: 32%;
+  background: #c47a34;
+}
+
+.acc__meter-bar--2::after {
+  width: 58%;
+  background: #c9a04a;
+}
+
+.acc__meter-bar--3::after {
+  width: 80%;
+  background: #7f9a5f;
+}
+
+.acc__meter-bar--4::after {
+  width: 100%;
+  background: #5f8a4a;
+}
+
+.acc__reveal {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+
+.acc__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.acc__submit {
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--cream);
+  background: var(--orange);
+  border: 2px solid #8f4525;
+  border-radius: 9px;
+  box-shadow: var(--shadow-soft);
+}
+
+.acc__submit:hover {
+  filter: brightness(1.06);
+}
+
+.acc__submit:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.acc__submit--ghost {
+  color: var(--ink);
+  background: #fffaf0;
+  border-color: var(--line);
+}
+
+/* 送るはずだった内容 */
+.acc__recap {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.acc__recap > div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 8px;
+  padding: 7px 10px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+}
+
+.acc__recap dt {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.acc__recap dd {
+  margin: 0;
+  font-size: 0.68rem;
+  word-break: break-all;
+  color: var(--ink);
+}
+
+.acc__masked {
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}

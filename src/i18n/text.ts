@@ -20,10 +20,6 @@ export function setLanguage(next: Language): void {
   for (const f of listeners) f();
 }
 
-export function currentLanguage(): Language {
-  return current;
-}
-
 /**
  * LocalizedText を、いまの言語の文字にする。
  * ただの文字列（未訳）は、そのまま返す。

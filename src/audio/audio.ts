@@ -208,11 +208,6 @@ export function setBgmTrack(blob: Blob | null): void {
   });
 }
 
-/** 曲のファイルを鳴らしているか */
-export function hasBgmTrack(): boolean {
-  return track !== null;
-}
-
 /** 効果音の設定を変える */
 export function setSe(on: boolean, volume: number): void {
   seOn = on;
