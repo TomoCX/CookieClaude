@@ -219,6 +219,7 @@ export const SCENES: Scene[] = [
     exits: [
       { id: 'ex_tower_plaza', to: 'scn_plaza_fountain', dir: 'near', x: 0.06, y: 0.83 },
       { id: 'ex_tower_alley', to: 'scn_alley_back', dir: 'right', x: 0.9, y: 0.6 },
+      { id: 'ex_tower_mill', to: 'scn_mill_yard', dir: 'far', x: 0.62, y: 0.46 },
       // 壁の掲示板に寄る。closeup は view をさらに拡大した図。
       { id: 'ex_tower_board', to: 'scn_tower_board', dir: 'into', x: 0.38, y: 0.4 },
     ],
@@ -233,6 +234,85 @@ export const SCENES: Scene[] = [
     puzzles: [],
     sparkles: [{ id: 'skl_board_1', itemId: 'it_pin', x: 0.74, y: 0.31 }],
     exits: [{ id: 'ex_board_tower', to: 'scn_tower_foot', dir: 'back', x: 0.5, y: 0.88 }],
+  },
+
+  /* ---- 水車小屋（2 シーン） ---- */
+  {
+    id: 'scn_mill_yard',
+    name: '水車小屋の前',
+    areaId: 'mill',
+    kind: 'street',
+    bg: 'river',
+    startX: 0.06,
+    npcs: [
+      { id: 'npc_nell', characterId: 'nell', x: 0.28, scenarioId: 'sc_mill' },
+      {
+        id: 'npc_toby_mill',
+        characterId: 'toby',
+        x: 0.82,
+        scenarioId: 'sc_mill_toby',
+        requiresScenario: 'sc_mill',
+      },
+    ],
+    puzzles: [{ id: 'pzs_mill_1', puzzleId: 'pz_wheel', x: 0.56, look: 'sundial' }],
+    sparkles: [{ id: 'skl_mill_1', itemId: 'it_grain', x: 0.17, y: 0.72 }],
+    exits: [
+      { id: 'ex_mill_tower', to: 'scn_tower_foot', dir: 'near', x: 0.06, y: 0.83 },
+      // 小屋の中へ。同じエリアの中でシーンが重なる。
+      { id: 'ex_mill_inside', to: 'scn_mill_inside', dir: 'far', x: 0.42, y: 0.46 },
+    ],
+  },
+  {
+    id: 'scn_mill_inside',
+    name: '水車小屋の中',
+    areaId: 'mill',
+    kind: 'view',
+    backdrop: 'mill',
+    // 背景を登録した画像に差しかえている例。読めなければ backdrop の絵に戻る。
+    image: 'img_mill_inside',
+    npcs: [],
+    puzzles: [{ id: 'pzs_mill_2', puzzleId: 'pz_sacks', x: 0.44, y: 0.62, look: 'pocketwatch' }],
+    sparkles: [],
+    props: [
+      {
+        id: 'prp_mill_wheel',
+        name: { ja: '大きな歯車', en: 'The Great Gear' },
+        text: {
+          ja: '水車の軸につながる歯車。歯のひとつだけが、まわりより明るい色をしている。近ごろ取りかえたものらしい。',
+          en: 'The gear on the mill shaft. One tooth is paler than the rest — replaced not long ago.',
+        },
+        x: 0.74,
+        y: 0.5,
+        w: 0.3,
+        h: 0.44,
+      },
+      {
+        id: 'prp_mill_sacks',
+        name: { ja: '積んだ麦袋', en: 'The Stacked Sacks' },
+        text: {
+          ja: '口を縛った袋が四つ。奥の壁ぎわに、歯車の山も見える。いちばん下の段だけ、ひとつぶんの隙間があいている。',
+          en: 'Four sacks, tied at the mouth. Behind them, a heap of gears — with one gap in the bottom row.',
+        },
+        x: 0.16,
+        y: 0.76,
+        w: 0.24,
+        h: 0.22,
+      },
+      {
+        id: 'prp_mill_coat',
+        name: { ja: '掛け釘の上着', en: 'The Coat on the Peg' },
+        text: {
+          ja: '子ども用の上着が、乾ききらないまま掛かっている。裾に川の泥。袖口に、緑の髪ひもが引っかかっていた。',
+          en: 'A child’s coat, still damp on its peg. River mud on the hem — and a green hair ribbon caught in the cuff.',
+        },
+        x: 0.47,
+        y: 0.32,
+        w: 0.16,
+        h: 0.3,
+        gives: 'it_ribbon',
+      },
+    ],
+    exits: [{ id: 'ex_inside_mill', to: 'scn_mill_yard', dir: 'near', x: 0.5, y: 0.9 }],
   },
 
   /* ---- 裏路地 ---- */

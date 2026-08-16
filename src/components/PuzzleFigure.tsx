@@ -340,6 +340,96 @@ export function PuzzleFigure({ id }: Props) {
             </text>
           </g>
         )}
+        {id === 'water' && (
+          <g>
+            {/* 水を受けて回る水輪。腕（スポーク）と歯が見えるように描く。 */}
+            <g transform="translate(112 62)">
+              <circle r="48" fill="none" stroke="#8a6f45" strokeWidth="6" />
+              <circle r="9" fill="#8a6f45" />
+              {[0, 45, 90, 135].map((a) => (
+                <rect
+                  key={a}
+                  x="-50"
+                  y="-3"
+                  width="100"
+                  height="6"
+                  rx="3"
+                  fill="#a3854f"
+                  transform={`rotate(${a})`}
+                />
+              ))}
+              {Array.from({ length: 12 }, (_, i) => (
+                <rect
+                  key={`p-${i}`}
+                  x="-5"
+                  y="-58"
+                  width="10"
+                  height="14"
+                  rx="2"
+                  fill="#c9a04a"
+                  transform={`rotate(${i * 30})`}
+                />
+              ))}
+            </g>
+            <path
+              d="M186 46 Q214 44 240 52 Q266 60 296 56"
+              stroke="#7fa8b4"
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d="M176 118 Q220 108 268 118 Q292 122 312 116"
+              stroke="#7fa8b4"
+              strokeWidth="10"
+              fill="none"
+              strokeLinecap="round"
+              opacity="0.7"
+            />
+            <text x="244" y="92" textAnchor="middle" fontSize="12" fontWeight="700" fill="#8a6f45">
+              歯と、腕と、水
+            </text>
+          </g>
+        )}
+        {id === 'sacks' && (
+          <g>
+            {/* 口を縛った袋を四つ。中身は伏せてある。 */}
+            {[
+              [56, 1.0],
+              [122, 0.86],
+              [188, 0.72],
+              [254, 0.6],
+            ].map(([x, k]) => {
+              const w = 44 * (k as number);
+              const h = 68 * (k as number);
+              return (
+                <g key={x as number} transform={`translate(${x} ${112 - h})`}>
+                  <path
+                    d={`M${-w / 2} ${h} Q${-w / 2 - 4} 12 0 6 Q${w / 2 + 4} 12 ${w / 2} ${h} Z`}
+                    fill="#cbb68d"
+                  />
+                  <ellipse cx="0" cy="8" rx={w * 0.3} ry="5" fill="#a8906a" />
+                  <path
+                    d={`M${-w / 2 + 6} ${h * 0.42} Q0 ${h * 0.34} ${w / 2 - 6} ${h * 0.42}`}
+                    stroke="#a8906a"
+                    strokeWidth="2.5"
+                    fill="none"
+                  />
+                  <text
+                    x="0"
+                    y={h + 14}
+                    textAnchor="middle"
+                    fontSize="12"
+                    fontWeight="800"
+                    fill="#8a6f45"
+                  >
+                    ？
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        )}
       </svg>
     </div>
   );

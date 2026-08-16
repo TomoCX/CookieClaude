@@ -9,6 +9,7 @@ const KINDS = [
   { id: 'npc', label: '立っている人', field: 'npcs' },
   { id: 'puzzle', label: 'ナゾ', field: 'puzzles' },
   { id: 'sparkle', label: 'キラキラ', field: 'sparkles' },
+  { id: 'prop', label: '調べどころ', field: 'props' },
   { id: 'exit', label: '出口', field: 'exits' },
 ] as const;
 
@@ -22,6 +23,7 @@ function nextIndex(sceneId: string, kind: Kind): number {
     npc: scene.npcs,
     puzzle: scene.puzzles,
     sparkle: scene.sparkles,
+    prop: scene.props ?? [],
     exit: scene.exits,
   };
   return lists[kind].length + 1;
@@ -43,6 +45,11 @@ function snippet(kind: Kind, sceneId: string, x: number, y: number): string {
       return `{ id: 'pzs_${short}_${n}', puzzleId: '???', x: ${fx}${yPart}, look: 'clock' },`;
     case 'sparkle':
       return `{ id: 'skl_${short}_${n}', itemId: '???', x: ${fx}, y: ${fy} },`;
+    case 'prop':
+      return (
+        `{ id: 'prp_${short}_${n}', name: '???', text: '???',\n` +
+        `  x: ${fx}, y: ${fy}, w: 0.16, h: 0.2 },`
+      );
     case 'exit':
       return `{ id: 'ex_${short}_${n}', to: '???', dir: 'far', x: ${fx}, y: ${fy} },`;
   }
@@ -134,6 +141,8 @@ export function PlaceTab({ api }: { api: DevApi }) {
             <code>src/data/scenes.ts</code> の <code>{api.sceneId}</code> の{' '}
             <code>{field}</code> に貼り、<code>???</code> を埋める。
             {kind === 'puzzle' && ' look は clock / sundial / pocketwatch。'}
+            {kind === 'prop' &&
+              ' w と h は押せる範囲の広さ。品を置くなら gives にアイテムの id。'}
             {kind === 'exit' &&
               ' 出口は行き帰りの両方を書くこと。dir は far / near / left / right / into / back。'}
           </p>

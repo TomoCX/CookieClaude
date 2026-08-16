@@ -3,6 +3,7 @@ import type { GameState, Settings } from '../types';
 import { SettingsPanel } from './panels/SettingsPanel';
 import { ProgressPanel } from './panels/ProgressPanel';
 import { CollectionPanel } from './panels/CollectionPanel';
+import { AchievementsPanel } from './panels/AchievementsPanel';
 import { BackupPanel } from './panels/BackupPanel';
 import { NotesPanel } from './panels/NotesPanel';
 import { StoryPanel } from './panels/StoryPanel';
@@ -13,6 +14,7 @@ import { SavePanel } from './panels/SavePanel';
 import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
 import { saveGame, solvedCount } from '../state/gameState';
+import { earnedAchievements } from '../state/achievements';
 import { useText } from '../i18n/text';
 import { UI } from '../i18n/ui';
 
@@ -27,6 +29,7 @@ type Panel =
   | 'charms'
   | 'settings'
   | 'collection'
+  | 'achievements'
   | 'backup'
   | null;
 
@@ -67,6 +70,8 @@ export function MainMenuScreen({
   const t = useText();
   const [panel, setPanel] = useState<Panel>(null);
   const [saveMsg, setSaveMsg] = useState('');
+  /** 解放ずみの実績の数。トランクの右肩に出す。 */
+  const earnedCount = earnedAchievements(state).length;
 
   const handleSave = () => {
     playSe('click');
@@ -120,16 +125,25 @@ export function MainMenuScreen({
                 badge={solvedCount(state)}
                 onClick={() => setPanel('index')}
               />
-              <TrunkItem icon="🖋" label={t(UI.toolSave)} onClick={handleSave} />
             </div>
 
             <div className="trunk__row">
+              <TrunkItem
+                icon="🏅"
+                label={t(UI.toolAchievements)}
+                badge={earnedCount}
+                onClick={() => setPanel('achievements')}
+              />
               <TrunkItem
                 icon="🧺"
                 label={t(UI.toolCollection)}
                 badge={state.collected.length}
                 onClick={() => setPanel('collection')}
               />
+              <TrunkItem icon="🖋" label={t(UI.toolSave)} onClick={handleSave} />
+            </div>
+
+            <div className="trunk__row">
               <TrunkItem icon="💾" label={t(UI.toolBackup)} onClick={() => setPanel('backup')} />
               <TrunkItem icon="⚙" label={t(UI.toolSettings)} onClick={() => setPanel('settings')} />
               {/* 中身を足すための道具箱。Ctrl + Shift + D でも出入りできる。 */}
@@ -152,6 +166,7 @@ export function MainMenuScreen({
             {panel === 'index' && <PuzzleIndexPanel state={state} />}
             {panel === 'charms' && <CharmsPanel state={state} />}
             {panel === 'collection' && <CollectionPanel state={state} />}
+            {panel === 'achievements' && <AchievementsPanel state={state} />}
             {panel === 'backup' && <BackupPanel buildSave={buildSave} onRestore={onRestore} />}
             {panel === 'settings' && (
               <SettingsPanel settings={settings} onChange={onChangeSettings} />

@@ -106,6 +106,7 @@ export type BackgroundId =
   | 'clocktower'
   | 'inn'
   | 'alley'
+  | 'river'
   | 'night';
 
 /** 調査メモ 1 件 */
@@ -158,7 +159,9 @@ export type ItemIcon =
   | 'glove'
   | 'letter'
   | 'chain'
-  | 'pin';
+  | 'pin'
+  | 'grain'
+  | 'ribbon';
 
 /** シーンに散らばっている収集アイテム */
 export interface Item {
@@ -190,7 +193,28 @@ export interface CollectedItem {
 export type SceneKind = 'street' | 'view' | 'closeup';
 
 /** view・closeup で使う一枚絵の種類 */
-export type BackdropId = 'manhole' | 'noticeboard' | 'room';
+export type BackdropId = 'manhole' | 'noticeboard' | 'room' | 'mill';
+
+/**
+ * シーンの背景に使う画像。
+ *
+ * 絵は基本すべてインライン SVG で描くが、シーンの背景だけは
+ * **開発者がプログラムを書きかえて**任意の画像に差しかえられる。
+ * 遊ぶ人が選ぶものではない（設定にも出ない）。
+ *
+ * 素材そのものはリポジトリに置かない（BGM と同じ扱い）。
+ * `src` には、自分で用意した画像への URL か、import した中身を書く。
+ * 登録簿は `src/data/images.ts`、使いかたは docs/DEVELOPMENT.md。
+ */
+export interface SceneImage {
+  id: string;
+  /** 画像の在りか（URL・data URI・import したもの） */
+  src: string;
+  /** 枠への収めかた。既定は cover（はみ出しても埋める） */
+  fit?: 'cover' | 'contain';
+  /** 出どころや権利の覚え書き。画面には出ない。 */
+  credit?: string;
+}
 
 /** シーンに立っている人 */
 export interface Npc {
@@ -296,6 +320,12 @@ interface SceneBase {
   props?: SceneProp[];
   /** 隣のシーンへの出口 */
   exits: SceneExit[];
+  /**
+   * 背景を任意の画像に差しかえる（`SceneImage.id`）。
+   * 書かなければ、これまでどおり SVG で描いた背景を使う。
+   * 画像が読めなかったときも、描いた背景に戻る。
+   */
+  image?: string;
 }
 
 /**
@@ -353,7 +383,9 @@ export type FigureId =
   | 'riddle'
   | 'flower'
   | 'lamps'
-  | 'timeline';
+  | 'timeline'
+  | 'water'
+  | 'sacks';
 
 /** ウミガメのスープ用。ひとつずつ開いていく「はい／いいえ」の手がかり。 */
 export interface Clue {
@@ -394,6 +426,78 @@ export interface Puzzle {
   clues?: Clue[];
   /** 正解したあとに読める解説 */
   explanation: LocalizedText;
+}
+
+/* ---- フラグと実績 ---- */
+
+/** フラグの仲間わけ。開発者ツールで並べるときに使う。 */
+export type FlagGroup = '本筋' | '探索' | '収集' | 'やりこみ';
+
+/**
+ * フラグが立つ条件。
+ *
+ * **条件は関数ではなく、データとして書く。** 判定は `flags.ts` の
+ * `testFlag()` 一か所だけが行う。こうしておくと、
+ *
+ * - `registry.ts` が「実在しない id を見ている条件」を起動時に見つけられる
+ * - 開発者ツールが「どの条件がまだ満たされていないか」を並べられる
+ * - 条件のたてかたが増えても、判定の書き場所は一か所のまま
+ *
+ * 書いた項目は **すべて** 満たされたときに、そのフラグが立つ（AND）。
+ * 「どれか一つ」で立てたいときは、フラグを分けて実績側で組み合わせる。
+ */
+export interface FlagNeeds {
+  /** すべて読み終えた会話（Scenario.id） */
+  scenarios?: string[];
+  /** すべて正解したナゾ（Puzzle.id） */
+  puzzles?: string[];
+  /** すべて手に入れたアイテム（Item.id） */
+  items?: string[];
+  /** すべて調べ終えた調べどころ（SceneProp.id） */
+  props?: string[];
+  /** すべて行けるようになったエリア（Area.id） */
+  areas?: string[];
+  /** これ以上のひらめき指数（ピカラット） */
+  picarat?: number;
+  /** ナゾをすべて解いたか */
+  allPuzzles?: boolean;
+  /** アイテムをすべて集めたか */
+  allItems?: boolean;
+  /** 会話をすべて読んだか */
+  allScenarios?: boolean;
+}
+
+/**
+ * フラグ 1 本。
+ *
+ * **フラグの値は保存しない。** いつでも進行状況（`GameState`）から引き直す。
+ * 二重に持たないので、片方だけ書きかわって食いちがう、という壊れかたをしない。
+ */
+export interface FlagDef {
+  id: string;
+  group: FlagGroup;
+  /** 開発者ツールに出す名前 */
+  name: LocalizedText;
+  /** 何を表すフラグか（開発者向けの覚え書き） */
+  note: string;
+  needs: FlagNeeds;
+}
+
+/**
+ * 実績 1 件。
+ * `flags` に挙げたフラグが **すべて** 立った瞬間に解放され、
+ * 画面の中央上部にしばらく知らせが出る。
+ */
+export interface Achievement {
+  id: string;
+  name: LocalizedText;
+  desc: LocalizedText;
+  /** 一覧と知らせに出す絵文字 */
+  icon: string;
+  /** 解放の条件になるフラグ（FlagDef.id）。すべて立つと解放。 */
+  flags: string[];
+  /** 解放するまで名前と説明を伏せる */
+  secret?: boolean;
 }
 
 /* ---- エフェクト ---- */
@@ -544,6 +648,12 @@ export interface GameState {
   picks: Record<string, string>;
   /** 調べた「調べどころ」（SceneProp.id） */
   examined: string[];
+  /**
+   * 解放した実績（Achievement.id）。
+   * 条件そのものはフラグから引き直すので、ここに残すのは
+   * 「もう知らせを出した」という覚えだけ。
+   */
+  achievements: string[];
   /** 自由記入メモ */
   memo: string;
 }

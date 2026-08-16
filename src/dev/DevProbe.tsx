@@ -52,6 +52,13 @@ export function DevProbe({ scene, center, view }: Props) {
           y: s.y,
           label: getItem(s.itemId)?.name ?? s.itemId,
         })),
+        ...(scene.props ?? []).map((p) => ({
+          key: p.id,
+          kind: '調べどころ',
+          x: p.x,
+          y: p.y,
+          label: p.name,
+        })),
         ...scene.exits.map((e) => ({
           key: e.id,
           kind: '出口',

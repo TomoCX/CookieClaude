@@ -32,6 +32,7 @@ export function createInitialState(): GameState {
     collected: [],
     picks: {},
     examined: [],
+    achievements: [],
     memo: '',
   };
 }
@@ -217,6 +218,7 @@ export function healSave(state: GameState): GameState {
   // 配列であるべき項目が壊れていたら空にしておく
   const lists = [
     'examined',
+    'achievements',
     'openAreas',
     'clearedScenarios',
     'foundPuzzles',

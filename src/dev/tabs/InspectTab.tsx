@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
+import { ACHIEVEMENTS } from '../../data/achievements';
 import { CHARACTERS } from '../../data/characters';
+import { FLAGS } from '../../data/flags';
+import { SCENE_IMAGES } from '../../data/images';
 import { ITEMS } from '../../data/items';
 import { AREAS } from '../../data/areas';
 import { PUZZLES } from '../../data/puzzles';
@@ -30,6 +33,14 @@ export function InspectTab() {
     { label: 'ナゾ', n: PUZZLES.length, note: `${TOTAL_PICARAT} ピカラット` },
     { label: 'アイテム', n: ITEMS.length },
     { label: '立っている人', n: SCENES.reduce((n, s) => n + s.npcs.length, 0) },
+    { label: '調べどころ', n: SCENES.reduce((n, s) => n + (s.props?.length ?? 0), 0) },
+    { label: 'フラグ', n: FLAGS.length },
+    { label: '実績', n: ACHIEVEMENTS.length },
+    {
+      label: '背景画像',
+      n: SCENE_IMAGES.length,
+      note: `使用 ${SCENES.filter((s) => s.image).length}`,
+    },
   ];
 
   return (

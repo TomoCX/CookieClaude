@@ -53,6 +53,21 @@
   width: 300%;
 }
 
+/*
+ * 背景を画像に差しかえたとき、3 層のかわりに敷く一枚。
+ * 手前の層と同じ幅・同じ速さで動かすので、立ち位置の座標はそのまま通じる。
+ */
+.street__layer--photo {
+  width: 300%;
+}
+
+.street__photo,
+.viewscene__art--photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .street__road {
   position: absolute;
   inset: 0;

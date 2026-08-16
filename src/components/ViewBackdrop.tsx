@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
-import type { BackdropId, SceneKind } from '../types';
+import { useState, type ReactNode } from 'react';
+import type { BackdropId, SceneImage, SceneKind } from '../types';
+import { SceneImageArt } from './SceneImageArt';
 
 /**
  * view・closeup シーンの背景。
@@ -12,23 +13,38 @@ import type { BackdropId, SceneKind } from '../types';
 interface Props {
   backdrop: BackdropId;
   kind: SceneKind;
+  /** 背景に敷く画像。書かなければ SVG で描いた絵を使う。 */
+  image?: SceneImage;
   /** 絵の上に置くもの（人・ナゾ・キラキラ・出口） */
   children: ReactNode;
 }
 
-export function ViewBackdrop({ backdrop, kind, children }: Props) {
+export function ViewBackdrop({ backdrop, kind, image, children }: Props) {
+  /** 画像を読めなかったか。読めなければ描いた絵に戻す。 */
+  const [imageFailed, setImageFailed] = useState(false);
+  const usingImage = image != null && !imageFailed;
+
   return (
     <div className={`viewscene viewscene--${backdrop}`}>
-      <svg
-        className="viewscene__art"
-        viewBox="0 0 400 300"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
-      >
-        {backdrop === 'manhole' && <Manhole />}
-        {backdrop === 'noticeboard' && <Noticeboard />}
-        {backdrop === 'room' && <Room />}
-      </svg>
+      {usingImage ? (
+        <SceneImageArt
+          image={image}
+          className="viewscene__art viewscene__art--photo"
+          onFail={() => setImageFailed(true)}
+        />
+      ) : (
+        <svg
+          className="viewscene__art"
+          viewBox="0 0 400 300"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
+          {backdrop === 'manhole' && <Manhole />}
+          {backdrop === 'noticeboard' && <Noticeboard />}
+          {backdrop === 'room' && <Room />}
+          {backdrop === 'mill' && <Mill />}
+        </svg>
+      )}
 
       {/* closeup は、まわりを落として真ん中に目を寄せる */}
       {kind === 'closeup' && <div className="viewscene__vignette" aria-hidden="true" />}
@@ -136,6 +152,79 @@ function Room() {
       <circle cx="200" cy="18" r="26" fill="#f0c86a" opacity="0.24" />
       <rect x="196" y="0" width="8" height="14" fill="#4e3a26" />
       <path d="M182 14 L218 14 L212 30 L188 30 Z" fill="#e8c98a" />
+    </g>
+  );
+}
+
+/**
+ * 水車小屋の中。右手に大きな歯車、左手に麦袋、奥の壁に掛け釘。
+ *
+ * このシーンは `src/data/images.ts` の画像に差しかえてあるので、
+ * ふだんはこの絵は出ない。画像を読めなかったときにここへ戻る。
+ */
+function Mill() {
+  return (
+    <g>
+      {/* 板張りの壁と床 */}
+      <rect x="0" y="0" width="400" height="300" fill="#4b3f2e" />
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} x="0" y={i * 34} width="400" height="30" fill={i % 2 ? '#54472f' : '#4b3f2e'} />
+      ))}
+      <rect x="0" y="252" width="400" height="48" fill="#3a3021" />
+
+      {/* 高窓から差す光 */}
+      <rect x="24" y="26" width="58" height="46" rx="4" fill="#cddbe0" opacity="0.85" />
+      <path d="M24 72 L82 72 L150 300 L36 300 Z" fill="#f2e3b4" opacity="0.1" />
+
+      {/* 右手の大きな歯車 */}
+      <g transform="translate(292 150)">
+        <circle r="86" fill="none" stroke="#6b5942" strokeWidth="13" />
+        <circle r="16" fill="#6b5942" />
+        {[0, 45, 90, 135].map((a) => (
+          <rect
+            key={a}
+            x="-92"
+            y="-5"
+            width="184"
+            height="10"
+            rx="4"
+            fill="#6b5942"
+            transform={`rotate(${a})`}
+          />
+        ))}
+        {Array.from({ length: 16 }, (_, i) => (
+          <rect
+            key={`t-${i}`}
+            x="-6"
+            y="-100"
+            width="12"
+            height="16"
+            rx="2"
+            fill="#7d694e"
+            transform={`rotate(${i * 22.5})`}
+          />
+        ))}
+      </g>
+
+      {/* 左手の麦袋 */}
+      <g>
+        <path d="M22 268 Q16 200 46 194 Q78 200 72 268 Z" fill="#cbb68d" />
+        <path d="M28 210 Q46 202 66 210" stroke="#a8906a" strokeWidth="3" fill="none" />
+        <path d="M78 268 Q74 216 98 212 Q124 216 120 268 Z" fill="#bda87f" />
+        <ellipse cx="99" cy="214" rx="14" ry="5" fill="#a8906a" />
+      </g>
+
+      {/* 奥の壁の掛け釘 */}
+      <g transform="translate(168 74)">
+        <rect x="-4" y="0" width="52" height="6" rx="3" fill="#33291c" />
+        <circle cx="6" cy="10" r="4" fill="#6b5942" />
+        <circle cx="40" cy="10" r="4" fill="#6b5942" />
+        <path d="M2 12 Q-8 60 8 96 L38 96 Q52 58 44 12 Z" fill="#5e7f74" />
+        <path d="M18 12 L18 96" stroke="#4c6b61" strokeWidth="3" />
+      </g>
+
+      {/* 床に散った粉 */}
+      <ellipse cx="196" cy="276" rx="86" ry="14" fill="#d8c9a6" opacity="0.28" />
     </g>
   );
 }

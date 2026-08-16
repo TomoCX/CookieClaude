@@ -5,6 +5,7 @@ import { getArea } from '../data/areas';
 import { getPuzzle } from '../data/puzzles';
 import { getScene } from '../data/scenes';
 import { getScenario } from '../data/scenarios';
+import { getSceneImage } from '../data/images';
 import { StreetBackdrop } from '../components/StreetBackdrop';
 import { ViewBackdrop } from '../components/ViewBackdrop';
 import { EffectLayer } from '../components/EffectLayer';
@@ -353,12 +354,17 @@ export function SceneScreen({
           bg={scene.bg}
           cameraT={cam.cameraT}
           surface={cam.surface}
+          image={getSceneImage(scene.image)}
           back={<EffectLayer slot="scene.back" cameraT={cam.cameraT} sceneKind={scene.kind} />}
         >
           {actors}
         </StreetBackdrop>
       ) : (
-        <ViewBackdrop backdrop={scene.backdrop} kind={scene.kind}>
+        <ViewBackdrop
+          backdrop={scene.backdrop}
+          kind={scene.kind}
+          image={getSceneImage(scene.image)}
+        >
           {actors}
         </ViewBackdrop>
       )}

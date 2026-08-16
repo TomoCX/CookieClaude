@@ -1,0 +1,139 @@
+/* ---- 実績（知らせと一覧） ---- */
+
+/*
+ * 解放したときの知らせ。画面の中央上部に数秒だけ出る。
+ * 地図やメニューのアイコンより手前に出したいので、z-index は HUD より上。
+ */
+.achvtoast {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  z-index: 40;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  max-width: 78%;
+  padding: 9px 16px 9px 12px;
+  text-align: left;
+  background: rgba(38, 25, 14, 0.94);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  animation: achvtoast-in 0.28s ease;
+}
+
+@keyframes achvtoast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achvtoast {
+    animation: none;
+  }
+}
+
+.achvtoast__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.achvtoast__body {
+  display: grid;
+  gap: 2px;
+}
+
+.achvtoast__head {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.achvtoast__name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+/* 一覧 */
+
+.achvlist {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.achvitem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 11px;
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 8px;
+}
+
+.achvitem--on {
+  border-left-color: var(--gold);
+  background: #fff6e0;
+}
+
+.achvitem__icon {
+  font-size: 1.3rem;
+  line-height: 1.2;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.achvitem--on .achvitem__icon {
+  filter: none;
+  opacity: 1;
+}
+
+.achvitem__body {
+  display: grid;
+  gap: 3px;
+}
+
+.achvitem__name {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.achvitem__desc {
+  font-size: 0.62rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* 解放の条件になっているフラグ */
+.achvitem__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.achvflag {
+  padding: 1px 7px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.achvflag--on {
+  color: #3f5f36;
+  background: #e6f0dc;
+  border-color: #9dba8c;
+}

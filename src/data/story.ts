@@ -54,6 +54,14 @@ export const STORY_BEATS: StoryBeat[] = [
       '鍵の入った上着は食堂の掛けに残されたままだった。鍵を「持つ人」と「使える人」は別だ。',
   },
   {
+    id: 'beat_mill',
+    afterScenario: 'sc_mill',
+    heading: '歯車は水車小屋から持ち出された',
+    body:
+      '塔の予備の歯車は、川ぞいの水車小屋に寝かせてある。三日前の夕方、山はひとつぶん低くなった。' +
+      '減ったのはいちばん下の段だけ。背の高い者なら、わざわざ下から取らない。',
+  },
+  {
     id: 'beat_gear',
     afterScenario: 'sc_clocktower',
     heading: '鐘は故障ではなく、細工されている',
@@ -78,6 +86,7 @@ export const CAST: { id: string; name: string; role: string; from: string }[] = 
   { id: 'martha', name: 'マーサ', role: 'まんげつ亭の女将', from: 'sc_plaza' },
   { id: 'lily', name: 'リリー', role: '広場の花売り', from: 'sc_plaza_lily' },
   { id: 'gear', name: 'ギアじいさん', role: '時計塔の管理人', from: 'sc_inn' },
+  { id: 'nell', name: 'ネル', role: '川ぞいの粉屋', from: 'sc_mill' },
   { id: 'hans', name: 'ハンス', role: '塔の見物人', from: 'sc_tower_hans' },
   { id: 'pete', name: 'ピート', role: '路地の少年', from: 'sc_alley_pete' },
   { id: 'mint', name: 'ミント', role: '手紙の差出人', from: 'sc_alley' },

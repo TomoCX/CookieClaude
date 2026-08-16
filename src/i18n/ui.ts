@@ -277,6 +277,25 @@ export const UI = {
   bgmTooBig: s('ファイルが大きすぎる。', 'That file is too large.'),
   bgmBadFile: s('この形式は鳴らせなかった。', 'That format could not be played.'),
 
+  /* ---- 実績 ---- */
+  achievements: s('実績', 'Achievements'),
+  toolAchievements: s('実績', 'Awards'),
+  achievementGained: s('実績を解放', 'ACHIEVEMENT'),
+  achievementsLead: s(
+    '一定の手がかりがそろうと解放される記録。解放すると画面の上に知らせが出る。',
+    'Records that unlock as the pieces come together. A notice appears at the top of the screen.',
+  ),
+  achievementsUnlocked: s('解放した実績', 'Unlocked'),
+  achievementSecret: s('？？？？？', '?????'),
+  achievementSecretLead: s(
+    'この実績は、解放するまで伏せてある。',
+    'This one stays hidden until you earn it.',
+  ),
+  achievementsNote: s(
+    '未解放のものには、あと何が必要かだけを丸印で示してある。',
+    'For those still locked, the dots show what is still missing — nothing more.',
+  ),
+
   /* ---- 調べどころ ---- */
   examine: s('調べる', 'Examine'),
   examineClose: s('見るのをやめる', 'Stop looking'),

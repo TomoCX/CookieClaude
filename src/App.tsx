@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Area, DialogueChoice, GameState, SceneProp, ScreenId, Settings } from './types';
+import type {
+  Achievement,
+  Area,
+  DialogueChoice,
+  GameState,
+  SceneProp,
+  ScreenId,
+  Settings,
+} from './types';
 import { getScenario } from './data/scenarios';
 import { getScene, sceneStartX } from './data/scenes';
 import { getArea } from './data/areas';
@@ -10,6 +18,7 @@ import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
 import { BootOverlay } from './screens/BootOverlay';
+import { AchievementToast } from './screens/AchievementToast';
 import { ResultOverlay, type Result } from './screens/ResultOverlay';
 import { PickupToast } from './screens/panels/CollectionPanel';
 import { Hud } from './components/Hud';
@@ -20,6 +29,7 @@ import { playSe, setBgm, setBgmTrack, setSe, unlock } from './audio/audio';
 import { getTrack } from './audio/bgmFile';
 import { setEffectSettings } from './effects/runtime';
 import { setLanguage } from './i18n/text';
+import { applyAchievements, pendingAchievements, seedAchievements } from './state/achievements';
 import {
   applyChoices,
   applyExamine,
@@ -65,6 +75,8 @@ export function App() {
   const [result, setResult] = useState<Result | null>(null);
   /** アイテムを拾った直後に出す知らせ */
   const [pickup, setPickup] = useState<{ itemId: string; areaId: string } | null>(null);
+  /** 解放した実績の順番待ち。先頭の一枚だけを画面の上に出す。 */
+  const [awards, setAwards] = useState<Achievement[]>([]);
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const devFlags = useDevFlags();
@@ -93,6 +105,21 @@ export function App() {
   }, [pickup]);
 
   /**
+   * 実績の解放。
+   *
+   * 条件はフラグから引き直すので、どこで進行が変わってもここ一か所で拾える
+   * （会話・ナゾ・拾いもの・調べもの、どれも同じ道を通る）。
+   * 解放したことだけを進行状況に書きとめ、知らせは順番待ちに積む。
+   */
+  useEffect(() => {
+    if (booting) return;
+    const gained = pendingAchievements(state);
+    if (gained.length === 0) return;
+    setState((s) => applyAchievements(s, pendingAchievements(s)));
+    setAwards((queue) => [...queue, ...gained]);
+  }, [booting, state]);
+
+  /**
    * 自動保存。
    *
    * 進行が変わったら少し待って書く。手で「セーブ」を押さなくても、
@@ -108,6 +135,7 @@ export function App() {
     state.foundPuzzles.length,
     state.collected.length,
     state.examined.length,
+    state.achievements.length,
     state.notes.length,
     state.charms.length,
     state.coin,
@@ -219,7 +247,8 @@ export function App() {
 
   /** その進行状況で遊びはじめる。「最初から」「続きから」「復元」で共通。 */
   const startWith = useCallback((next: GameState) => {
-    setState(next);
+    // 始めた時点で条件を満たしている実績は、知らせを出さずに記録だけしておく
+    setState(seedAchievements(next));
     setSceneId(next.sceneId);
     scenePos.current = { [next.sceneId]: next.sceneX };
     setScenarioId(null);
@@ -329,6 +358,15 @@ export function App() {
         )}
 
         {pickup && <PickupToast itemId={pickup.itemId} areaId={pickup.areaId} />}
+
+        {/* 実績の知らせ。順番待ちの先頭を、画面の中央上部に数秒だけ出す。 */}
+        {awards[0] && (
+          <AchievementToast
+            key={awards[0].id}
+            achievement={awards[0]}
+            onDone={() => setAwards((queue) => queue.slice(1))}
+          />
+        )}
 
         {/* 中身を足すための道具箱。Ctrl + Shift + D で出入りする。 */}
         <DevTools

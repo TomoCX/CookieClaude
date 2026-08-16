@@ -6,6 +6,7 @@ import { JumpTab } from './tabs/JumpTab';
 import { PlaceTab } from './tabs/PlaceTab';
 import { TemplateTab } from './tabs/TemplateTab';
 import { StateTab } from './tabs/StateTab';
+import { FlagTab } from './tabs/FlagTab';
 import { EffectsTab } from './tabs/EffectsTab';
 
 const TABS = [
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'place', label: '配置' },
   { id: 'template', label: 'ひな型' },
   { id: 'state', label: '状態' },
+  { id: 'flags', label: 'フラグ' },
   { id: 'effects', label: 'エフェクト' },
 ] as const;
 
@@ -89,6 +91,7 @@ export function DevTools({ api }: { api: DevApi }) {
           {tab === 'place' && <PlaceTab api={api} />}
           {tab === 'template' && <TemplateTab />}
           {tab === 'state' && <StateTab api={api} />}
+          {tab === 'flags' && <FlagTab api={api} />}
           {tab === 'effects' && <EffectsTab />}
         </div>
       )}

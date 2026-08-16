@@ -19,11 +19,11 @@ const TEMPLATES: Template[] = [
   {
     id: 'scenario',
     label: '会話',
-    where: "src/data/scenarios.ts の SCENARIOS",
+    where: 'src/data/scenarios/<エリア>.ts',
     body: `{
   id: 'sc_???',
   title: '???',
-  bg: 'plaza',            // highway / gate / plaza / clocktower / inn / alley / night
+  bg: 'plaza',            // highway / gate / plaza / clocktower / inn / river / alley / night
   kind: 'flavor',         // 本筋なら 'main'
   coin: 2,
   lines: [
@@ -43,7 +43,7 @@ const TEMPLATES: Template[] = [
     where: 'src/data/puzzles.ts の PUZZLES',
     body: `{
   id: 'pz_???',
-  no: 11,                 // ナゾ事典に並ぶ番号。重複させない
+  no: 13,                 // ナゾ事典に並ぶ番号。重複させない
   title: '???',
   picarat: [30, 25, 20],  // 一発正解 / 一度まちがえた / それ以降
   figure: 'riddle',       // src/components/PuzzleFigure.tsx にある図
@@ -97,11 +97,13 @@ const TEMPLATES: Template[] = [
   name: '???',            // そのエリアの中で重ならない固有名。現在地に出る
   areaId: '???',
   kind: 'street',
-  bg: 'plaza',            // highway / gate / plaza / clocktower / inn / alley / night
+  bg: 'plaza',            // highway / gate / plaza / clocktower / inn / river / alley / night
   startX: 0.06,           // 入ってきたときのカメラ位置
   npcs: [],               // 道の上に立つので x のみ
   puzzles: [],
   sparkles: [],
+  // 背景を画像に差しかえるとき（src/data/images.ts に登録した id）
+  // image: 'img_???',
   exits: [
     // 行きと帰りの両方を書く。つなぎ元のシーンにも出口を足すこと。
     { id: 'ex_???_???', to: 'scn_???', dir: 'far', x: 0.5, y: 0.5 },
@@ -114,10 +116,15 @@ const TEMPLATES: Template[] = [
   name: '???',
   areaId: '???',
   kind: 'view',           // 拡大図なら 'closeup'（人は置かない）
-  backdrop: 'manhole',    // manhole / noticeboard
+  backdrop: 'manhole',    // manhole / noticeboard / room / mill
   npcs: [],               // 見わたさないので x と y の両方が要る
   puzzles: [],
   sparkles: [{ id: 'skl_???_1', itemId: '???', x: 0.5, y: 0.6 }],
+  // 押すと文が出るところ（棚・飾りなど）
+  props: [
+    { id: 'prp_???_???', name: '???', text: '???', x: 0.5, y: 0.5,
+      w: 0.16, h: 0.2, gives: 'it_???' },
+  ],
   exits: [
     // 覗きこんだ先からは、必ず同じエリアへ戻れるようにする
     { id: 'ex_???_???', to: 'scn_???', dir: 'back', x: 0.5, y: 0.12 },
@@ -147,6 +154,62 @@ const TEMPLATES: Template[] = [
 
 // 3) 隣のエリアのシーンと出口でつなぐ。行き先が別エリアなら、
 //    それだけでエリアをまたいだことになる。`,
+  },
+  {
+    id: 'flag',
+    label: 'フラグ',
+    where: 'src/data/flags.ts の FLAGS',
+    body: `{
+  id: 'fl_???',
+  group: '探索',           // 本筋 / 探索 / 収集 / やりこみ
+  name: '???',            // 開発者ツールに出る名前
+  note: '???',            // 何を表すフラグか（開発者向けの覚え書き）
+  // 条件は関数ではなくデータで書く。書いたものが「すべて」満たされると立つ。
+  // 実在しない id は起動時の検査ではじかれる。
+  needs: {
+    scenarios: ['sc_???'],  // すべて読了
+    // puzzles: ['pz_???'],  // すべて正解
+    // items: ['it_???'],    // すべて所持
+    // props: ['prp_???'],   // すべて調査
+    // areas: ['???'],       // すべて開放
+    // picarat: 300,         // これ以上
+    // allPuzzles: true, allItems: true, allScenarios: true,
+  },
+},`,
+  },
+  {
+    id: 'achievement',
+    label: '実績',
+    where: 'src/data/achievements.ts の ACHIEVEMENTS',
+    body: `{
+  id: 'ac_???',
+  name: { ja: '???', en: '???' },
+  desc: { ja: '???', en: '???' },
+  icon: '🏅',
+  // ここに挙げたフラグが「すべて」立った瞬間に解放され、
+  // 画面の中央上部に数秒だけ知らせが出る。
+  flags: ['fl_???'],
+  // secret: true,        // 解放するまで名前も説明も伏せる
+},`,
+  },
+  {
+    id: 'image',
+    label: '背景画像',
+    where: 'src/data/images.ts の SCENE_IMAGES',
+    body: `// 1) src/data/images.ts の SCENE_IMAGES へ
+{
+  id: 'img_???',
+  src: '???',             // URL、または import した画像
+  // fit: 'cover',        // contain にすると全体を収める
+  credit: '???',          // 出どころ・権利の覚え書き（画面には出ない）
+},
+
+// 2) src/data/scenes.ts の、そのシーンに一行
+//    image: 'img_???',
+//
+//    street は横長の一枚（画面 3 枚分の幅）、view / closeup は画面と同じ比率。
+//    読めなかったときは、これまでどおり描いた背景に戻る。
+//    素材そのものはリポジトリに置かない。`,
   },
   {
     id: 'effect',

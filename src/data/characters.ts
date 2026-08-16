@@ -106,6 +106,16 @@ export const CHARACTERS: Record<string, Character> = {
     skin: '#efcaa4',
     hair: '#2f2a22',
   },
+  nell: {
+    id: 'nell',
+    name: 'ネル',
+    side: 'left',
+    hat: 'bonnet',
+    coat: '#8a9a6d',
+    accent: '#5c6b45',
+    skin: '#f2d3b0',
+    hair: '#a8763f',
+  },
   pete: {
     id: 'pete',
     name: 'ピート',

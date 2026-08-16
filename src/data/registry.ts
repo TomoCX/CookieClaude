@@ -1,4 +1,7 @@
+import { ACHIEVEMENTS } from './achievements';
 import { CHARACTERS } from './characters';
+import { FLAGS } from './flags';
+import { SCENE_IMAGES } from './images';
 import { ITEMS } from './items';
 import { AREAS } from './areas';
 import { PUZZLES } from './puzzles';
@@ -35,6 +38,10 @@ interface Known {
   scenarios: Set<string>;
   puzzles: Set<string>;
   items: Set<string>;
+  /** シーンに置かれた調べどころ。フラグの条件から引くので通しで集める。 */
+  props: Set<string>;
+  flags: Set<string>;
+  images: Set<string>;
 }
 
 type Check = (r: Report, known: Known) => void;
@@ -48,6 +55,10 @@ const checkIds: Check = ({ dup }) => {
   dup('ナゾ', PUZZLES.map((p) => p.id));
   dup('アイテム', ITEMS.map((i) => i.id));
   dup('ナゾ番号', PUZZLES.map((p) => String(p.no)));
+  dup('フラグ', FLAGS.map((f) => f.id));
+  dup('実績', ACHIEVEMENTS.map((a) => a.id));
+  dup('背景画像', SCENE_IMAGES.map((i) => i.id));
+  dup('調べどころ', SCENES.flatMap((s) => (s.props ?? []).map((p) => p.id)));
 };
 
 /* ---- エリアとシーンの対応 ---- */
@@ -98,6 +109,11 @@ function checkScenes(r: Report, known: Known): Used {
       (o) => o !== scene && o.areaId === scene.areaId && text(o.name) === text(scene.name),
     );
     if (twin) say(`シーン ${where}: 同じエリアの ${twin.id} と名前が同じ`);
+
+    // 背景を差しかえているなら、その画像が登録簿にあるか
+    if (scene.image && !known.images.has(scene.image)) {
+      say(`シーン ${where}: 背景画像 ${scene.image} が images.ts に無い`);
+    }
 
     if (scene.kind === 'street') {
       if (scene.startX < 0 || scene.startX > 1) say(`シーン ${where}: startX が 0〜1 の外`);
@@ -329,6 +345,60 @@ const checkPuzzles: Check = ({ say }) => {
   }
 };
 
+/* ---- フラグと実績 ---- */
+
+/**
+ * フラグの条件が、実在する中身を見ているか。
+ *
+ * 条件を関数ではなくデータ（`FlagNeeds`）で書いているのは、ここで
+ * 見に行けるようにするため。会話やナゾの id を打ちまちがえても、
+ * そのフラグが永久に立たないまま黙っている、ということにならない。
+ */
+const checkFlags: Check = ({ say }, known) => {
+  for (const flag of FLAGS) {
+    const where = `フラグ「${text(flag.name)}」`;
+    const n = flag.needs;
+    for (const id of n.scenarios ?? []) {
+      if (!known.scenarios.has(id)) say(`${where}: 会話 ${id} が無い`);
+    }
+    for (const id of n.puzzles ?? []) {
+      if (!known.puzzles.has(id)) say(`${where}: ナゾ ${id} が無い`);
+    }
+    for (const id of n.items ?? []) {
+      if (!known.items.has(id)) say(`${where}: アイテム ${id} が無い`);
+    }
+    for (const id of n.props ?? []) {
+      if (!known.props.has(id)) say(`${where}: 調べどころ ${id} が無い`);
+    }
+    for (const id of n.areas ?? []) {
+      if (!known.areas.has(id)) say(`${where}: エリア ${id} が無い`);
+    }
+    if (n.picarat != null && n.picarat <= 0) say(`${where}: ピカラットの条件が 0 以下`);
+    // 条件がひとつも無いと、始めた瞬間から立ちっぱなしになる
+    if (Object.keys(n).length === 0) say(`${where}: 条件が空`);
+    if (!flag.note) say(`${where}: 覚え書き（note）が空`);
+  }
+};
+
+/** 実績が実在するフラグを見ているか。使われていないフラグも拾う。 */
+const checkAchievements: Check = ({ say }, known) => {
+  const used = new Set<string>();
+  for (const a of ACHIEVEMENTS) {
+    const where = `実績「${text(a.name)}」`;
+    if (a.flags.length === 0) say(`${where}: 条件のフラグが無い`);
+    for (const id of a.flags) {
+      if (!known.flags.has(id)) say(`${where}: フラグ ${id} が無い`);
+      used.add(id);
+    }
+    if (!a.icon) say(`${where}: 絵文字が無い`);
+  }
+  for (const flag of FLAGS) {
+    if (!used.has(flag.id)) {
+      say(`フラグ「${text(flag.name)}」は、どの実績からも見られていない`);
+    }
+  }
+};
+
 /* ---- 物語まわり ---- */
 
 const checkStory: Check = ({ say }, known) => {
@@ -352,6 +422,8 @@ const CHECKS: Check[] = [
   checkUnlocks,
   checkScenarios,
   checkPuzzles,
+  checkFlags,
+  checkAchievements,
   checkStory,
 ];
 
@@ -375,6 +447,9 @@ export function checkContent(): string[] {
     scenarios: new Set(SCENARIOS.map((s) => s.id)),
     puzzles: new Set(PUZZLES.map((p) => p.id)),
     items: new Set(ITEMS.map((i) => i.id)),
+    props: new Set(SCENES.flatMap((s) => (s.props ?? []).map((p) => p.id))),
+    flags: new Set(FLAGS.map((f) => f.id)),
+    images: new Set(SCENE_IMAGES.map((i) => i.id)),
   };
 
   for (const check of CHECKS) check(report, known);

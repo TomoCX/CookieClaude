@@ -8,6 +8,8 @@ export const INN_SCENARIOS: Scenario[] = [
     bg: 'inn',
     kind: 'main',
     coin: 4,
+    // 川ぞいの水車小屋は、ここでギアじいさんに聞いて初めて行けるようになる
+    unlocks: ['mill'],
     charm: {
       id: 'charm_spoon',
       name: 'まんげつのスプーン',
@@ -59,6 +61,21 @@ export const INN_SCENARIOS: Scenario[] = [
         speaker: 'gear',
         pose: 'normal',
         text: { ja: '上着の内ポケットじゃ。……上着は、そこの掛けにかけてあったがな。', en: 'Inner pocket of my coat. ...The coat was hanging right over there, mind you.' },
+      },
+      {
+        speaker: 'claude',
+        pose: 'think',
+        text: { ja: 'もうひとつ。塔の歯車は、どこで手に入れておいでですか。', en: 'One more thing. Where do you come by the tower’s gears?' },
+      },
+      {
+        speaker: 'gear',
+        pose: 'normal',
+        text: { ja: '川ぞいの水車小屋じゃ。粉屋のネルが、古い歯車を山ほど寝かせておる。', en: 'The mill down by the river. Nell the miller keeps a heap of old gears lying about.' },
+      },
+      {
+        speaker: 'cookie',
+        pose: 'surprised',
+        text: { ja: '……歯車が手に入る場所が、町にもうひとつあったんですね。', en: '...So there is somewhere else in town to get a gear.' },
       },
       {
         speaker: 'claude',

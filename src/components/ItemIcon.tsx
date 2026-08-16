@@ -166,6 +166,50 @@ export function ItemArt({ icon, className }: Props) {
           <path d="M17 14 Q22 11 27 13" stroke="#d99b78" strokeWidth="1.8" fill="none" opacity="0.7" />
         </g>
       )}
+      {icon === 'grain' && (
+        <g>
+          {/* 殻をかぶったままの麦。穂を三本たばねてある。 */}
+          <path d="M24 42 L24 24" stroke="#a8905f" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M17 42 Q14 32 16 26" stroke="#a8905f" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M31 42 Q34 32 32 26" stroke="#a8905f" strokeWidth="2" fill="none" strokeLinecap="round" />
+          {[
+            [24, 8, 0],
+            [16, 12, -18],
+            [32, 12, 18],
+          ].map(([x, y, a]) => (
+            <g key={`${x}-${y}`} transform={`rotate(${a} ${x} ${(y as number) + 8})`}>
+              <ellipse cx={x} cy={(y as number) + 8} rx="4.6" ry="9" fill="#d9bd76" />
+              <path d={`M${x} ${y} L${x} ${(y as number) + 17}`} stroke="#b39553" strokeWidth="1.4" />
+              <path
+                d={`M${(x as number) - 4} ${(y as number) + 4} L${x} ${(y as number) + 8}`}
+                stroke="#b39553"
+                strokeWidth="1.2"
+              />
+            </g>
+          ))}
+        </g>
+      )}
+      {icon === 'ribbon' && (
+        <g>
+          {/* ほどけかけた髪ひも。片方の端がほつれている。 */}
+          <path
+            d="M24 20 Q10 10 8 20 Q6 30 24 24"
+            fill="#6fae9a"
+            stroke="#3f7f6b"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M24 20 Q38 10 40 20 Q42 30 24 24"
+            fill="#6fae9a"
+            stroke="#3f7f6b"
+            strokeWidth="1.4"
+          />
+          <circle cx="24" cy="22" r="4" fill="#4f9382" />
+          <path d="M22 26 Q18 34 15 41" stroke="#5da491" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M26 26 Q30 34 33 40" stroke="#5da491" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M31 38 L35 42 M33 40 L30 43" stroke="#8fc6b6" strokeWidth="1.4" strokeLinecap="round" />
+        </g>
+      )}
     </svg>
   );
 }

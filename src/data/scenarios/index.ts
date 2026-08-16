@@ -3,6 +3,7 @@ import { COACH_SCENARIOS } from './coach';
 import { GATE_SCENARIOS } from './gate';
 import { PLAZA_SCENARIOS } from './plaza';
 import { INN_SCENARIOS } from './inn';
+import { MILL_SCENARIOS } from './mill';
 import { CLOCKTOWER_SCENARIOS } from './clocktower';
 import { ALLEY_SCENARIOS } from './alley';
 
@@ -21,6 +22,7 @@ export const SCENARIOS: Scenario[] = [
   ...GATE_SCENARIOS,
   ...PLAZA_SCENARIOS,
   ...INN_SCENARIOS,
+  ...MILL_SCENARIOS,
   ...CLOCKTOWER_SCENARIOS,
   ...ALLEY_SCENARIOS,
 ];

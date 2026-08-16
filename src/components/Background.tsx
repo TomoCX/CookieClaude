@@ -9,6 +9,7 @@ const PALETTE: Record<BackgroundId, { sky: [string, string]; ground: string }> =
     clocktower: { sky: ['#9fbdd2', '#e3d6be'], ground: '#8f8069' },
     inn: { sky: ['#e8c9a0', '#f6dfba'], ground: '#8a6644' },
     alley: { sky: ['#8ca3bb', '#c9c2ae'], ground: '#6f6553' },
+    river: { sky: ['#b6d8e2', '#eae6cc'], ground: '#a8a37c' },
     night: { sky: ['#2c3d5e', '#5a5f7c'], ground: '#3a3648' },
   };
 
@@ -128,6 +129,36 @@ export function Background({ id }: Props) {
             <rect x="710" y="150" width="60" height="70" rx="4" />
           </g>
           <path d="M230 300 L230 40 L570 40 L570 300 Z" fill="#8b93a0" opacity="0.35" />
+        </g>
+      )}
+
+      {id === 'river' && (
+        <g>
+          <path d="M0 300 Q200 262 400 296 Q600 328 800 292 L800 300 Z" fill="#8fae74" />
+          <path d="M0 258 Q220 236 420 258 Q620 280 800 256 L800 300 L0 300 Z" fill="#7fa8b4" opacity="0.75" />
+          <g transform="translate(520 176)">
+            <rect x="-70" y="24" width="140" height="100" fill="#cdbf9c" />
+            <path d="M-82 26 L82 26 L0 -26 Z" fill="#7a6a4a" />
+            <rect x="-24" y="66" width="34" height="58" fill="#67583c" opacity="0.6" />
+            <circle cx="98" cy="88" r="42" fill="none" stroke="#6b5942" strokeWidth="7" />
+            {[0, 45, 90, 135].map((a) => (
+              <rect
+                key={a}
+                x="54"
+                y="85"
+                width="88"
+                height="6"
+                fill="#6b5942"
+                transform={`rotate(${a} 98 88)`}
+              />
+            ))}
+          </g>
+          {[110, 230].map((x, i) => (
+            <g key={x}>
+              <rect x={x - 5} y={236} width="10" height="64" fill="#7a5b3e" />
+              <ellipse cx={x} cy={222} rx={40} ry={48} fill={i % 2 ? '#7f9a68' : '#6e8a59'} />
+            </g>
+          ))}
         </g>
       )}
 
