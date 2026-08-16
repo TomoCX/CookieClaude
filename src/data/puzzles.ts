@@ -235,3 +235,8 @@ export function picaratFor(puzzle: Puzzle, misses: number): number {
   const i = Math.min(misses, puzzle.picarat.length - 1);
   return puzzle.picarat[i] ?? puzzle.picarat[puzzle.picarat.length - 1] ?? 0;
 }
+
+/** ナゾ番号の表記（001 のように三桁でそろえる） */
+export function puzzleNo(puzzle: Puzzle): string {
+  return String(puzzle.no).padStart(3, '0');
+}

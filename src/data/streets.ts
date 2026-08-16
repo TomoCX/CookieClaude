@@ -157,3 +157,14 @@ export const STREETS: Street[] = [
 export function getStreet(id: string): Street | undefined {
   return STREETS.find((s) => s.id === id);
 }
+
+/** 街並みが無いときに使う、道の入口あたりのカメラ位置 */
+const FALLBACK_START_X = 0.06;
+
+/**
+ * その街並みに入ってきたときのカメラ位置。
+ * 知らない id を渡されても落ちないよう、既定値でしのぐ。
+ */
+export function streetStartX(id: string): number {
+  return getStreet(id)?.startX ?? FALLBACK_START_X;
+}

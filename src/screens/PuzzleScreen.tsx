@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { GameState, Puzzle } from '../types';
-import { picaratFor } from '../data/puzzles';
+import { picaratFor, puzzleNo } from '../data/puzzles';
 import { PuzzleFigure } from '../components/PuzzleFigure';
 import { playSe } from '../audio/audio';
 
@@ -121,7 +121,7 @@ export function PuzzleScreen({
         <div className="clear">
           <p className="clear__head">正解</p>
           <h2 className="clear__title">
-            ナゾ {String(puzzle.no).padStart(3, '0')}・{puzzle.title}
+            ナゾ {puzzleNo(puzzle)}・{puzzle.title}
           </h2>
           {!wasSolved && (
             <p className="clear__picarat">
@@ -147,7 +147,7 @@ export function PuzzleScreen({
         <button type="button" className="iconbtn" onClick={onQuit} title="中断">
           ↰
         </button>
-        <span className="puzzle__no">ナゾ {String(puzzle.no).padStart(3, '0')}</span>
+        <span className="puzzle__no">ナゾ {puzzleNo(puzzle)}</span>
         <span className="puzzle__picarat">{reward} ピカラット</span>
       </div>
 

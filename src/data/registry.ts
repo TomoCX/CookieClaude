@@ -145,6 +145,27 @@ export function checkContent(): string[] {
     }
   }
 
+  /* ---- 場所の開きかた ---- */
+  // 会話で開く場所を最初から開けてしまうと、幕開けを飛ばして先へ行けてしまう。
+  // 逆に、どこからも開かれない場所は永久に行けない。
+  const unlockedBy = new Map<string, string[]>();
+  for (const sc of SCENARIOS) {
+    for (const id of sc.unlocks ?? []) {
+      unlockedBy.set(id, [...(unlockedBy.get(id) ?? []), sc.title]);
+    }
+  }
+  const fromStart = PLACES.filter((p) => p.openFromStart);
+  if (fromStart.length === 0) say('最初から行ける場所が一つも無い');
+  for (const place of PLACES) {
+    const by = unlockedBy.get(place.id);
+    if (place.openFromStart && by) {
+      say(`場所「${place.name}」: 最初から開いているのに、会話「${by[0]}」でも開かれる`);
+    }
+    if (!place.openFromStart && !by) {
+      say(`場所「${place.name}」: 最初から開いておらず、開放する会話も無い`);
+    }
+  }
+
   /* ---- 置き忘れ ---- */
   for (const p of PUZZLES) {
     if (!usedPuzzles.has(p.id)) say(`ナゾ「${p.title}」がどの街並みにも置かれていない`);

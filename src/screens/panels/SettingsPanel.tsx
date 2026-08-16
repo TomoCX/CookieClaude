@@ -1,5 +1,5 @@
-import type { Settings } from '../types';
-import { SCREEN_SIZES } from '../state/settings';
+import type { Settings } from '../../types';
+import { SCREEN_SIZES } from '../../state/settings';
 
 interface Props {
   settings: Settings;

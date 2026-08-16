@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { GameState } from '../types';
-import { ITEMS, getItem } from '../data/items';
-import { getPlace } from '../data/places';
-import { formatPlayTime } from '../state/gameState';
-import { ItemArt } from '../components/ItemIcon';
+import type { GameState } from '../../types';
+import { ITEMS, getItem } from '../../data/items';
+import { getPlace } from '../../data/places';
+import { formatPlayTime } from '../../state/gameState';
+import { ItemArt } from '../../components/ItemIcon';
 
 interface Props {
   state: GameState;

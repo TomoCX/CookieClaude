@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
-import type { GameState } from '../types';
-import { buildBackupFile, decodeSave, encodeSave } from '../state/saveCode';
-import { playSe } from '../audio/audio';
+import type { GameState } from '../../types';
+import { buildBackupFile, decodeSave, encodeSave } from '../../state/saveCode';
+import { playSe } from '../../audio/audio';
 
 interface Props {
   /** セーブ用に、いまいる街並みも含めた状態を組み立てる */

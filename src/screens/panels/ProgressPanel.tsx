@@ -1,7 +1,7 @@
-import type { GameState } from '../types';
-import { getPlace } from '../data/places';
-import { PUZZLES } from '../data/puzzles';
-import { MAIN_SCENARIOS } from '../data/scenarios';
+import type { GameState } from '../../types';
+import { getPlace } from '../../data/places';
+import { PUZZLES } from '../../data/puzzles';
+import { MAIN_SCENARIOS } from '../../data/scenarios';
 import {
   TOTAL_PICARAT,
   clearedMainCount,
@@ -9,7 +9,8 @@ import {
   foundCount,
   progressPercent,
   solvedCount,
-} from '../state/gameState';
+} from '../../state/gameState';
+import { ProgressBar } from '../../components/ProgressBar';
 
 interface Props {
   state: GameState;
@@ -23,7 +24,6 @@ export function ProgressPanel({ state }: Props) {
 
   return (
     <div className="progress">
-
       <h2 className="panel__title">進行状況</h2>
 
       <div className="menu__grid">
@@ -82,24 +82,19 @@ export function ProgressPanel({ state }: Props) {
         </span>
       </div>
 
-      <div className="menu__progress">
-        <div className="menu__progress-head">
-          <span>物語の進行</span>
-          <span>
-            {clearedMainCount(state)} / {MAIN_SCENARIOS.length}（{percent}%）
-          </span>
-        </div>
-        <div className="menu__progress-track">
-          <div className="menu__progress-fill" style={{ width: `${percent}%` }} />
-        </div>
+      <ProgressBar
+        label="物語の進行"
+        note={`${clearedMainCount(state)} / ${MAIN_SCENARIOS.length}（${percent}%）`}
+        percent={percent}
+      >
         <div className="menu__progress-head menu__progress-head--sub">
           <span>ナゾの収集</span>
           <span>
-            {solvedCount(state)} / {PUZZLES.length}（{state.picarat} /{' '}
-            {TOTAL_PICARAT} ピカラット）
+            {solvedCount(state)} / {PUZZLES.length}（{state.picarat} / {TOTAL_PICARAT}{' '}
+            ピカラット）
           </span>
         </div>
-      </div>
+      </ProgressBar>
     </div>
   );
 }

@@ -28,17 +28,24 @@ bun run typecheck  # tsc --noEmit で型チェック
 
 ## 画面構成
 
+画面そのものは `src/screens/`、メインメニューの中身は `src/screens/panels/` にある。
+
 | 画面 | ファイル | 説明 |
 | --- | --- | --- |
-| 地図 | `src/screens/MapOverlay.tsx` | 左上のアイコンから開く。行き先ピンが並ぶ |
-| 街並み画面 | `src/screens/StreetScreen.tsx` | 道を左右に見渡せる。人物とナゾが並ぶ |
-| シナリオ会話画面 | `src/screens/ScenarioScreen.tsx` | 立ち絵つきの会話。日本語＋英字幕 |
-| ナゾ解き画面 | `src/screens/PuzzleScreen.tsx` | ストーリーから独立した 1 問。図・ヒント・かいせつつき |
-| 設定 | `src/screens/SettingsPanel.tsx` | 画面の大きさ・BGM・効果音（メインメニューの中） |
-| 進行状況 | `src/screens/ProgressPanel.tsx` | 解いたナゾ・ひらめき指数・プレイ時間などの集計（メインメニューのタブ） |
-| コレクション | `src/screens/CollectionPanel.tsx` | 拾った品の一覧（メインメニューの中） |
-| バックアップ | `src/screens/BackupPanel.tsx` | 進行状況の書きだしと読みこみ（メインメニューの中） |
-| メインメニュー | `src/screens/MainMenuScreen.tsx` | トランク型の道具ばこ |
+| 地図 | `screens/MapOverlay.tsx` | 左上のアイコンから開く。行き先ピンが並ぶ |
+| 街並み画面 | `screens/StreetScreen.tsx` | 道を左右に見渡せる。人物とナゾが並ぶ |
+| シナリオ会話画面 | `screens/ScenarioScreen.tsx` | 立ち絵つきの会話。日本語＋英字幕 |
+| ナゾ解き画面 | `screens/PuzzleScreen.tsx` | ストーリーから独立した 1 問。図・ヒント・かいせつつき |
+| メインメニュー | `screens/MainMenuScreen.tsx` | トランク型の道具ばこ。中身の出し分けだけを持つ |
+| 表紙 | `screens/BootOverlay.tsx` | 「最初から」「続きから」を選ぶ |
+| 会話の結果 | `screens/ResultOverlay.tsx` | 初めて読み終えたときに出す、手に入れたもの |
+| 設定 | `screens/panels/SettingsPanel.tsx` | 画面の大きさ・BGM・効果音 |
+| 進行状況 | `screens/panels/ProgressPanel.tsx` | 解いたナゾ・ひらめき指数・プレイ時間などの集計 |
+| 調査メモ／深まるナゾ | `screens/panels/NotesPanel.tsx`・`StoryPanel.tsx` | 手がかりと、物語全体の情報 |
+| ナゾ事典 | `screens/panels/PuzzleIndexPanel.tsx` | ナゾ一問ずつの一覧と解説 |
+| コレクション | `screens/panels/CollectionPanel.tsx` | 拾った品の一覧 |
+| バックアップ | `screens/panels/BackupPanel.tsx` | 進行状況の書きだしと読みこみ |
+| メモ／チャーム／セーブ | `screens/panels/MemoPanel.tsx` ほか | タブとセーブの報告 |
 
 ### 画面の行き来
 
@@ -202,15 +209,20 @@ src/
 │   ├── story.ts          深まるナゾに出す、物語全体の情報
 │   └── registry.ts       中身のつながりを起動時に検査する
 ├── audio/audio.ts        BGM と効果音（Web Audio API で合成）
-├── screens/              画面と、せっていのパネル
+├── screens/              画面まるごと
+│   └── panels/           メインメニューを開いた中に出るもの
+├── hooks/
+│   └── useStreetCamera.ts  街並みのカメラ（見わたす・ドラッグ・自動で寄せる）
 ├── components/
 │   ├── Hud.tsx           常に出ている地図／メインメニューのアイコン
 │   ├── Background.tsx    会話画面の背景（SVG）
 │   ├── CharacterSprite.tsx  人物の絵（立ち絵・街並み 共用）
 │   ├── StreetScene.tsx   街並みの 3 層パララックス
+│   ├── StreetActors.tsx  道の上に置くもの（人・ナゾ・矢印・キラキラ・靴）
 │   ├── TownMap.tsx       地図と行き先ピン
 │   ├── PuzzleObject.tsx  街並みに置くナゾの物体（時計・日時計・懐中時計）
 │   ├── ItemIcon.tsx      収集アイテムの絵
+│   ├── ProgressBar.tsx   見出しつきの進み具合の帯
 │   └── PuzzleFigure.tsx  ナゾに添える図（時計・歯車・鐘 など）
 ├── state/
 │   ├── gameState.ts      進行状況の計算とセーブ／ロード
@@ -219,14 +231,25 @@ src/
 └── styles/               画面ごとの CSS
 ```
 
+`App.tsx` は画面の出し分けと進行状況だけを持ち、絵と入力は
+`screens/` と `components/` に寄せてある。街並みのカメラのように
+状態と時間の絡むものは `hooks/` に切り出す。
+
 ## 中身を足す
 
 場所・街並み・人物・会話・ナゾ・アイテムは、すべて `src/data/` の中だけで
 完結している。id でつなぐだけなので、画面側に手を入れずに増やせる。
 
 **書きまちがえは起動時に見つかる。** `src/data/registry.ts` が id のつながりを
-通しで検査し、問題があればコンソールに並べる（置き忘れたナゾ、話しかける人の
-いない会話、どこにも落ちていないアイテム、範囲外の座標など）。
+通しで検査し、問題があればコンソールに並べる。見ているのは次のようなこと。
+
+- 置き忘れたナゾ、話しかける人のいない会話、どこにも落ちていないアイテム
+- 実在しない id への参照、id の重複、0〜1 の外にある座標
+- 出口の行き先が実在するか、戻り道があるか、たどって行き着けるか
+- 最初から開いている場所と、会話で開かれる場所の食いちがい
+  （両方に書くと幕開けを飛ばせてしまい、どちらにも無い場所は永久に行けない）
+- 答えの形の破綻（選択肢の外を指す正解、項目とかみ合わない並べかえ など）
+
 中身を足したらブラウザのコンソールを一度見ること。
 
 **会話を足す**

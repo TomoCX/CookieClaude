@@ -1,10 +1,14 @@
 import type { GameState, Puzzle, Scenario } from '../types';
 import { PLACES, getPlace } from '../data/places';
-import { getStreet } from '../data/streets';
+import { getStreet, streetStartX } from '../data/streets';
 import { MAIN_SCENARIOS } from '../data/scenarios';
 import { PUZZLES, picaratFor } from '../data/puzzles';
 
 const SAVE_KEY = 'cookieclaude.save.v2';
+
+/** 物語の出発点 */
+const START_PLACE_ID = 'coach';
+const START_STREET_ID = 'st_coach';
 
 /** 最初から始めるときの状態 */
 export function createInitialState(): GameState {
@@ -12,9 +16,9 @@ export function createInitialState(): GameState {
     picarat: 0,
     coin: 10,
     playSeconds: 0,
-    placeId: 'coach',
-    streetId: 'st_coach',
-    streetX: 0.06,
+    placeId: START_PLACE_ID,
+    streetId: START_STREET_ID,
+    streetX: streetStartX(START_STREET_ID),
     openPlaces: PLACES.filter((p) => p.openFromStart).map((p) => p.id),
     clearedScenarios: [],
     foundPuzzles: [],
@@ -153,13 +157,12 @@ export function healSave(state: GameState): GameState {
   // （そのままだと「現在地は大門広場なのに、いるのは馬車止め」になってしまう）
   const street = getStreet(healed.streetId);
   if (!street || street.placeId !== healed.placeId) {
-    const fromPlace = getPlace(healed.placeId)?.streetId;
-    healed.streetId = fromPlace ?? createInitialState().streetId;
-    healed.streetX = getStreet(healed.streetId)?.startX ?? 0.06;
+    healed.streetId = getPlace(healed.placeId)?.streetId ?? START_STREET_ID;
+    healed.streetX = streetStartX(healed.streetId);
   }
   // 見渡していた位置がおかしい保存も直す
   if (!Number.isFinite(healed.streetX) || healed.streetX < 0 || healed.streetX > 1) {
-    healed.streetX = getStreet(healed.streetId)?.startX ?? 0.06;
+    healed.streetX = streetStartX(healed.streetId);
   }
   // 配列であるべき項目が壊れていたら空にしておく
   const lists = [
