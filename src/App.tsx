@@ -13,8 +13,10 @@ import { BootOverlay } from './screens/BootOverlay';
 import { ResultOverlay, type Result } from './screens/ResultOverlay';
 import { PickupToast } from './screens/panels/CollectionPanel';
 import { Hud } from './components/Hud';
+import { DevTools } from './dev/DevTools';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setSe, unlock } from './audio/audio';
+import { setEffectSettings } from './effects/runtime';
 import {
   applyHintUse,
   applyPickup,
@@ -53,11 +55,12 @@ export function App() {
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
 
-  // 設定を覚えておき、音にもすぐ反映する
+  // 設定を覚えておき、音とエフェクトにもすぐ反映する
   useEffect(() => {
     saveSettings(settings);
     setBgm(settings.bgmOn, settings.bgmVolume);
     setSe(settings.seOn, settings.seVolume);
+    setEffectSettings(settings.effectsOn, settings.effectStrength);
   }, [settings]);
 
   // 拾った知らせは、しばらくしたら消す
@@ -256,6 +259,18 @@ export function App() {
         )}
 
         {pickup && <PickupToast itemId={pickup.itemId} placeId={pickup.placeId} />}
+
+        {/* 中身を足すための道具箱。Ctrl + Shift + D で出入りする。 */}
+        <DevTools
+          api={{
+            state,
+            setState,
+            streetId,
+            goToStreet,
+            playScenario: talkTo,
+            openPuzzle,
+          }}
+        />
 
         {result && <ResultOverlay result={result} onClose={() => setResult(null)} />}
 

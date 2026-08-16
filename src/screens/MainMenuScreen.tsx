@@ -10,6 +10,7 @@ import { PuzzleIndexPanel } from './panels/PuzzleIndexPanel';
 import { CharmsPanel } from './panels/CharmsPanel';
 import { MemoPanel } from './panels/MemoPanel';
 import { SavePanel } from './panels/SavePanel';
+import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
 import { saveGame, solvedCount } from '../state/gameState';
 
@@ -81,6 +82,7 @@ export function MainMenuScreen({
 
   return (
     <div className="trunk">
+      <EffectLayer slot="menu.back" />
       <div className="trunk__bar">
         <button
           type="button"

@@ -46,8 +46,39 @@ export function SettingsPanel({ settings, onChange }: Props) {
         onVolume={(v) => patch({ seVolume: v })}
       />
 
+      <h3 className="panel__sub">画面のエフェクト</h3>
+
+      <div className={`soundrow${settings.effectsOn ? '' : ' soundrow--off'}`}>
+        <div className="soundrow__head">
+          <span className="soundrow__name">エフェクト</span>
+          <button
+            type="button"
+            className={`toggle${settings.effectsOn ? ' toggle--on' : ''}`}
+            onClick={() => patch({ effectsOn: !settings.effectsOn })}
+            aria-pressed={settings.effectsOn}
+          >
+            <span className="toggle__knob" />
+            <span className="toggle__text">{settings.effectsOn ? 'オン' : 'オフ'}</span>
+          </button>
+        </div>
+        <label className="soundrow__slider">
+          <span className="soundrow__srlabel">強さ</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            value={settings.effectStrength}
+            disabled={!settings.effectsOn}
+            onChange={(e) => patch({ effectStrength: Number(e.target.value) })}
+          />
+          <output>{settings.effectStrength}</output>
+        </label>
+      </div>
+
       <p className="panel__note">
         音声ファイルは使用せず、ブラウザ上で合成している。
+        エフェクトも画像を使わず、その場で描いている。
         設定はこの端末に保存され、セーブデータとは別に残る。
       </p>
     </div>

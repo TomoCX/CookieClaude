@@ -1,0 +1,452 @@
+/* ---- 開発者モード ---- */
+
+/*
+ * 遊びの画面とは、わざと別の見た目にしてある。
+ * 中身を足しているあいだ開きっぱなしにするので、暗く・詰めて置く。
+ */
+
+/*
+ * 画面（.device）の中ではなく、窓のすみに置く。
+ * 遊びの画面を覆ってしまうと、置き場所を見ながら書けないため。
+ */
+.dev {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  max-height: 100%;
+  font-family: ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dev__badge {
+  position: relative;
+  margin: 0 8px 8px 0;
+  padding: 4px 10px;
+  border: 1px solid #6f7f5a;
+  border-radius: 6px;
+  background: #1d2118;
+  color: #b7d38b;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.dev--open .dev__badge,
+.dev__badge:hover {
+  opacity: 1;
+}
+
+.dev__badge-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e2701c;
+}
+
+.dev__drawer {
+  display: flex;
+  flex-direction: column;
+  width: min(430px, 100vw);
+  max-height: min(74vh, 720px);
+  border-top: 1px solid #4d5842;
+  border-left: 1px solid #4d5842;
+  border-radius: 10px 0 0 0;
+  background: rgba(22, 25, 19, 0.97);
+  color: #d6e0c6;
+  box-shadow: -6px -6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dev__bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 8px;
+  border-bottom: 1px solid #39412f;
+}
+
+.dev__tabs {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.dev__tab {
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: none;
+  color: #97a684;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev__tab:hover {
+  color: #d6e0c6;
+}
+
+.dev__tab--on {
+  border-color: #6f7f5a;
+  background: #2b3122;
+  color: #cfe6a6;
+}
+
+.dev__close {
+  padding: 2px 7px;
+  border: 1px solid #4d5842;
+  border-radius: 5px;
+  background: none;
+  color: #97a684;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev__body {
+  overflow-y: auto;
+  padding: 10px 12px 16px;
+}
+
+.dev__head {
+  margin: 14px 0 6px;
+  color: #cfe6a6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dev__body > .dev__head:first-child {
+  margin-top: 0;
+}
+
+.dev__note {
+  margin: 6px 0;
+  color: #8b997a;
+}
+
+.dev__note code,
+.dev__row code,
+.dev__slot-head code {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: #2b3122;
+  color: #b7d38b;
+}
+
+.dev__ok {
+  color: #a8d46a;
+}
+
+.dev__problems {
+  margin: 0;
+  padding-left: 18px;
+  color: #f0a35e;
+}
+
+/* 数えたもの */
+.dev__counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+
+.dev__count {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+  border: 1px solid #39412f;
+  border-radius: 6px;
+  background: #1f2419;
+}
+
+.dev__count-label {
+  color: #8b997a;
+}
+
+.dev__count-value {
+  color: #cfe6a6;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.dev__count-note {
+  color: #6f7c60;
+  font-size: 11px;
+}
+
+/* 一覧 */
+.dev__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #2a3022;
+}
+
+.dev__row--here {
+  background: #232a1d;
+}
+
+.dev__row-main {
+  display: flex;
+  flex: 1;
+  min-width: 150px;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.dev__row-main strong {
+  color: #e6edda;
+  font-weight: 700;
+}
+
+.dev__row-note {
+  flex-basis: 100%;
+  color: #7f8c6e;
+  font-size: 11px;
+}
+
+.dev__go {
+  padding: 3px 9px;
+  border: 1px solid #6f7f5a;
+  border-radius: 5px;
+  background: #2b3122;
+  color: #cfe6a6;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev__go:hover:not(:disabled) {
+  background: #3a4330;
+}
+
+.dev__go:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dev__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+/* まる い ボタン の 並び */
+.dev__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 6px 0;
+}
+
+.dev__chip {
+  padding: 3px 9px;
+  border: 1px solid #4d5842;
+  border-radius: 999px;
+  background: none;
+  color: #8b997a;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev__chip--slim {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.dev__chip--on {
+  border-color: #8fb05f;
+  background: #37421f;
+  color: #cfe6a6;
+}
+
+/* 切りかえ */
+.dev__switch {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.dev__switch input {
+  margin-top: 3px;
+}
+
+.dev__switch span {
+  display: flex;
+  flex-direction: column;
+  color: #8b997a;
+}
+
+.dev__switch strong {
+  color: #e6edda;
+}
+
+/* 座標とひな型 */
+.dev__coords {
+  margin: 6px 0;
+  color: #8b997a;
+}
+
+.dev__coords strong {
+  color: #cfe6a6;
+  font-size: 15px;
+}
+
+.dev__code {
+  overflow-x: auto;
+  margin: 6px 0;
+  padding: 8px 10px;
+  border: 1px solid #39412f;
+  border-radius: 6px;
+  background: #12150f;
+  color: #b7d38b;
+  font: inherit;
+  white-space: pre;
+}
+
+.dev__code--tall {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dev__json {
+  width: 100%;
+  height: 96px;
+  padding: 6px 8px;
+  border: 1px solid #39412f;
+  border-radius: 6px;
+  background: #12150f;
+  color: #b7d38b;
+  font: inherit;
+  resize: vertical;
+}
+
+.dev__nums {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.dev__num {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #8b997a;
+}
+
+.dev__num input {
+  padding: 3px 6px;
+  border: 1px solid #39412f;
+  border-radius: 5px;
+  background: #12150f;
+  color: #cfe6a6;
+  font: inherit;
+}
+
+/* エフェクトの差し込み口 */
+.dev__slot {
+  margin: 8px 0;
+  padding: 6px 8px;
+  border: 1px solid #2f3626;
+  border-radius: 6px;
+}
+
+.dev__slot-head {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin: 0;
+  color: #a8b894;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dev__slot-empty {
+  margin: 4px 0 0;
+  color: #6f7c60;
+}
+
+/* ---- 街並みに重ねる置き場所どうぐ ---- */
+
+.probe {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.probe--live {
+  cursor: crosshair;
+  pointer-events: auto;
+  background: rgba(120, 200, 120, 0.05);
+}
+
+.probe__mark,
+.probe__pick {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.probe__mark::before,
+.probe__pick::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid #8fe08f;
+  border-radius: 50%;
+  background: rgba(20, 40, 20, 0.5);
+}
+
+.probe__pick::before {
+  border-color: #ffb648;
+  background: rgba(255, 182, 72, 0.35);
+}
+
+.probe__label {
+  position: absolute;
+  left: 8px;
+  top: -9px;
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(18, 24, 16, 0.88);
+  color: #cfe6a6;
+  font-family: ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.probe__label em {
+  color: #8b997a;
+  font-style: normal;
+}
+
+.probe__label--pick {
+  background: rgba(60, 36, 8, 0.92);
+  color: #ffd08a;
+}

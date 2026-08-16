@@ -269,6 +269,68 @@ export interface Puzzle {
   explanation: string;
 }
 
+/* ---- エフェクト ---- */
+
+/**
+ * エフェクトを差しこめる場所。
+ * 画面ごとに、絵の奥（back）と手前（front）が用意してある。
+ */
+export type EffectSlot =
+  | 'street.back' // 空と建物の上、人やナゾより奥
+  | 'street.front' // 街並みの何よりも手前
+  | 'scenario.front'
+  | 'puzzle.front'
+  | 'menu.back'
+  | 'boot.front';
+
+/** 大きさが決まったときに渡すもの */
+export interface EffectSize {
+  /** CSS ピクセル。devicePixelRatio は EffectLayer 側で吸収してある。 */
+  width: number;
+  height: number;
+}
+
+/** 一コマ描くときに渡すもの */
+export interface EffectFrame extends EffectSize {
+  ctx: CanvasRenderingContext2D;
+  /** 動きだしてからの秒数 */
+  time: number;
+  /** 前のコマからの秒数（大きく飛ばないよう頭打ちにしてある） */
+  dt: number;
+  /** 画面の中の指の位置（0〜1）。触れていなければ null */
+  pointer: { x: number; y: number } | null;
+  /** 0〜1。設定の「エフェクトの強さ」。0 のときは描画そのものを止める。 */
+  strength: number;
+  /** 街並みのカメラ位置（0〜1）。街並み以外の場所では 0。 */
+  cameraT: number;
+}
+
+/**
+ * ひとつのエフェクトの中身。Processing の setup / draw と同じ組み立て。
+ * 粒などの持ちものは create() の中に閉じこめる。
+ */
+export interface EffectSketch {
+  /** 大きさが決まったとき・変わったときに呼ぶ */
+  setup?: (size: EffectSize) => void;
+  /** 毎コマ呼ぶ。画面は EffectLayer 側で消してある。 */
+  draw: (frame: EffectFrame) => void;
+  /** 片づけ（タイマーなどを持ったとき用） */
+  teardown?: () => void;
+}
+
+/** 差しこめるエフェクト 1 つ */
+export interface Effect {
+  id: string;
+  name: string;
+  slot: EffectSlot;
+  /** 開発者モードの一覧に出すひとこと */
+  note: string;
+  /** 既定で動かすか */
+  enabled: boolean;
+  /** 一枚の画面につき一度だけ呼ばれる。ここで持ちものを作る。 */
+  create: () => EffectSketch;
+}
+
 /* ---- 設定 ---- */
 
 /** 画面の大きさ */
@@ -283,6 +345,30 @@ export interface Settings {
   seOn: boolean;
   /** 0〜100 */
   seVolume: number;
+  /** 画面のエフェクトを動かすか */
+  effectsOn: boolean;
+  /** エフェクトの強さ（0〜100） */
+  effectStrength: number;
+}
+
+/* ---- 開発者モード ---- */
+
+/**
+ * 開発者モードから遊びの側をさわるための口。
+ * `App` が持っている操作のうち、中身を足すときに要るものだけを渡す。
+ */
+export interface DevApi {
+  state: GameState;
+  /** 進行状況を丸ごと差しかえる */
+  setState: (next: GameState) => void;
+  /** いま見ている街並み */
+  streetId: string;
+  /** その街並みへ飛ぶ */
+  goToStreet: (id: string) => void;
+  /** その会話を頭から読む */
+  playScenario: (id: string) => void;
+  /** そのナゾを開く */
+  openPuzzle: (id: string) => void;
 }
 
 /* ---- 進行状況 ---- */

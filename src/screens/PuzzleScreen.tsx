@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { GameState, Puzzle } from '../types';
 import { picaratFor, puzzleNo } from '../data/puzzles';
 import { PuzzleFigure } from '../components/PuzzleFigure';
+import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
 
 interface Props {
@@ -143,6 +144,7 @@ export function PuzzleScreen({
 
   return (
     <div className="puzzle">
+      <EffectLayer slot="puzzle.front" />
       <div className="puzzle__bar">
         <button type="button" className="iconbtn" onClick={onQuit} title="中断">
           ↰

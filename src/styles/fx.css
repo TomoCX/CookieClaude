@@ -1,0 +1,34 @@
+/* ---- エフェクトの差し込み口 ---- */
+
+/*
+ * EffectLayer が置く canvas。
+ * 親の四すみいっぱいに広がり、クリックは通りぬける。
+ * 重なり順は、置いた場所（どの要素の隣に書いたか）でそのまま決まる。
+ */
+.fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* 街並みの手前に置く層は、下の操作バーより奥に来るようにしておく */
+.street > .fx {
+  z-index: 2;
+}
+
+/* 表紙とメインメニューでは、文字より奥に敷く */
+.overlay--boot > .fx,
+.trunk > .fx {
+  z-index: 0;
+}
+
+.overlay--boot > .boot,
+.trunk > .trunk__bar,
+.trunk > .trunk__case,
+.trunk > .trunk__footer {
+  position: relative;
+  z-index: 1;
+}

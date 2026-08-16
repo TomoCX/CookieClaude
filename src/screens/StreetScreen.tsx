@@ -6,6 +6,8 @@ import { getPuzzle } from '../data/puzzles';
 import { getStreet } from '../data/streets';
 import { getScenario } from '../data/scenarios';
 import { StreetScene } from '../components/StreetScene';
+import { EffectLayer } from '../components/EffectLayer';
+import { DevProbe } from '../dev/DevProbe';
 import {
   ExitArrow,
   NpcMarker,
@@ -219,7 +221,12 @@ export function StreetScreen({
         frozen ? ' street--frozen' : ''
       }`}
     >
-      <StreetScene bg={street.bg} cameraT={cam.cameraT} surface={cam.surface}>
+      <StreetScene
+        bg={street.bg}
+        cameraT={cam.cameraT}
+        surface={cam.surface}
+        back={<EffectLayer slot="street.back" cameraT={cam.cameraT} />}
+      >
         {/* 立っている人 */}
         {npcs.map((npc) => {
           const ch = getCharacter(npc.characterId);
@@ -269,6 +276,12 @@ export function StreetScreen({
           <SparkleMarker key={sp.id} x={sp.x} y={sp.y} onClick={() => pickUp(sp.itemId)} />
         ))}
       </StreetScene>
+
+      {/* 手前のエフェクト（落ち葉など）。操作の当たり判定は持たない。 */}
+      <EffectLayer slot="street.front" cameraT={cam.cameraT} />
+
+      {/* 開発者モードの置き場所どうぐ（ふだんは何も描かない） */}
+      <DevProbe street={street} center={cam.center} view={VIEW} />
 
       {/* 画面のまんなかをさす目じるし */}
       <div

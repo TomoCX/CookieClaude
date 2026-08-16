@@ -92,6 +92,8 @@ interface Props {
   cameraT: number;
   /** ドラッグで見わたすための handler をまとめて受けとる */
   surface?: HTMLAttributes<HTMLDivElement>;
+  /** 建物より手前、人物より奥に挟むもの（エフェクトの差し込み口） */
+  back?: ReactNode;
   /** 道の上に置くもの（人物など） */
   children: ReactNode;
 }
@@ -100,7 +102,7 @@ interface Props {
  * 街並み。奥・中・手前の 3 層をちがう速さで動かして、道を進んでいる感じを出す。
  * 手前の層は横幅 300%、その中の座標がそのまま「道の 0〜1」になる。
  */
-export function StreetScene({ bg, cameraT, surface, children }: Props) {
+export function StreetScene({ bg, cameraT, surface, back, children }: Props) {
   const pal = PALETTES[bg];
   const t = Math.min(Math.max(cameraT, 0), 1);
 
@@ -255,6 +257,9 @@ export function StreetScene({ bg, cameraT, surface, children }: Props) {
           )}
         </svg>
       </div>
+
+      {/* 奥のエフェクト（建物の上、人より奥） */}
+      {back}
 
       {/* 手前の層：道と、その上に立つ人 */}
       <div

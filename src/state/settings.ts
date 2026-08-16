@@ -2,6 +2,15 @@ import type { ScreenSize, Settings } from '../types';
 
 const SETTINGS_KEY = 'cookieclaude.settings.v1';
 
+/** 動きを控えてほしいと、端末側で指定されているか */
+function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
 /** はじめての起動で使う設定 */
 export function defaultSettings(): Settings {
   return {
@@ -10,6 +19,9 @@ export function defaultSettings(): Settings {
     bgmVolume: 45,
     seOn: true,
     seVolume: 70,
+    // 動きを控える設定の端末では、エフェクトを切った状態から始める
+    effectsOn: !prefersReducedMotion(),
+    effectStrength: 80,
   };
 }
 

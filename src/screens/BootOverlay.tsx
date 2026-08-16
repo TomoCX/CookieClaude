@@ -1,4 +1,5 @@
 import { hasSave } from '../state/gameState';
+import { EffectLayer } from '../components/EffectLayer';
 
 /** 起動したときの表紙。ここから「最初から」か「続きから」を選ぶ。 */
 export function BootOverlay({
@@ -12,6 +13,7 @@ export function BootOverlay({
 
   return (
     <div className="overlay overlay--boot">
+      <EffectLayer slot="boot.front" />
       <div className="boot">
         <p className="boot__sub">レイトン風シナリオアドベンチャー</p>
         <h1 className="boot__title">

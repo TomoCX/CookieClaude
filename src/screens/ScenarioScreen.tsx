@@ -3,6 +3,7 @@ import type { Scenario } from '../types';
 import { getCharacter } from '../data/characters';
 import { Background } from '../components/Background';
 import { CharacterSprite } from '../components/CharacterSprite';
+import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
 
 /** 1 文字あたりの表示間隔（ミリ秒） */
@@ -99,6 +100,7 @@ export function ScenarioScreen({ scenario, onFinish, onQuit }: Props) {
   return (
     <div className="scenario" onClick={advance} role="presentation">
       <Background id={scenario.bg} />
+      <EffectLayer slot="scenario.front" />
 
       <div className="scenario__stage">
         {leftChar && (
