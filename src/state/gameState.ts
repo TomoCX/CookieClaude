@@ -1,5 +1,6 @@
 import type { GameState, Puzzle, Scenario } from '../types';
-import { PLACES } from '../data/places';
+import { PLACES, getPlace } from '../data/places';
+import { getStreet } from '../data/streets';
 import { MAIN_SCENARIOS } from '../data/scenarios';
 import { PUZZLES, picaratFor } from '../data/puzzles';
 
@@ -140,7 +141,21 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<GameState>;
     // 保存データが古い / 壊れている場合に備えて初期値で埋める
-    return { ...createInitialState(), ...parsed };
+    const merged: GameState = { ...createInitialState(), ...parsed };
+
+    // 街並みを持たない古い保存や、現在地と食い違う保存は、現在地から引き直す。
+    // （そのままだと「現在地は大門広場なのに、いるのは馬車止め」になってしまう）
+    const street = getStreet(merged.streetId);
+    if (!street || street.placeId !== merged.placeId) {
+      const fromPlace = getPlace(merged.placeId)?.streetId;
+      merged.streetId = fromPlace ?? createInitialState().streetId;
+      merged.streetX = getStreet(merged.streetId)?.startX ?? 0.06;
+    }
+    // 見渡していた位置がおかしい保存も直す
+    if (!Number.isFinite(merged.streetX) || merged.streetX < 0 || merged.streetX > 1) {
+      merged.streetX = getStreet(merged.streetId)?.startX ?? 0.06;
+    }
+    return merged;
   } catch {
     return null;
   }
@@ -152,14 +167,5 @@ export function hasSave(): boolean {
     return localStorage.getItem(SAVE_KEY) !== null;
   } catch {
     return false;
-  }
-}
-
-/** セーブデータを消す */
-export function clearSave(): void {
-  try {
-    localStorage.removeItem(SAVE_KEY);
-  } catch {
-    /* 保存領域が使えない環境では何もしない */
   }
 }

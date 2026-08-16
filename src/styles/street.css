@@ -146,27 +146,6 @@
   }
 }
 
-/* 上部バー */
-.street__topbar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-}
-
-.street__place {
-  padding: 5px 12px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: var(--cream);
-  background: rgba(64, 42, 25, 0.8);
-  border-radius: 999px;
-}
-
 /* 下部の操作 */
 .street__controls {
   position: absolute;
@@ -251,9 +230,11 @@
   border-radius: 10px;
 }
 
-/* 街並みでは 右下ボタンを 操作バーの 上に ずらす */
-.street .main__corner--br {
-  bottom: 68px;
+/* 地図などがかぶさっている間は、街並みの操作を隠す */
+.street--frozen .street__controls,
+.street--frozen .street__sight {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* 街並みに置かれた ナゾ */

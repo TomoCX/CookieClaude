@@ -142,15 +142,6 @@ button:disabled {
   box-shadow: none;
 }
 
-.iconbtn--gear {
-  background: var(--board);
-  border-color: var(--board-dark);
-}
-
-.iconbtn--gear:hover {
-  background: #66702f;
-}
-
 /* ---- 常に出ている操作（左上：地図／右上：メインメニュー） ---- */
 .hud {
   position: absolute;
