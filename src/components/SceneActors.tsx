@@ -1,6 +1,9 @@
-import type { Character, ExitDir, Npc, ScenePuzzle } from '../types';
+import type { Character, ExitDir, LocalizedText, Npc, ScenePuzzle } from '../types';
 import { CharacterArt } from './CharacterSprite';
 import { PuzzleObject } from './PuzzleObject';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
+
 
 /**
  * シーンの上に置かれるもの。
@@ -28,6 +31,7 @@ export function NpcMarker({
   isMain: boolean;
   onClick: () => void;
 }) {
+  const t = useText();
   return (
     <button
       type="button"
@@ -42,13 +46,13 @@ export function NpcMarker({
         } as React.CSSProperties
       }
       onClick={onClick}
-      title={`${character.name}に話しかける`}
+      title={`${t(character.name)}${t(UI.talkTo)}`}
     >
       <span className="walker__tag">
         <i className="walker__mark" aria-hidden="true">
           {talked ? '✓' : isMain ? '！' : '？'}
         </i>
-        {character.name}
+        {t(character.name)}
       </span>
       <CharacterArt character={character} pose="normal" className="walker__art" />
     </button>
@@ -65,12 +69,13 @@ export function PuzzleMarker({
 }: {
   spot: ScenePuzzle;
   /** まだ見つけていないナゾは名前を伏せる */
-  title: string;
+  title: LocalizedText;
   solved: boolean;
   /** view・closeup のときだけ、縦位置も指定する */
   fixedY?: number;
   onClick: () => void;
 }) {
+  const t = useText();
   return (
     <button
       type="button"
@@ -82,13 +87,13 @@ export function PuzzleMarker({
         top: fixedY == null ? undefined : `${fixedY * 100}%`,
       }}
       onClick={onClick}
-      title={solved ? '解いたナゾ' : 'ナゾ！'}
+      title={solved ? t(UI.puzzleSolvedTag) : t(UI.puzzleHere)}
     >
       <span className="streetpuzzle__tag">
         <i className="streetpuzzle__mark" aria-hidden="true">
-          {solved ? '✓' : 'ナ'}
+          {solved ? '✓' : t(UI.puzzleMark)}
         </i>
-        {title}
+        {t(title)}
       </span>
       <PuzzleObject look={spot.look} solved={solved} />
     </button>
@@ -106,13 +111,13 @@ const ARROW_ROTATION: Record<ExitDir, number> = {
 };
 
 /** 矢印に添える言葉 */
-const ARROW_LABEL: Record<ExitDir, string> = {
-  far: '奥へ',
-  near: '手前へ',
-  left: '左へ',
-  right: '右へ',
-  into: '調べる',
-  back: 'もどる',
+const ARROW_LABEL: Record<ExitDir, (typeof UI)[keyof typeof UI]> = {
+  far: UI.dirFar,
+  near: UI.dirNear,
+  left: UI.dirLeft,
+  right: UI.dirRight,
+  into: UI.dirInto,
+  back: UI.dirBack,
 };
 
 /**
@@ -132,26 +137,27 @@ export function ExitArrow({
   x: number;
   y: number;
   /** 行き先の場所の名前 */
-  name: string;
+  name: LocalizedText;
   /** もう行ける場所か */
   open: boolean;
   onClick: () => void;
 }) {
+  const t = useText();
   return (
     <button
       type="button"
       className={`exit exit--${dir}${open ? '' : ' exit--locked'}`}
       style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
       disabled={!open}
-      title={open ? `${name}へ移動する` : 'まだ行けない'}
+      title={open ? `${t(name)}${t(UI.moveTo)}` : t(UI.cannotGo)}
       onClick={onClick}
     >
       <svg viewBox="0 0 40 34" className="exit__arrow" aria-hidden="true">
         <path d="M20 2 L37 30 L3 30 Z" transform={`rotate(${ARROW_ROTATION[dir]} 20 18)`} />
       </svg>
       <span className="exit__label">
-        <em>{ARROW_LABEL[dir]}</em>
-        {open ? name : '？？？'}
+        <em>{t(ARROW_LABEL[dir])}</em>
+        {open ? t(name) : t(UI.unknown)}
       </span>
     </button>
   );
@@ -167,13 +173,14 @@ export function SparkleMarker({
   y: number;
   onClick: () => void;
 }) {
+  const t = useText();
   return (
     <button
       type="button"
       className="sparkle"
       style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
-      aria-label="光るものを拾う"
-      title="何か落ちている"
+      aria-label={t(UI.pickUp)}
+      title={t(UI.somethingHere)}
       onClick={onClick}
     >
       {/* 回転させるのは中の絵だけ。押せる範囲が動くと拾いにくくなる。 */}
@@ -190,12 +197,13 @@ export function SparkleMarker({
 
 /** 移動モードに入るための靴のアイコン。画面の右下に常に出ている。 */
 export function ShoeButton({ on, onClick }: { on: boolean; onClick: () => void }) {
+  const t = useText();
   return (
     <button
       type="button"
       className={`scene__shoe${on ? ' scene__shoe--on' : ''}`}
       aria-pressed={on}
-      title={on ? '移動をやめる' : '別の場所へ移動する'}
+      title={on ? t(UI.moveOff) : t(UI.moveOn)}
       onClick={onClick}
     >
       <svg viewBox="0 0 32 24" aria-hidden="true">

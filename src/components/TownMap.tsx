@@ -1,4 +1,7 @@
 import type { Area } from '../types';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
+
 
 interface Props {
   areas: Area[];
@@ -21,6 +24,7 @@ export function TownMap({
   selectedId,
   onSelect,
 }: Props) {
+  const t = useText();
   return (
     <div className="map" onClick={() => onSelect(null)} role="presentation">
       <svg
@@ -130,7 +134,7 @@ export function TownMap({
               type="button"
               className={cls}
               style={{ left: `${area.x}%`, top: `${area.y}%` }}
-              aria-label={isHere ? `${area.name}（現在地）` : area.name}
+              aria-label={isHere ? `${t(area.name)}${t(UI.hereSuffix)}` : t(area.name)}
               aria-current={isHere ? 'location' : undefined}
               onClick={(e) => {
                 e.stopPropagation();
@@ -139,7 +143,7 @@ export function TownMap({
             >
               {isHere && (
                 <span className="pin__here" aria-hidden="true">
-                  現在地
+                  {t(UI.here)}
                 </span>
               )}
               <span className="pin__marker" aria-hidden="true">
@@ -154,7 +158,7 @@ export function TownMap({
                   <i className="pin__glyph">{cleared ? '✓' : '!'}</i>
                 )}
               </span>
-              <span className="pin__name">{area.name}</span>
+              <span className="pin__name">{t(area.name)}</span>
             </button>
           );
         })}

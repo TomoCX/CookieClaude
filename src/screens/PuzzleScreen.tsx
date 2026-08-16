@@ -4,6 +4,8 @@ import { picaratFor, puzzleNo } from '../data/puzzles';
 import { PuzzleFigure } from '../components/PuzzleFigure';
 import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
 
 interface Props {
   puzzle: Puzzle;
@@ -41,6 +43,7 @@ export function PuzzleScreen({
   onSolved,
   onQuit,
 }: Props) {
+  const t = useText();
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [wrong, setWrong] = useState(false);
   /**
@@ -120,22 +123,22 @@ export function PuzzleScreen({
     return (
       <div className="puzzle puzzle--clear">
         <div className="clear">
-          <p className="clear__head">正解</p>
+          <p className="clear__head">{t(UI.correct)}</p>
           <h2 className="clear__title">
-            ナゾ {puzzleNo(puzzle)}・{puzzle.title}
+            {t(UI.puzzleNoLabel)} {puzzleNo(puzzle)}・{t(puzzle.title)}
           </h2>
           {!wasSolved && (
             <p className="clear__picarat">
-              +{reward} <em>ピカラット</em>
+              +{reward} <em>{t(UI.picarat)}</em>
             </p>
           )}
-          {wasSolved && <p className="clear__again">※ このナゾは解決済み</p>}
+          {wasSolved && <p className="clear__again">{t(UI.alreadySolved)}</p>}
           <div className="clear__explain">
-            <h3>解説</h3>
-            <p>{puzzle.explanation}</p>
+            <h3>{t(UI.explanation)}</h3>
+            <p>{t(puzzle.explanation)}</p>
           </div>
           <button type="button" className="result__ok" onClick={onQuit}>
-            街へ戻る
+            {t(UI.backToScene)}
           </button>
         </div>
       </div>
@@ -146,22 +149,22 @@ export function PuzzleScreen({
     <div className="puzzle">
       <EffectLayer slot="puzzle.front" />
       <div className="puzzle__bar">
-        <button type="button" className="iconbtn" onClick={onQuit} title="中断">
+        <button type="button" className="iconbtn" onClick={onQuit} title={t(UI.interrupt)}>
           ↰
         </button>
-        <span className="puzzle__no">ナゾ {puzzleNo(puzzle)}</span>
-        <span className="puzzle__picarat">{reward} ピカラット</span>
+        <span className="puzzle__no">{t(UI.puzzleNoLabel)} {puzzleNo(puzzle)}</span>
+        <span className="puzzle__picarat">{reward} {t(UI.picarat)}</span>
       </div>
 
       <div className="puzzle__body">
-        <h2 className="puzzle__title">{puzzle.title}</h2>
+        <h2 className="puzzle__title">{t(puzzle.title)}</h2>
         <PuzzleFigure id={puzzle.figure} />
-        <p className="puzzle__question">{puzzle.question}</p>
+        <p className="puzzle__question">{t(puzzle.question)}</p>
 
         {/* ウミガメのスープ：はい／いいえを一つずつ開く */}
         {puzzle.clues && (
           <div className="cluebox">
-            <h3 className="cluebox__head">質問してみる</h3>
+            <h3 className="cluebox__head">{t(UI.askQuestions)}</h3>
             <ol className="cluelist">
               {puzzle.clues.slice(0, cluesOpen).map((c) => (
                 <li key={c.q}>
@@ -179,10 +182,10 @@ export function PuzzleScreen({
                   setCluesOpen(cluesOpen + 1);
                 }}
               >
-                次の質問をする（無料）
+                {t(UI.askMore)}
               </button>
             ) : (
-              <p className="cluebox__done">質問はここまで。あとは考えるだけだ。</p>
+              <p className="cluebox__done">{t(UI.askDone)}</p>
             )}
           </div>
         )}
@@ -191,7 +194,7 @@ export function PuzzleScreen({
           <ul className="hintlist">
             {puzzle.hints.slice(0, hintsSeen).map((h, i) => (
               <li key={h}>
-                <span className="hintlist__no">ヒント{i + 1}</span>
+                <span className="hintlist__no">{t(UI.hintN)}{i + 1}</span>
                 {h}
               </li>
             ))}
@@ -201,7 +204,7 @@ export function PuzzleScreen({
         <div className={`answer${wrong ? ' answer--wrong' : ''}`}>
           {(a.kind === 'number' || a.kind === 'text') && (
             <label className="answer__num">
-              <span className="answer__label">答え</span>
+              <span className="answer__label">{t(UI.answerLabel)}</span>
               <input
                 type={a.kind === 'number' ? 'number' : 'text'}
                 inputMode={a.kind === 'number' ? 'numeric' : 'text'}
@@ -210,7 +213,7 @@ export function PuzzleScreen({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && canAnswer) check();
                 }}
-                placeholder={a.kind === 'number' ? '？' : a.placeholder}
+                placeholder={a.kind === 'number' ? t(UI.unknownShort) : a.placeholder}
               />
               {a.kind === 'number' && <span className="answer__unit">{a.unit}</span>}
             </label>
@@ -234,14 +237,14 @@ export function PuzzleScreen({
           {a.kind === 'order' && (
             <div className="answer__order">
               <div className="answer__orderhead">
-                <span className="answer__label">早い順に押す</span>
+                <span className="answer__label">{t(UI.orderPrompt)}</span>
                 <button
                   type="button"
                   className="answer__reset"
                   onClick={() => setDraft({ ...draft, order: [] })}
                   disabled={draft.order.length === 0}
                 >
-                  やり直す
+                  {t(UI.reset)}
                 </button>
               </div>
               {a.items.map((item, i) => {
@@ -273,7 +276,7 @@ export function PuzzleScreen({
             <div className="answer__grid">
               <div className="answer__orderhead">
                 <span className="answer__label">
-                  灯した明かり {draft.cells.length} / {a.rows}
+                  {t(UI.lampsLit)} {draft.cells.length} / {a.rows}
                 </span>
                 <button
                   type="button"
@@ -298,7 +301,7 @@ export function PuzzleScreen({
                       key={key}
                       type="button"
                       className={`lampcell${on ? ' lampcell--on' : ''}`}
-                      aria-label={`${r + 1}階 ${c + 1}番目の窓`}
+                      aria-label={`${r + 1}${t(UI.windowAt)}${c + 1}`}
                       aria-pressed={on}
                       onClick={() =>
                         setDraft({
@@ -316,8 +319,8 @@ export function PuzzleScreen({
           )}
         </div>
 
-        {wrong && <p className="puzzle__wrong">不正解。もう一度考えてみよう。</p>}
-        {misses > 0 && !wrong && <p className="puzzle__misses">誤答：{misses} 回</p>}
+        {wrong && <p className="puzzle__wrong">{t(UI.wrong)}</p>}
+        {misses > 0 && !wrong && <p className="puzzle__misses">{t(UI.missCount)}：{misses}</p>}
       </div>
 
       <div className="puzzle__footer">
@@ -331,8 +334,8 @@ export function PuzzleScreen({
           disabled={hintsSeen >= puzzle.hints.length || state.coin < 1}
         >
           {hintsSeen >= puzzle.hints.length
-            ? 'ヒントは残っていない'
-            : `ヒント${hintsSeen + 1}（コイン1枚）`}
+            ? t(UI.noHintsLeft)
+            : `${t(UI.hintN)}${hintsSeen + 1}${t(UI.hintCost)}`}
         </button>
         <button
           type="button"
@@ -340,7 +343,7 @@ export function PuzzleScreen({
           onClick={check}
           disabled={!canAnswer}
         >
-          答える
+          {t(UI.submit)}
         </button>
       </div>
     </div>

@@ -11,6 +11,8 @@ import {
   solvedCount,
 } from '../../state/gameState';
 import { ProgressBar } from '../../components/ProgressBar';
+import { useText } from '../../i18n/text';
+import { UI } from '../../i18n/ui';
 
 interface Props {
   state: GameState;
@@ -18,53 +20,54 @@ interface Props {
 
 /** 進行状況。メインメニューのタブから開く。 */
 export function ProgressPanel({ state }: Props) {
+  const t = useText();
   const time = formatPlayTime(state.playSeconds);
   const here = getArea(state.areaId);
   const percent = progressPercent(state);
 
   return (
     <div className="progress">
-      <h2 className="panel__title">進行状況</h2>
+      <h2 className="panel__title">{t(UI.progress)}</h2>
 
       <div className="menu__grid">
         <StatCard
           icon="▮"
-          label="解いたナゾ"
+          label={t(UI.statSolved)}
           value={String(solvedCount(state))}
-          unit="問"
+          unit={t(UI.questionUnit)}
           tone="orange"
         />
         <StatCard
           icon="✦"
-          label="ひらめき指数（累計）"
+          label={t(UI.statPicarat)}
           value={String(state.picarat)}
-          unit="ピカラット"
+          unit={t(UI.picarat)}
           tone="orange"
           wide
         />
         <StatCard
           icon="!"
-          label="発見したナゾ"
+          label={t(UI.statFound)}
           value={String(foundCount(state))}
-          unit="問"
+          unit={t(UI.questionUnit)}
           tone="orange"
         />
         <StatCard
           icon="C"
-          label="ひらめきコイン"
+          label={t(UI.statCoin)}
           value={String(state.coin)}
-          unit="枚"
+          unit={t(UI.coinUnit)}
           tone="gold"
           wide
         />
         <div className="card card--time">
           <span className="card__icon">◷</span>
-          <span className="card__label">プレイ時間</span>
+          <span className="card__label">{t(UI.playTime)}</span>
           <span className="card__value">
             {time.h}
-            <em>時間</em>
+            <em>{t(UI.hours)}</em>
             {time.m}
-            <em>分</em>
+            <em>{t(UI.minutes)}</em>
           </span>
         </div>
       </div>
@@ -73,25 +76,25 @@ export function ProgressPanel({ state }: Props) {
         <span className="menu__place-icon" aria-hidden="true">
           🎩
         </span>
-        <span className="menu__place-label">現在地</span>
+        <span className="menu__place-label">{t(UI.currentPlace)}</span>
         <span className="menu__place-value">
           <ruby>
-            {here?.name}
+            {t(here?.name)}
             <rt>{here?.ruby}</rt>
           </ruby>
         </span>
       </div>
 
       <ProgressBar
-        label="物語の進行"
+        label={t(UI.storyProgress)}
         note={`${clearedMainCount(state)} / ${MAIN_SCENARIOS.length}（${percent}%）`}
         percent={percent}
       >
         <div className="menu__progress-head menu__progress-head--sub">
-          <span>ナゾの収集</span>
+          <span>{t(UI.puzzleCollection)}</span>
           <span>
             {solvedCount(state)} / {PUZZLES.length}（{state.picarat} / {TOTAL_PICARAT}{' '}
-            ピカラット）
+            {t(UI.picarat)}）
           </span>
         </div>
       </ProgressBar>

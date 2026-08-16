@@ -165,3 +165,70 @@
   background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
 }
+
+/* ---- 好きな曲を鳴らす ---- */
+
+.bgmfile {
+  margin: 6px 0 4px;
+  padding: 10px 12px;
+  background: var(--cream-dim);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+}
+
+.bgmfile__now {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.bgmfile__now strong {
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.bgmfile__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bgmfile__pick,
+.bgmfile__clear {
+  padding: 7px 14px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.bgmfile__pick input {
+  display: none;
+}
+
+.bgmfile__pick:hover,
+.bgmfile__clear:hover:not(:disabled) {
+  border-color: var(--orange);
+}
+
+.bgmfile__clear:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+.bgmfile__msg {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--orange-deep);
+}
+
+.panel__sub--small {
+  font-size: 0.72rem;
+}

@@ -4,6 +4,7 @@
 
 - 遊びかたと画面の一覧は [`../README.md`](../README.md)
 - 作業のながれと書きかたの決まりは [`../CLAUDE.md`](../CLAUDE.md)
+- 開発者モードの使いかたは [`DEV-MODE.md`](DEV-MODE.md)（手を動かす手順つき）
 - この文書は **ゲーム上の概念** と、**中身の足しかた** を扱う
 
 ---
@@ -21,6 +22,7 @@
 | **会話** | `Scenario` | 立ち絵つきの会話イベント |
 | **ナゾ** | `Puzzle` | 物語から独立した一問 |
 | **アイテム** | `Item` | シーンに落ちている収集物 |
+| **調べどころ** | `SceneProp` | 押すと文が出るところ（棚・飾り）。画面は移らない |
 | **登場人物** | `Character` | 絵の指定（色・帽子）。誰がどこに立つかは別 |
 
 ### 1.1 エリアとシーンの関係
@@ -140,7 +142,50 @@ scn_gate_front（エリア: gate）
 地図とメインメニューはシーンの上にかぶさるだけなので、
 裏でシーンは生きたまま（カメラ位置も保たれる）。
 
-### 1.7 進行状況（`GameState`）
+### 1.7 会話の分かれ道
+
+行に `choices` を書くと、そこで止まって選択肢が出る。
+選ぶと `to` の指す**節**（`label` を付けた行）へ飛び、`goto` で合流できる。
+
+```ts
+// 分かれ道を出す行
+{ speaker: 'claude', text: '——ひとつ、うかがってもよろしいか。',
+  choices: [
+    { id: 'ch_a', label: '売れ残った品について聞く', to: 'goods',
+      gives: { coin: 2, note: { /* この道でだけ手に入るメモ */ } } },
+    { id: 'ch_b', label: '丘の道について聞く', to: 'road',
+      gives: { coin: 2, note: { /* もう一方の道のメモ */ } } },
+  ] },
+
+// 分かれた先。読み終えたら合流する。
+{ label: 'goods', speaker: 'toby', text: '……', goto: 'merge' },
+{ label: 'road',  speaker: 'toby', text: '……', goto: 'merge' },
+{ label: 'merge', speaker: 'cookie', text: '書き留めておきますね。' },
+```
+
+- `gives`（`Reward`）で、コイン・調査メモ・チャーム・エリアの開放・
+  アイテムが**その道を選んだときだけ**手に入る
+- 選んだことは `GameState.picks` に残る
+- `end: true` を書くと、その行で会話を終える（別々に終わらせたいとき）
+
+**検査が見ているもの**（`registry.ts`）: 飛び先の節があるか、節の名前が重なって
+いないか、**どこからも来られない節**が無いか、`gives` の参照が実在するか。
+
+### 1.8 調べどころ（`SceneProp`）
+
+棚や飾りのように、**押すと文が出るだけ**のもの。シーンは移らない。
+
+```ts
+props: [
+  { id: 'prp_desk_vase', name: '青い壺', text: '……', x: 0.74, y: 0.28,
+    w: 0.12, h: 0.16, gives: 'it_quill' },
+],
+```
+
+`gives` を書くと、初めて調べたときに品が手に入る。
+調べたことは `GameState.examined` に残るので、二度は手に入らない。
+
+### 1.9 進行状況（`GameState`）
 
 セーブされるのはこれだけ。画面の状態は入らない。
 
@@ -154,10 +199,16 @@ scn_gate_front（エリア: gate）
 | `foundPuzzles` / `solvedPuzzles` | 見つけたナゾ／解いたナゾ |
 | `misses` / `hints` | ナゾごとの誤答数・見たヒント数 |
 | `notes` / `charms` / `collected` | 手に入れたもの |
+| `picks` | 会話の分かれ道で選んだもの |
+| `examined` | 調べ終えた「調べどころ」 |
 | `picarat` / `coin` / `playSeconds` / `memo` | 数値とメモ |
 
 状態を変える関数は `src/state/gameState.ts` の `apply*` に集めてある。
 すべて**新しい状態を返す**（元の値は書きかえない）。
+
+**自動保存**: 進行が変わると 0.8 秒後に `localStorage` へ書く（`App.tsx`）。
+プレイ時間は毎秒変わるので、保存の合図には使っていない。
+メインメニューの「セーブ」は残してあるが、押さなくても消えない。
 
 ---
 
@@ -168,6 +219,8 @@ src/
 ├── App.tsx            画面の出し分けと進行状況。絵は持たない
 ├── types.ts           型はすべてここ。ほかのファイルで型を定義しない
 ├── data/              中身。ここだけで完結させ、画面側に埋めこまない
+│   └── scenarios/     会話。エリアごとにファイルを分ける
+├── i18n/              ことばの切りかえ（text.ts）と UI の文言（ui.ts）
 ├── screens/           画面まるごと
 │   └── panels/        メインメニューを開いた中に出るもの
 ├── components/        画面をまたいで使う部品
@@ -178,6 +231,13 @@ src/
 ├── audio/             Web Audio API による合成音
 └── styles/            画面ごとの素の CSS
 ```
+
+**ことばの扱い**
+
+画面に出る文字は `LocalizedText`。**ただの文字列を書いてよく**、
+訳ができたところだけ `{ ja, en }` にする（未訳が混ざっていても動く）。
+画面側は `useText()` の `t(...)` を通して出す。
+ボタンや見出しの文言は `src/i18n/ui.ts` にまとめてある。
 
 **守っている境目**
 
@@ -243,9 +303,12 @@ src/
 
 ### 3.4 会話を足す
 
-1. `src/data/scenarios.ts` に `Scenario` を追加（`kind` は `'main'` か `'flavor'`）
+1. `src/data/scenarios/<エリア>.ts` に `Scenario` を追加
+   （`kind` は `'main'` か `'flavor'`）
 2. `src/data/scenes.ts` の `npcs` に、その会話を持つ人を並べる
    （`requiresScenario` を書くと、その会話のあとに現れる）
+3. 分かれ道を入れるなら 1.7 の形で。新しいエリアを作ったときは
+   `src/data/scenarios/index.ts` に import を一行足す
 
 `note` / `charm` / `unlocks` を書いておくと、読了時に自動で増える。
 本筋を足したときは `src/data/story.ts` の `STORY_BEATS` にも一行。
@@ -265,7 +328,13 @@ src/
 2. `src/data/scenes.ts` の `sparkles` に落ちている場所を足す
 3. 新しい絵は `ItemIcon` と `src/components/ItemIcon.tsx` へ
 
-### 3.7 エフェクトを足す
+### 3.7 調べどころを足す
+
+1. `src/data/scenes.ts` の、そのシーンの `props` に一つ追加
+2. 座標は開発者モードの「配置」で拾う（`w` / `h` は押せる範囲の広さ）
+3. 品を置くなら `gives` にアイテムの id
+
+### 3.8 エフェクトを足す
 
 1. `src/effects/sketches/` に `create???(): EffectSketch` を書く（`setup` / `draw`）
 2. `src/effects/registry.ts` の `EFFECTS` に一行足す
@@ -330,4 +399,5 @@ bun run build       # dist/ へのバンドル
 | 現在地とシーンが食いちがう | 古いセーブ。`healSave()` がエリアから引き直す |
 | 開発者モードの目じるしが 1/3 ずれる | 見わたさないシーンは画面と 1 対 1。カメラ位置ではなく `center=0.5` / `view=1` を渡す |
 | 窓の listener が毎コマ貼りなおされる | hook が返すオブジェクトを毎回作ると、依存に置いた `useEffect` が回りつづける。ref しか触らない関数は `useCallback` で固める |
+| 会話が進まなくなる | 選択肢の出ている行では `Space` を無視している。選ぶまで進まない |
 | 右を押しっぱなしで左を叩くと止まる | 押した向きを上書きすると、離したとき残りが分からない。押されているキーの集合から向きを引き直す |

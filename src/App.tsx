@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Area, GameState, ScreenId, Settings } from './types';
+import type { Area, DialogueChoice, GameState, SceneProp, ScreenId, Settings } from './types';
 import { getScenario } from './data/scenarios';
 import { getScene, sceneStartX } from './data/scenes';
 import { getArea } from './data/areas';
@@ -16,9 +16,14 @@ import { Hud } from './components/Hud';
 import { DevTools } from './dev/DevTools';
 import { toggleDevMode, useDevFlags } from './dev/devFlags';
 import { loadSettings, saveSettings } from './state/settings';
-import { playSe, setBgm, setSe, unlock } from './audio/audio';
+import { playSe, setBgm, setBgmTrack, setSe, unlock } from './audio/audio';
+import { getTrack } from './audio/bgmFile';
 import { setEffectSettings } from './effects/runtime';
+import { setLanguage } from './i18n/text';
 import {
+  applyChoices,
+  applyExamine,
+  applyReward,
   applyHintUse,
   applyPickup,
   applyPuzzleFound,
@@ -27,10 +32,17 @@ import {
   applyScenarioClear,
   createInitialState,
   loadGame,
+  saveGame,
 } from './state/gameState';
 
 /** 拾った知らせを出しておく長さ（ミリ秒） */
 const PICKUP_TOAST_MS = 2400;
+/**
+ * 自動保存を待つ長さ（ミリ秒）。
+ * 進行が変わるたびに書くと、見わたしているあいだ書きっぱなしになるので、
+ * 少し落ちついてからまとめて書く。
+ */
+const AUTOSAVE_DELAY_MS = 800;
 
 /**
  * 画面のルーティングと進行状況。
@@ -63,7 +75,15 @@ export function App() {
     setBgm(settings.bgmOn, settings.bgmVolume);
     setSe(settings.seOn, settings.seVolume);
     setEffectSettings(settings.effectsOn, settings.effectStrength);
+    setLanguage(settings.language);
   }, [settings]);
+
+  // 端末に残してある曲があれば、それを鳴らす（無ければ合成音のまま）
+  useEffect(() => {
+    void getTrack().then((found) => {
+      if (found) setBgmTrack(found.blob);
+    });
+  }, []);
 
   // 拾った知らせは、しばらくしたら消す
   useEffect(() => {
@@ -71,6 +91,33 @@ export function App() {
     const id = setTimeout(() => setPickup(null), PICKUP_TOAST_MS);
     return () => clearTimeout(id);
   }, [pickup]);
+
+  /**
+   * 自動保存。
+   *
+   * 進行が変わったら少し待って書く。手で「セーブ」を押さなくても、
+   * タブを閉じたぶんが消えないようにするため。
+   * プレイ時間は毎秒変わるので、保存の合図には使わない。
+   */
+  const autosaveKey = [
+    state.areaId,
+    sceneId,
+    state.openAreas.length,
+    state.clearedScenarios.length,
+    state.solvedPuzzles.length,
+    state.foundPuzzles.length,
+    state.collected.length,
+    state.examined.length,
+    state.notes.length,
+    state.charms.length,
+    state.coin,
+    state.picarat,
+  ].join('|');
+  useEffect(() => {
+    if (booting) return;
+    const id = setTimeout(() => saveGame(buildSaveRef.current()), AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [booting, autosaveKey]);
 
   // プレイ時間を数える
   useEffect(() => {
@@ -107,17 +154,20 @@ export function App() {
 
   /** 会話を読み終えた／中断した。どちらもシーンへ戻る。 */
   const endScenario = useCallback(
-    (finished: boolean) => {
+    (finished: boolean, picked: DialogueChoice[] = []) => {
       const sc = scenarioId ? getScenario(scenarioId) : null;
       if (finished && sc) {
         const first = !state.clearedScenarios.includes(sc.id);
-        setState((s) => applyScenarioClear(s, sc));
+        // 分かれ道でもらえるものは、読了ぶんとは別に足す
+        setState((s) => applyChoices(applyScenarioClear(s, sc), sc.id, picked));
         // 手に入れたものの一覧は、初めて読んだときだけ出す
         if (first) {
           setResult({
             title: sc.title,
             coin: sc.coin,
-            unlocked: (sc.unlocks?.length ?? 0) > 0,
+            unlocked:
+              (sc.unlocks?.length ?? 0) > 0 ||
+              picked.some((c) => (c.gives?.unlocks?.length ?? 0) > 0),
             note: sc.note?.title,
             charm: sc.charm?.name,
           });
@@ -138,6 +188,15 @@ export function App() {
     },
     [state.areaId],
   );
+
+  /** 棚や飾りを調べた。品が置いてあれば、そこで手に入る。 */
+  const examineProp = useCallback((prop: SceneProp) => {
+    setState((s) => {
+      if (s.examined.includes(prop.id)) return s;
+      const marked = applyExamine(s, prop.id);
+      return prop.gives ? applyReward(marked, { items: [prop.gives] }) : marked;
+    });
+  }, []);
 
   /** シーンでナゾを押した */
   const openPuzzle = useCallback((id: string) => {
@@ -179,6 +238,10 @@ export function App() {
     [state, sceneId],
   );
 
+  // 自動保存のたびに組みなおさずに済むよう、最新の組み立て手を持っておく
+  const buildSaveRef = useRef(buildSave);
+  buildSaveRef.current = buildSave;
+
   const scenario = scenarioId ? getScenario(scenarioId) : null;
   const scene = getScene(sceneId);
   const puzzle = puzzleId ? getPuzzle(puzzleId) : null;
@@ -203,6 +266,7 @@ export function App() {
             onTalk={talkTo}
             onOpenPuzzle={openPuzzle}
             onPickup={pickUpItem}
+            onExamine={examineProp}
             onGoTo={goToScene}
             frozen={mapOpen}
           />
@@ -211,7 +275,7 @@ export function App() {
         {screen === 'scenario' && scenario && (
           <ScenarioScreen
             scenario={scenario}
-            onFinish={() => endScenario(true)}
+            onFinish={(picked) => endScenario(true, picked)}
             onQuit={() => endScenario(false)}
           />
         )}

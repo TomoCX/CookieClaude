@@ -19,7 +19,7 @@ export type Hat = 'tophat' | 'cap' | 'bonnet' | 'straw' | 'hood' | 'none';
 /** 登場人物 */
 export interface Character {
   id: string;
-  name: string;
+  name: LocalizedText;
   /** 会話画面での既定の立ち位置 */
   side: Side;
   hat: Hat;
@@ -35,16 +35,67 @@ export interface Character {
   scale?: number;
 }
 
+/* ---- ことば ---- */
+
+/** 遊ぶ人が選べる言語 */
+export type Language = 'ja' | 'en';
+
+/**
+ * 画面に出る文字。
+ *
+ * **ただの文字列を書いてよい。** その場合は、どちらの言語でもそのまま出る。
+ * 訳ができたところだけ `{ ja, en }` に書きかえればよく、
+ * 未訳のまま混ざっていても動く（「仕組みは全部に、中身は段階的に」）。
+ *
+ *   name: 'マーサ'                        … 未訳。どちらでもこう出る
+ *   name: { ja: 'マーサ', en: 'Martha' }  … 訳あり
+ */
+export type LocalizedText = string | { ja: string; en?: string };
+
+/** 会話の分かれ道。選ぶと `to` の節へ飛ぶ。 */
+export interface DialogueChoice {
+  id: string;
+  /** 画面に出る選択肢の文言 */
+  label: LocalizedText;
+  /** 飛び先。同じ会話の中の `label` を指す。 */
+  to: string;
+  /** 選んだときに手に入るもの */
+  gives?: Reward;
+}
+
 /** 会話の 1 行 */
 export interface DialogueLine {
   /** 話者の Character.id。省略するとナレーション表示 */
   speaker?: string;
-  /** 本文（日本語） */
-  text: string;
-  /** 字幕（英語） */
-  sub?: string;
+  /** 本文 */
+  text: LocalizedText;
   /** 話者のポーズ */
   pose?: Pose;
+  /**
+   * この行から始まる節の名前。
+   * `DialogueChoice.to` と `goto` の飛び先になる。
+   */
+  label?: string;
+  /** ここで選択肢を出す。選ぶまで先へ進まない。 */
+  choices?: DialogueChoice[];
+  /** この行を読んだら、その節へ飛ぶ（分かれ道を合流させるのに使う） */
+  goto?: string;
+  /** ここで会話を終える（分かれた先が別々に終わるとき） */
+  end?: boolean;
+}
+
+/** 会話や選択で手に入るもの */
+export interface Reward {
+  /** ひらめきコイン */
+  coin?: number;
+  /** 調査メモ */
+  note?: Note;
+  /** チャーム */
+  charm?: Charm;
+  /** 行けるようになるエリア */
+  unlocks?: string[];
+  /** その場で手に入る収集アイテム（Item.id） */
+  items?: string[];
 }
 
 /** 背景の種類 */
@@ -60,22 +111,22 @@ export type BackgroundId =
 /** 調査メモ 1 件 */
 export interface Note {
   id: string;
-  title: string;
-  body: string;
+  title: LocalizedText;
+  body: LocalizedText;
 }
 
 /** チャーム（お守り） */
 export interface Charm {
   id: string;
-  name: string;
-  desc: string;
+  name: LocalizedText;
+  desc: LocalizedText;
   icon: string;
 }
 
 /** シナリオ（1 つの会話イベント） */
 export interface Scenario {
   id: string;
-  title: string;
+  title: LocalizedText;
   bg: BackgroundId;
   /** 本筋の会話か、町の人とのちょっとした立ち話か */
   kind: 'main' | 'flavor';
@@ -112,9 +163,9 @@ export type ItemIcon =
 /** シーンに散らばっている収集アイテム */
 export interface Item {
   id: string;
-  name: string;
+  name: LocalizedText;
   /** ひとこと添える説明 */
-  flavor: string;
+  flavor: LocalizedText;
   icon: ItemIcon;
 }
 
@@ -139,7 +190,7 @@ export interface CollectedItem {
 export type SceneKind = 'street' | 'view' | 'closeup';
 
 /** view・closeup で使う一枚絵の種類 */
-export type BackdropId = 'manhole' | 'noticeboard';
+export type BackdropId = 'manhole' | 'noticeboard' | 'room';
 
 /** シーンに立っている人 */
 export interface Npc {
@@ -179,6 +230,27 @@ export interface SceneSparkle {
 }
 
 /**
+ * シーンに置かれた「調べどころ」。
+ * 押すと短い文がポップアップで出るだけで、画面は移らない。
+ * 棚・飾り・貼り紙など、部屋の中を見てまわるためのもの。
+ */
+export interface SceneProp {
+  id: string;
+  /** ポップアップの見出し */
+  name: LocalizedText;
+  /** ポップアップの本文 */
+  text: LocalizedText;
+  /** シーンの中での位置（0〜1） */
+  x: number;
+  y: number;
+  /** 押せる範囲の広さ（0〜1。省略すると小さめ） */
+  w?: number;
+  h?: number;
+  /** 一度調べたら手に入る収集アイテム（Item.id） */
+  gives?: string;
+}
+
+/**
  * 出口の向き。
  * far / near / left / right は同じ地面の上での移動、
  * into / back はシーンの重なり（覗きこむ・もどる）を表す。
@@ -211,7 +283,7 @@ interface SceneBase {
    * 開発者が見分けるためのもので、遊ぶ側にも現在地として出る。
    * 同じエリアの中で重ならないようにする（例「噴水前」「マンホールの底」）。
    */
-  name: string;
+  name: LocalizedText;
   /** どのエリアに属するか（Area.id） */
   areaId: string;
   /** 立っている人たち */
@@ -220,6 +292,8 @@ interface SceneBase {
   puzzles: ScenePuzzle[];
   /** 落ちている収集アイテム */
   sparkles: SceneSparkle[];
+  /** 調べると文が出るところ（棚・飾りなど） */
+  props?: SceneProp[];
   /** 隣のシーンへの出口 */
   exits: SceneExit[];
 }
@@ -252,7 +326,7 @@ export type Scene =
 export interface Area {
   id: string;
   /** 地図と現在地に出す名前 */
-  name: string;
+  name: LocalizedText;
   /** ふりがな */
   ruby: string;
   /** 地図上の位置（％） */
@@ -308,10 +382,10 @@ export interface Puzzle {
   id: string;
   /** ナゾ事典に並ぶ番号 */
   no: number;
-  title: string;
+  title: LocalizedText;
   /** 1回目・2回目・3回目以降の正解でもらえるピカラット */
   picarat: [number, number, number];
-  question: string;
+  question: LocalizedText;
   figure: FigureId;
   answer: PuzzleAnswer;
   /** ヒントは一つにつきひらめきコイン 1 枚 */
@@ -319,7 +393,7 @@ export interface Puzzle {
   /** ウミガメのスープ形式のときの「はい／いいえ」。無料で開ける。 */
   clues?: Clue[];
   /** 正解したあとに読める解説 */
-  explanation: string;
+  explanation: LocalizedText;
 }
 
 /* ---- エフェクト ---- */
@@ -397,6 +471,8 @@ export type ScreenSize = 'small' | 'medium' | 'large' | 'xlarge' | 'full';
 
 /** ゲームの設定。進行状況とは別に保存する。 */
 export interface Settings {
+  /** 画面に出す言語。既定は日本語。併記はしない。 */
+  language: Language;
   screenSize: ScreenSize;
   bgmOn: boolean;
   /** 0〜100 */
@@ -464,6 +540,10 @@ export interface GameState {
   charms: Charm[];
   /** 拾った収集アイテム */
   collected: CollectedItem[];
+  /** 会話の分かれ道で選んだもの（会話 id → 選択肢 id） */
+  picks: Record<string, string>;
+  /** 調べた「調べどころ」（SceneProp.id） */
+  examined: string[];
   /** 自由記入メモ */
   memo: string;
 }

@@ -4,91 +4,97 @@ import { ITEMS, getItem } from '../../data/items';
 import { getArea } from '../../data/areas';
 import { formatPlayTime } from '../../state/gameState';
 import { ItemArt } from '../../components/ItemIcon';
+import { ProgressBar } from '../../components/ProgressBar';
+import { DetailView } from '../../components/DetailView';
+import { useText } from '../../i18n/text';
+import { UI } from '../../i18n/ui';
 
 interface Props {
   state: GameState;
 }
 
-/**
- * コレクション。街で拾ったアイテムを並べる。
- * まだ拾っていないものは伏せておき、いくつ残っているかだけが分かるようにする。
- */
+/** 拾った品の一覧。選ぶと画面いっぱいの説明にかわる。 */
 export function CollectionPanel({ state }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+  const t = useText();
 
   const found = new Map(state.collected.map((c) => [c.itemId, c]));
   const percent = Math.round((found.size / ITEMS.length) * 100);
 
+  const shown = open ? ITEMS.find((i) => i.id === open) : undefined;
+  const got = shown ? found.get(shown.id) : undefined;
+
+  // 一件を選んでいるあいだは、一覧のかわりにその説明だけを出す
+  if (shown && got) {
+    const when = formatPlayTime(got.atSeconds);
+    return (
+      <DetailView
+        eyebrow={t(UI.pickedUp)}
+        title={t(shown.name)}
+        art={<ItemArt icon={shown.icon} className="detail__icon" />}
+        onBack={() => setOpen(null)}
+      >
+        <p className="detail__lead">{t(shown.flavor)}</p>
+        <dl className="detail__meta">
+          <div>
+            <dt>{t(UI.pickedWhere)}</dt>
+            <dd>{t(getArea(got.areaId)?.name) || t(UI.none)}</dd>
+          </div>
+          <div>
+            <dt>{t(UI.pickedWhen)}</dt>
+            <dd>
+              {when.h} {t(UI.hours)} {when.m} {t(UI.minutes)}
+            </dd>
+          </div>
+        </dl>
+      </DetailView>
+    );
+  }
+
   return (
     <div className="panel__body">
-      <h2 className="panel__title">コレクション</h2>
-      <p className="panel__lead">
-        街のあちこちに落ちている品。光っているものをクリックすると拾える。
-      </p>
+      <h2 className="panel__title">{t(UI.collection)}</h2>
+      <p className="panel__lead">{t(UI.collectionLead)}</p>
 
-      <div className="menu__progress">
-        <div className="menu__progress-head">
-          <span>拾った品</span>
-          <span>
-            {found.size} / {ITEMS.length}（{percent}%）
-          </span>
-        </div>
-        <div className="menu__progress-track">
-          <div className="menu__progress-fill" style={{ width: `${percent}%` }} />
-        </div>
-      </div>
+      <ProgressBar
+        label={t(UI.pickedUp)}
+        note={`${found.size} / ${ITEMS.length}（${percent}%）`}
+        percent={percent}
+      />
 
       <ul className="collection">
         {ITEMS.map((item) => {
-          const got = found.get(item.id);
-          const isOpen = open === item.id;
+          const has = found.get(item.id);
           return (
             <li
               key={item.id}
-              className={`collection__item${got ? '' : ' collection__item--unknown'}`}
+              className={`collection__item${has ? '' : ' collection__item--unknown'}`}
             >
               <button
                 type="button"
                 className="collection__row"
-                onClick={() => setOpen(isOpen ? null : item.id)}
-                disabled={!got}
-                title={got ? item.name : 'まだ拾っていない'}
+                onClick={() => setOpen(item.id)}
+                disabled={!has}
+                title={has ? t(item.name) : t(UI.notPickedUp)}
               >
                 <span className="collection__icon">
-                  {got ? (
+                  {has ? (
                     <ItemArt icon={item.icon} className="collection__art" />
                   ) : (
-                    <span className="collection__q">？</span>
+                    <span className="collection__q">{t(UI.unknownShort)}</span>
                   )}
                 </span>
-                <span className="collection__name">{got ? item.name : '？？？'}</span>
+                <span className="collection__name">
+                  {has ? t(item.name) : t(UI.unknown)}
+                </span>
               </button>
-
-              {isOpen && got && (
-                <div className="collection__detail">
-                  <p className="collection__flavor">{item.flavor}</p>
-                  <dl className="collection__meta">
-                    <div>
-                      <dt>拾った場所</dt>
-                      <dd>{getArea(got.areaId)?.name ?? '不明'}</dd>
-                    </div>
-                    <div>
-                      <dt>拾った時点</dt>
-                      <dd>
-                        プレイ{formatPlayTime(got.atSeconds).h}時間
-                        {formatPlayTime(got.atSeconds).m}分
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              )}
             </li>
           );
         })}
       </ul>
 
       {found.size === ITEMS.length && (
-        <p className="panel__next">すべての品を集めた。街の隅々まで見て回った証である。</p>
+        <p className="panel__next">{t(UI.collectionAll)}</p>
       )}
     </div>
   );
@@ -96,15 +102,16 @@ export function CollectionPanel({ state }: Props) {
 
 /** 拾った直後に出す小さな知らせ */
 export function PickupToast({ itemId, areaId }: { itemId: string; areaId: string }) {
+  const t = useText();
   const item = getItem(itemId);
   if (!item) return null;
   return (
     <div className="pickup" role="status">
       <ItemArt icon={item.icon} className="pickup__art" />
       <div className="pickup__body">
-        <span className="pickup__head">拾った</span>
-        <strong className="pickup__name">{item.name}</strong>
-        <span className="pickup__place">{getArea(areaId)?.name}</span>
+        <span className="pickup__head">{t(UI.pickedUp)}</span>
+        <strong className="pickup__name">{t(item.name)}</strong>
+        <span className="pickup__place">{t(getArea(areaId)?.name)}</span>
       </div>
     </div>
   );

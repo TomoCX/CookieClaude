@@ -5,6 +5,8 @@ import { scenesOfArea } from '../data/scenes';
 import { TownMap } from '../components/TownMap';
 import { solvedCount } from '../state/gameState';
 import { playSe } from '../audio/audio';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
 
 interface Props {
   state: GameState;
@@ -21,6 +23,7 @@ interface Props {
  */
 export function MapOverlay({ state, onEnterArea, onClose }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
+  const t = useText();
 
   const here = getArea(state.areaId);
   const selectedArea = selected ? getArea(selected) : null;
@@ -38,24 +41,24 @@ export function MapOverlay({ state, onEnterArea, onClose }: Props) {
 
   const hint = selectedArea
     ? isHere
-      ? `${selectedArea.name}：いま滞在中のエリア`
+      ? `${t(selectedArea.name)}${t(UI.hintStaying)}`
       : visited
-        ? `${selectedArea.name}：再訪して話を聞ける`
-        : `${selectedArea.name}へ向かおう`
+        ? `${t(selectedArea.name)}${t(UI.hintVisited)}`
+        : `${t(selectedArea.name)}${t(UI.hintGo)}`
     : nextArea
-      ? `${nextArea.name}を調べよう`
-      : '物語は完結した。町を巡り、残るナゾを解こう';
+      ? `${t(nextArea.name)}${t(UI.hintInvestigate)}`
+      : t(UI.hintDone);
 
   return (
     <div className="mapview">
       <div className="mapview__topbar">
         <div className="mapview__counter">
-          <span className="mapview__counter-label">解いたナゾ</span>
+          <span className="mapview__counter-label">{t(UI.solvedPuzzles)}</span>
           <span className="mapview__counter-value">
             {String(solvedCount(state)).padStart(3, '0')}
           </span>
         </div>
-        <h1 className="mapview__title">地図</h1>
+        <h1 className="mapview__title">{t(UI.map)}</h1>
         <button
           type="button"
           className="iconbtn"
@@ -63,7 +66,7 @@ export function MapOverlay({ state, onEnterArea, onClose }: Props) {
             playSe('click');
             onClose();
           }}
-          title="地図を閉じる"
+          title={t(UI.closeMap)}
         >
           ✕
         </button>
@@ -80,10 +83,10 @@ export function MapOverlay({ state, onEnterArea, onClose }: Props) {
 
       <div className="mapview__hintbar">
         <p className="mapview__hint">
-          <span className="mapview__here">現在地：{here?.name}</span>
+          <span className="mapview__here">{t(UI.currentPlace)}：{t(here?.name)}</span>
           {hint}
           {sceneCount > 1 && (
-            <span className="mapview__scenes">シーン {sceneCount} 面</span>
+            <span className="mapview__scenes">{t(UI.sceneCount)} {sceneCount}</span>
           )}
         </p>
         {selectedArea && !isHere && (
@@ -95,7 +98,7 @@ export function MapOverlay({ state, onEnterArea, onClose }: Props) {
               onEnterArea(selectedArea);
             }}
           >
-            {visited ? '再訪する' : 'ここへ行く'} ▶
+            {visited ? t(UI.revisit) : t(UI.goThere)} ▶
           </button>
         )}
       </div>

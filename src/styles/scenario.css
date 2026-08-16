@@ -251,3 +251,60 @@
   background: var(--gold);
   transition: width 0.25s ease;
 }
+
+/* ---- 会話の分かれ道 ---- */
+
+.scenario__choices {
+  position: absolute;
+  left: 50%;
+  bottom: 34%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: min(78%, 420px);
+  padding: 12px 14px;
+  border: 2px solid var(--wood);
+  border-radius: 14px;
+  background: rgba(246, 236, 212, 0.97);
+  box-shadow: var(--shadow-panel);
+  animation: choices-in 0.2s ease;
+}
+
+@keyframes choices-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+}
+
+.scenario__prompt {
+  margin: 0 0 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.scenario__choice {
+  padding: 9px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.scenario__choice:hover {
+  background: #fff;
+  border-color: var(--orange);
+}
+
+.scenario__choice:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}

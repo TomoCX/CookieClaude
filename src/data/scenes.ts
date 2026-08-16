@@ -125,7 +125,75 @@ export const SCENES: Scene[] = [
       { id: 'skl_inn_1', itemId: 'it_paper', x: 0.2, y: 0.44 },
       { id: 'skl_inn_2', itemId: 'it_coaster', x: 0.7, y: 0.76 },
     ],
-    exits: [{ id: 'ex_inn_plaza', to: 'scn_plaza_fountain', dir: 'right', x: 0.92, y: 0.56 }],
+    exits: [
+      { id: 'ex_inn_plaza', to: 'scn_plaza_fountain', dir: 'right', x: 0.92, y: 0.56 },
+      // 奥の帳場へ。部屋の中も一枚絵のシーンとして作る。
+      { id: 'ex_inn_desk', to: 'scn_inn_desk', dir: 'far', x: 0.46, y: 0.45 },
+    ],
+  },
+  {
+    id: 'scn_inn_desk',
+    name: { ja: 'まんげつ亭の帳場', en: 'The Inn’s Front Desk' },
+    areaId: 'inn',
+    kind: 'view',
+    backdrop: 'room',
+    npcs: [],
+    puzzles: [],
+    sparkles: [],
+    // 部屋の中は、押すと文が出る「調べどころ」で埋める
+    props: [
+      {
+        id: 'prp_desk_shelf',
+        name: { ja: '作りつけの棚', en: 'The Built-in Shelf' },
+        text: {
+          ja: '背に年号を入れた帳簿が、ずらりと並んでいる。いちばん手前の一冊だけ埃が薄い。だれかが最近ひらいたらしい。',
+          en: 'Ledgers line the shelf, one per year. Only the nearest is free of dust — someone opened it recently.',
+        },
+        x: 0.2,
+        y: 0.4,
+        w: 0.3,
+        h: 0.46,
+      },
+      {
+        id: 'prp_desk_vase',
+        name: { ja: '青い壺', en: 'The Blue Jar' },
+        text: {
+          ja: 'まんげつ亭に代々ある壺。マーサいわく「割れたら宿がかたむく」。覗きこむと、底に乾いた花びらが一枚だけ残っている。',
+          en: 'A jar the inn has kept for generations. Martha says the place would tilt if it broke. One dried petal rests at the bottom.',
+        },
+        x: 0.74,
+        y: 0.28,
+        w: 0.12,
+        h: 0.16,
+      },
+      {
+        id: 'prp_desk_painting',
+        name: { ja: '壁の風景画', en: 'The Landscape on the Wall' },
+        text: {
+          ja: '丘の上から町を見おろした絵。よく見ると、描かれた時計塔の窓に、小さく明かりが入れてある。絵が描かれたのは十年前だという。',
+          en: 'The town seen from the hill. In the painted clocktower, one window has been given a tiny light. The painting is ten years old.',
+        },
+        x: 0.515,
+        y: 0.25,
+        w: 0.2,
+        h: 0.2,
+      },
+      {
+        id: 'prp_desk_ledger',
+        name: { ja: '開いたままの宿帳', en: 'The Open Guest Book' },
+        text: {
+          ja: '三日前の欄に、名前がひとつだけ書かれずに空いている。書きかけの線が一本だけ残っていて、そこで筆が止まっている。',
+          en: 'On the page for three nights ago, one entry is left blank — a single stroke begun, then abandoned.',
+        },
+        x: 0.505,
+        y: 0.63,
+        w: 0.16,
+        h: 0.1,
+        // 調べると、その場で手に入る
+        gives: 'it_quill',
+      },
+    ],
+    exits: [{ id: 'ex_desk_inn', to: 'scn_inn_hall', dir: 'near', x: 0.5, y: 0.9 }],
   },
 
   /* ---- 時計塔（2 シーン） ---- */

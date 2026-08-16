@@ -1,11 +1,15 @@
+import type { LocalizedText } from '../types';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
+
 /** シナリオを読み終えたときに出す結果表示 */
 export interface Result {
-  title: string;
+  title: LocalizedText;
   coin: number;
   /** 新しい行き先が開いたか */
   unlocked: boolean;
-  note?: string;
-  charm?: string;
+  note?: LocalizedText;
+  charm?: LocalizedText;
 }
 
 /** 会話を初めて読み終えたときに一度だけ出す、手に入れたものの一覧 */
@@ -16,32 +20,35 @@ export function ResultOverlay({
   result: Result;
   onClose: () => void;
 }) {
+  const t = useText();
   return (
     <div className="overlay" onClick={onClose} role="presentation">
       <div className="result" onClick={(e) => e.stopPropagation()}>
-        <p className="result__head">聞き込みを終えた</p>
-        <h2 className="result__title">{result.title}</h2>
+        <p className="result__head">{t(UI.resultHead)}</p>
+        <h2 className="result__title">{t(result.title)}</h2>
         <ul className="result__rewards">
           <li>
-            <span>ひらめきコイン</span>
-            <strong>+{result.coin} 枚</strong>
+            <span>{t(UI.hintCoins)}</span>
+            <strong>
+              +{result.coin} {t(UI.coinUnit)}
+            </strong>
           </li>
           {result.note && (
             <li>
-              <span>調査メモ</span>
-              <strong>{result.note}</strong>
+              <span>{t(UI.notes)}</span>
+              <strong>{t(result.note)}</strong>
             </li>
           )}
           {result.charm && (
             <li>
-              <span>チャーム</span>
-              <strong>{result.charm}</strong>
+              <span>{t(UI.charms)}</span>
+              <strong>{t(result.charm)}</strong>
             </li>
           )}
         </ul>
-        {result.unlocked && <p className="result__unlock">新たな行き先が開かれた</p>}
+        {result.unlocked && <p className="result__unlock">{t(UI.unlockedArea)}</p>}
         <button type="button" className="result__ok" onClick={onClose}>
-          続ける
+          {t(UI.continue)}
         </button>
       </div>
     </div>

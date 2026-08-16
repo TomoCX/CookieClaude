@@ -74,9 +74,12 @@ function ensure(): boolean {
 
 /** 人の操作のあとに呼ぶ。音を鳴らせる状態にする。 */
 export function unlock(): void {
+  // 最初の操作を待っていた曲があれば、ここで鳴らしはじめる
+  if (track && track.paused && bgmOn) void track.play().catch(() => {});
   if (!ensure() || !ctx) return;
   if (ctx.state === 'suspended') void ctx.resume();
-  if (bgmOn) startBgm();
+  // ファイルの曲を鳴らしているときは、合成音を重ねない
+  if (bgmOn && !track) startBgm();
 }
 
 /** ひとつの音を鳴らす */
@@ -147,10 +150,67 @@ export function stopBgm(): void {
 export function setBgm(on: boolean, volume: number): void {
   bgmOn = on;
   bgmVolume = Math.min(Math.max(volume, 0), 100) / 100;
+  applyTrackVolume();
   if (!ctx || !bgmGain) return;
-  bgmGain.gain.setTargetAtTime(on ? bgmVolume * 0.22 : 0, ctx.currentTime, 0.05);
-  if (on) startBgm();
+  // 曲のファイルを鳴らしているあいだ、合成音は止めておく
+  bgmGain.gain.setTargetAtTime(on && !track ? bgmVolume * 0.22 : 0, ctx.currentTime, 0.05);
+  if (on && !track) startBgm();
   else stopBgm();
+}
+
+/* ---- 遊ぶ人が選んだ曲 ---- */
+
+/**
+ * ファイルの BGM。選ばれているあいだは、合成音のかわりにこれを流す。
+ * Web Audio へ通さず素の <audio> で鳴らす。長い曲を丸ごと復号せずに済むため。
+ */
+let track: HTMLAudioElement | null = null;
+let trackUrl: string | null = null;
+
+function applyTrackVolume(): void {
+  if (track) track.volume = bgmOn ? bgmVolume : 0;
+}
+
+/**
+ * 曲を差しかえる。null を渡すと合成音にもどる。
+ * 鳴らしはじめは、ブラウザの決まりで最初の操作のあとになる。
+ */
+export function setBgmTrack(blob: Blob | null): void {
+  if (track) {
+    track.pause();
+    track.src = '';
+    track = null;
+  }
+  if (trackUrl) {
+    URL.revokeObjectURL(trackUrl);
+    trackUrl = null;
+  }
+
+  if (!blob) {
+    // 合成音にもどす
+    if (ctx && bgmGain) {
+      bgmGain.gain.setTargetAtTime(bgmOn ? bgmVolume * 0.22 : 0, ctx.currentTime, 0.05);
+      if (bgmOn) startBgm();
+    }
+    return;
+  }
+
+  // 合成音を黙らせてから、ファイルのほうを鳴らす
+  stopBgm();
+  if (ctx && bgmGain) bgmGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+
+  trackUrl = URL.createObjectURL(blob);
+  track = new Audio(trackUrl);
+  track.loop = true;
+  applyTrackVolume();
+  void track.play().catch(() => {
+    /* まだ操作されていないだけ。unlock() のあとで鳴りはじめる。 */
+  });
+}
+
+/** 曲のファイルを鳴らしているか */
+export function hasBgmTrack(): boolean {
+  return track !== null;
 }
 
 /** 効果音の設定を変える */

@@ -1,4 +1,4 @@
-import type { GameState, Puzzle, Scenario } from '../types';
+import type { DialogueChoice, GameState, Puzzle, Reward, Scenario } from '../types';
 import { AREAS, getArea } from '../data/areas';
 import { getScene, sceneStartX } from '../data/scenes';
 import { MAIN_SCENARIOS } from '../data/scenarios';
@@ -30,6 +30,8 @@ export function createInitialState(): GameState {
     notes: [],
     charms: [],
     collected: [],
+    picks: {},
+    examined: [],
     memo: '',
   };
 }
@@ -91,6 +93,55 @@ export function applyScenarioClear(state: GameState, sc: Scenario): GameState {
     notes: sc.note ? [...state.notes, sc.note] : state.notes,
     charms: sc.charm ? [...state.charms, sc.charm] : state.charms,
   };
+}
+
+/**
+ * 会話の分かれ道で選んだものを反映する。
+ * 選択そのものも覚えておき（`picks`）、あとから参照できるようにする。
+ */
+export function applyChoices(
+  state: GameState,
+  scenarioId: string,
+  picked: DialogueChoice[],
+): GameState {
+  let next = state;
+  for (const choice of picked) {
+    next = { ...next, picks: { ...next.picks, [`${scenarioId}:${choice.id}`]: choice.id } };
+    if (choice.gives) next = applyReward(next, choice.gives);
+  }
+  return next;
+}
+
+/** もらえるもの（コイン・メモ・チャーム・開放・アイテム）を一度に足す */
+export function applyReward(state: GameState, reward: Reward, areaId?: string): GameState {
+  const openAreas = [...state.openAreas];
+  for (const id of reward.unlocks ?? []) {
+    if (!openAreas.includes(id)) openAreas.push(id);
+  }
+  const collected = [...state.collected];
+  for (const itemId of reward.items ?? []) {
+    if (!collected.some((c) => c.itemId === itemId)) {
+      collected.push({ itemId, areaId: areaId ?? state.areaId, atSeconds: state.playSeconds });
+    }
+  }
+  return {
+    ...state,
+    coin: state.coin + (reward.coin ?? 0),
+    openAreas,
+    collected,
+    notes: reward.note && !state.notes.some((n) => n.id === reward.note!.id)
+      ? [...state.notes, reward.note]
+      : state.notes,
+    charms: reward.charm && !state.charms.some((c) => c.id === reward.charm!.id)
+      ? [...state.charms, reward.charm]
+      : state.charms,
+  };
+}
+
+/** 調べどころを調べたことを記録する（同じところは一度だけ） */
+export function applyExamine(state: GameState, propId: string): GameState {
+  if (state.examined.includes(propId)) return state;
+  return { ...state, examined: [...state.examined, propId] };
 }
 
 /** アイテムを拾ったことを記録する */
@@ -165,6 +216,7 @@ export function healSave(state: GameState): GameState {
   }
   // 配列であるべき項目が壊れていたら空にしておく
   const lists = [
+    'examined',
     'openAreas',
     'clearedScenarios',
     'foundPuzzles',
@@ -179,6 +231,7 @@ export function healSave(state: GameState): GameState {
     }
   }
   if (typeof healed.memo !== 'string') healed.memo = '';
+  if (typeof healed.picks !== 'object' || healed.picks === null) healed.picks = {};
   return healed;
 }
 

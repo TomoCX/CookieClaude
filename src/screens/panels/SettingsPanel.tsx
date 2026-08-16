@@ -1,20 +1,69 @@
-import type { Settings } from '../../types';
+import { useEffect, useState } from 'react';
+import type { Language, Settings } from '../../types';
 import { SCREEN_SIZES } from '../../state/settings';
+import { MAX_BGM_BYTES, clearTrack, getTrack, putTrack } from '../../audio/bgmFile';
+import { setBgmTrack } from '../../audio/audio';
+import { useText } from '../../i18n/text';
+import { UI } from '../../i18n/ui';
 
 interface Props {
   settings: Settings;
   onChange: (next: Settings) => void;
 }
 
-/** メインメニューの「設定」。画面の大きさ・BGM・効果音を調整する。 */
+const LANGUAGES: { id: Language; label: string }[] = [
+  { id: 'ja', label: '日本語' },
+  { id: 'en', label: 'English' },
+];
+
+/** メインメニューの「設定」。ことば・画面の大きさ・音・エフェクトを決める。 */
 export function SettingsPanel({ settings, onChange }: Props) {
+  const t = useText();
   const patch = (part: Partial<Settings>) => onChange({ ...settings, ...part });
+
+  /** いま鳴らしている曲のファイル名（合成音のときは null） */
+  const [trackName, setTrackName] = useState<string | null>(null);
+  const [bgmMsg, setBgmMsg] = useState('');
+
+  useEffect(() => {
+    void getTrack().then((found) => setTrackName(found?.name ?? null));
+  }, []);
+
+  /** 手元のファイルを選んだ */
+  const chooseTrack = async (file: File) => {
+    setBgmMsg('');
+    if (file.size > MAX_BGM_BYTES) {
+      setBgmMsg(t(UI.bgmTooBig));
+      return;
+    }
+    try {
+      await putTrack(file);
+      setBgmTrack(file);
+      setTrackName(file.name);
+    } catch {
+      setBgmMsg(t(UI.bgmBadFile));
+    }
+  };
 
   return (
     <div className="panel__body">
-      <h2 className="panel__title">設定</h2>
+      <h2 className="panel__title">{t(UI.settings)}</h2>
 
-      <h3 className="panel__sub">画面の大きさ</h3>
+      <h3 className="panel__sub">{t(UI.settingLanguage)}</h3>
+      <div className="sizepick">
+        {LANGUAGES.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className={`sizepick__btn${settings.language === l.id ? ' sizepick__btn--on' : ''}`}
+            onClick={() => patch({ language: l.id })}
+          >
+            <span className="sizepick__label">{l.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <h3 className="panel__sub">{t(UI.settingScreen)}</h3>
       <div className="sizepick">
         {SCREEN_SIZES.map((s) => (
           <button
@@ -29,28 +78,64 @@ export function SettingsPanel({ settings, onChange }: Props) {
         ))}
       </div>
 
-      <h3 className="panel__sub">音声</h3>
+      <h3 className="panel__sub">{t(UI.settingSound)}</h3>
 
       <SoundRow
-        name="BGM"
+        name={t(UI.bgm)}
         on={settings.bgmOn}
         volume={settings.bgmVolume}
         onToggle={(v) => patch({ bgmOn: v })}
         onVolume={(v) => patch({ bgmVolume: v })}
       />
       <SoundRow
-        name="効果音（SE）"
+        name={t(UI.se)}
         on={settings.seOn}
         volume={settings.seVolume}
         onToggle={(v) => patch({ seOn: v })}
         onVolume={(v) => patch({ seVolume: v })}
       />
 
-      <h3 className="panel__sub">画面のエフェクト</h3>
+      <h4 className="panel__sub panel__sub--small">{t(UI.bgmFile)}</h4>
+      <p className="panel__note">{t(UI.bgmFileLead)}</p>
+      <div className="bgmfile">
+        <span className="bgmfile__now">
+          {t(UI.bgmPlaying)}：<strong>{trackName ?? t(UI.bgmSynth)}</strong>
+        </span>
+        <div className="bgmfile__row">
+          <label className="bgmfile__pick">
+            {t(UI.bgmChoose)}
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void chooseTrack(file);
+                e.target.value = '';
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="bgmfile__clear"
+            disabled={!trackName}
+            onClick={() => {
+              void clearTrack();
+              setBgmTrack(null);
+              setTrackName(null);
+              setBgmMsg('');
+            }}
+          >
+            {t(UI.bgmClear)}
+          </button>
+        </div>
+        {bgmMsg && <p className="bgmfile__msg">{bgmMsg}</p>}
+      </div>
+
+      <h3 className="panel__sub">{t(UI.settingEffects)}</h3>
 
       <div className={`soundrow${settings.effectsOn ? '' : ' soundrow--off'}`}>
         <div className="soundrow__head">
-          <span className="soundrow__name">エフェクト</span>
+          <span className="soundrow__name">{t(UI.effects)}</span>
           <button
             type="button"
             className={`toggle${settings.effectsOn ? ' toggle--on' : ''}`}
@@ -58,11 +143,11 @@ export function SettingsPanel({ settings, onChange }: Props) {
             aria-pressed={settings.effectsOn}
           >
             <span className="toggle__knob" />
-            <span className="toggle__text">{settings.effectsOn ? 'オン' : 'オフ'}</span>
+            <span className="toggle__text">{settings.effectsOn ? t(UI.on) : t(UI.off)}</span>
           </button>
         </div>
         <label className="soundrow__slider">
-          <span className="soundrow__srlabel">強さ</span>
+          <span className="soundrow__srlabel">{t(UI.strength)}</span>
           <input
             type="range"
             min={0}
@@ -76,11 +161,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
         </label>
       </div>
 
-      <p className="panel__note">
-        音声ファイルは使用せず、ブラウザ上で合成している。
-        エフェクトも画像を使わず、その場で描いている。
-        設定はこの端末に保存され、セーブデータとは別に残る。
-      </p>
+      <p className="panel__note">{t(UI.settingsNote)}</p>
     </div>
   );
 }
@@ -94,6 +175,7 @@ interface RowProps {
 }
 
 function SoundRow({ name, on, volume, onToggle, onVolume }: RowProps) {
+  const t = useText();
   return (
     <div className={`soundrow${on ? '' : ' soundrow--off'}`}>
       <div className="soundrow__head">
@@ -105,11 +187,11 @@ function SoundRow({ name, on, volume, onToggle, onVolume }: RowProps) {
           aria-pressed={on}
         >
           <span className="toggle__knob" />
-          <span className="toggle__text">{on ? 'オン' : 'オフ'}</span>
+          <span className="toggle__text">{on ? t(UI.on) : t(UI.off)}</span>
         </button>
       </div>
       <label className="soundrow__slider">
-        <span className="soundrow__srlabel">音量</span>
+        <span className="soundrow__srlabel">{t(UI.volume)}</span>
         <input
           type="range"
           min={0}

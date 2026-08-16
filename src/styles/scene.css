@@ -633,3 +633,60 @@
 .scene--closeup .scene__controls {
   justify-content: center;
 }
+
+/* ---- 調べどころ（棚・飾りなど） ---- */
+
+.prop {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* ふだんは輪郭を出さず、近づいたときだけ光らせる */
+.prop__ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 236, 180, 0);
+  border-radius: 10px;
+  background: rgba(255, 236, 180, 0);
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.prop:hover .prop__ring,
+.prop:focus-visible .prop__ring {
+  border-color: rgba(255, 232, 160, 0.85);
+  background: rgba(255, 232, 160, 0.16);
+}
+
+/* 押せるところがあると分かるよう、ゆっくり息をする小さな点を出す */
+.prop::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: rgba(255, 240, 190, 0.7);
+  box-shadow: 0 0 6px rgba(255, 226, 150, 0.8);
+  animation: prop-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes prop-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
+}

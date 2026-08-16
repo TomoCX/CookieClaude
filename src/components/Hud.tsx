@@ -1,12 +1,16 @@
+import type { LocalizedText } from '../types';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
+
 interface Props {
   /** 左上：地図を開く */
   onOpenMap: () => void;
   /** 右上：メインメニューを開く */
   onOpenMenu: () => void;
   /** いまいるエリアの名前 */
-  areaName?: string;
+  areaName?: LocalizedText;
   /** いま見ているシーンの名前 */
-  sceneName?: string;
+  sceneName?: LocalizedText;
 }
 
 /**
@@ -14,6 +18,7 @@ interface Props {
  * 左上が地図（地点の移動）、右上がメインメニュー。
  */
 export function Hud({ onOpenMap, onOpenMenu, areaName, sceneName }: Props) {
+  const t = useText();
   return (
     <div className="hud">
       <button type="button" className="hud__btn hud__btn--map" onClick={onOpenMap}>
@@ -31,13 +36,13 @@ export function Hud({ onOpenMap, onOpenMenu, areaName, sceneName }: Props) {
           />
           <circle cx="12" cy="11" r="2.2" fill="#c2551e" stroke="#fff" strokeWidth="1" />
         </svg>
-        <span className="hud__label">地図</span>
+        <span className="hud__label">{t(UI.map)}</span>
       </button>
 
       {areaName && (
         <span className="hud__place">
-          {areaName}
-          {sceneName && <em className="hud__scene">{sceneName}</em>}
+          {t(areaName)}
+          {sceneName && <em className="hud__scene">{t(sceneName)}</em>}
         </span>
       )}
 
@@ -48,7 +53,7 @@ export function Hud({ onOpenMap, onOpenMenu, areaName, sceneName }: Props) {
           <rect x="2.5" y="11.5" width="19" height="2.4" fill="#3a2617" opacity="0.5" />
           <rect x="10.4" y="10.4" width="3.2" height="4.6" rx="1" fill="#e2a01c" />
         </svg>
-        <span className="hud__label">メニュー</span>
+        <span className="hud__label">{t(UI.menu)}</span>
       </button>
     </div>
   );

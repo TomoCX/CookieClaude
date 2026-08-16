@@ -3,6 +3,7 @@ import { getCharacter } from '../data/characters';
 import { getItem } from '../data/items';
 import { getPuzzle } from '../data/puzzles';
 import { setPickedSpot, useDevFlags, usePickedSpot } from './devFlags';
+import { text } from '../i18n/text';
 
 /**
  * シーンの上に重ねる、置き場所のための道具。
@@ -87,7 +88,7 @@ export function DevProbe({ scene, center, view }: Props) {
             style={{ left: `${left * 100}%`, top: `${m.y * 100}%` }}
           >
             <span className="probe__label">
-              {m.kind}・{m.label}
+              {m.kind}・{text(m.label)}
               <em>
                 {m.x.toFixed(2)}, {m.y.toFixed(2)}
               </em>

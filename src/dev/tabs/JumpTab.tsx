@@ -3,6 +3,7 @@ import { AREAS } from '../../data/areas';
 import { SCENES, scenesOfArea } from '../../data/scenes';
 import { SCENARIOS } from '../../data/scenarios';
 import { PUZZLES, puzzleNo } from '../../data/puzzles';
+import { text } from '../../i18n/text';
 
 /**
  * 中身へ飛ぶ。
@@ -54,7 +55,7 @@ export function JumpTab({ api }: { api: DevApi }) {
       {AREAS.map((area) => (
         <div key={area.id} className="dev__slot">
           <h4 className="dev__slot-head">
-            {area.name} <code>{area.id}</code>
+            {text(area.name)} <code>{area.id}</code>
           </h4>
           <ul className="dev__list">
             {scenesOfArea(area.id).map((sc) => {
@@ -63,7 +64,7 @@ export function JumpTab({ api }: { api: DevApi }) {
               return (
                 <li key={sc.id} className={`dev__row${here ? ' dev__row--here' : ''}`}>
                   <span className="dev__row-main">
-                    <strong>{sc.name}</strong>
+                    <strong>{text(sc.name)}</strong>
                     <code>{sc.id}</code>
                   </span>
                   <span className="dev__row-note">
@@ -93,7 +94,7 @@ export function JumpTab({ api }: { api: DevApi }) {
               onClick={() => toggleArea(area.id)}
               title={open ? '閉じる' : '開く'}
             >
-              {area.name}
+              {text(area.name)}
             </button>
           );
         })}
@@ -106,7 +107,7 @@ export function JumpTab({ api }: { api: DevApi }) {
           return (
             <li key={sc.id} className="dev__row">
               <span className="dev__row-main">
-                <strong>{sc.title}</strong>
+                <strong>{text(sc.title)}</strong>
                 <code>{sc.id}</code>
               </span>
               <span className="dev__row-note">
@@ -137,7 +138,7 @@ export function JumpTab({ api }: { api: DevApi }) {
             <li key={p.id} className="dev__row">
               <span className="dev__row-main">
                 <strong>
-                  {puzzleNo(p)}・{p.title}
+                  {puzzleNo(p)}・{text(p.title)}
                 </strong>
                 <code>{p.id}</code>
               </span>

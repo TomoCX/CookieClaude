@@ -13,6 +13,8 @@ import { SavePanel } from './panels/SavePanel';
 import { EffectLayer } from '../components/EffectLayer';
 import { playSe } from '../audio/audio';
 import { saveGame, solvedCount } from '../state/gameState';
+import { useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
 
 /** メインメニューの中で開いているサブ画面 */
 type Panel =
@@ -62,6 +64,7 @@ export function MainMenuScreen({
   onToggleDev,
   onClose,
 }: Props) {
+  const t = useText();
   const [panel, setPanel] = useState<Panel>(null);
   const [saveMsg, setSaveMsg] = useState('');
 
@@ -69,9 +72,7 @@ export function MainMenuScreen({
     playSe('click');
     setPanel('save');
     setSaveMsg(
-      saveGame(buildSave())
-        ? '冒険の記録を保存した。'
-        : 'セーブに失敗した。ブラウザの設定を確認してほしい。',
+      saveGame(buildSave()) ? t(UI.saveOk) : t(UI.saveNg),
     );
   };
 
@@ -94,11 +95,11 @@ export function MainMenuScreen({
           type="button"
           className="iconbtn"
           onClick={() => (panel ? setPanel(null) : onClose())}
-          title="戻る"
+          title={t(UI.back)}
         >
           ↰
         </button>
-        <h1 className="trunk__title">メインメニュー</h1>
+        <h1 className="trunk__title">{t(UI.mainMenu)}</h1>
         <span className="trunk__spacer" aria-hidden="true" />
       </div>
 
@@ -108,33 +109,33 @@ export function MainMenuScreen({
             <div className="trunk__row">
               <TrunkItem
                 icon="📖"
-                label="調査メモ"
+                label={t(UI.toolNotes)}
                 badge={state.notes.length}
                 onClick={() => setPanel('notes')}
               />
-              <TrunkItem icon="🎩" label="深まるナゾ" onClick={() => setPanel('story')} />
+              <TrunkItem icon="🎩" label={t(UI.toolStory)} onClick={() => setPanel('story')} />
               <TrunkItem
                 icon="📙"
-                label="ナゾ事典"
+                label={t(UI.toolIndex)}
                 badge={solvedCount(state)}
                 onClick={() => setPanel('index')}
               />
-              <TrunkItem icon="🖋" label="セーブ" onClick={handleSave} />
+              <TrunkItem icon="🖋" label={t(UI.toolSave)} onClick={handleSave} />
             </div>
 
             <div className="trunk__row">
               <TrunkItem
                 icon="🧺"
-                label="コレクション"
+                label={t(UI.toolCollection)}
                 badge={state.collected.length}
                 onClick={() => setPanel('collection')}
               />
-              <TrunkItem icon="💾" label="バックアップ" onClick={() => setPanel('backup')} />
-              <TrunkItem icon="⚙" label="設定" onClick={() => setPanel('settings')} />
+              <TrunkItem icon="💾" label={t(UI.toolBackup)} onClick={() => setPanel('backup')} />
+              <TrunkItem icon="⚙" label={t(UI.toolSettings)} onClick={() => setPanel('settings')} />
               {/* 中身を足すための道具箱。Ctrl + Shift + D でも出入りできる。 */}
               <TrunkItem
                 icon="🛠"
-                label="開発"
+                label={t(UI.toolDev)}
                 on={devOn}
                 onClick={() => {
                   onToggleDev();
@@ -162,11 +163,11 @@ export function MainMenuScreen({
       </div>
 
       <div className="trunk__footer">
-        {tab('progress', '📊', '進行状況')}
-        {tab('memo', '📕', 'メモ')}
-        {tab('charms', '💝', 'チャーム')}
+        {tab('progress', '📊', t(UI.tabProgress))}
+        {tab('memo', '📕', t(UI.tabMemo))}
+        {tab('charms', '💝', t(UI.tabCharms))}
         <button type="button" className="tab tab--close" onClick={onClose}>
-          <span aria-hidden="true">🧳</span> 閉じる
+          <span aria-hidden="true">🧳</span> {t(UI.close)}
         </button>
       </div>
     </div>
@@ -187,6 +188,7 @@ interface TrunkItemProps {
 
 /** トランクに並ぶ道具ひとつ */
 function TrunkItem({ icon, label, badge, locked, on, onClick }: TrunkItemProps) {
+  const t = useText();
   return (
     <button
       type="button"
@@ -196,7 +198,7 @@ function TrunkItem({ icon, label, badge, locked, on, onClick }: TrunkItemProps) 
         onClick?.();
       }}
       disabled={locked}
-      title={locked ? 'まだ使用できない' : on ? `${label}（いま入っている）` : label}
+      title={locked ? t(UI.toolLocked) : on ? `${label}${t(UI.toolActive)}` : label}
     >
       <span className="titem__icon" aria-hidden="true">
         {icon}

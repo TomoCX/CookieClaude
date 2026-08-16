@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { GameState, Scene } from '../types';
+import type { GameState, Scene, SceneProp } from '../types';
 import { getCharacter } from '../data/characters';
 import { getArea } from '../data/areas';
 import { getPuzzle } from '../data/puzzles';
@@ -8,6 +8,8 @@ import { getScenario } from '../data/scenarios';
 import { StreetBackdrop } from '../components/StreetBackdrop';
 import { ViewBackdrop } from '../components/ViewBackdrop';
 import { EffectLayer } from '../components/EffectLayer';
+import { ExamineModal, PropSpot } from '../components/ExamineModal';
+import { getItem } from '../data/items';
 import {
   ExitArrow,
   NpcMarker,
@@ -18,6 +20,8 @@ import {
 import { VIEW, clampCenter, useSceneCamera } from '../hooks/useSceneCamera';
 import { DevProbe } from '../dev/DevProbe';
 import { playSe } from '../audio/audio';
+import { text as tr, useText } from '../i18n/text';
+import { UI } from '../i18n/ui';
 
 /** 画面のまんなか近くとみなす距離（street のみ） */
 const FOCUS_RANGE = 0.075;
@@ -54,6 +58,8 @@ interface Props {
   onOpenPuzzle: (puzzleId: string) => void;
   /** キラキラを押してアイテムを拾った */
   onPickup: (itemId: string) => void;
+  /** 棚や飾りを調べた */
+  onExamine: (prop: SceneProp) => void;
   /** 隣のシーンへ移った */
   onGoTo: (sceneId: string) => void;
   /** 地図などがかぶさっている間は操作を受けつけない */
@@ -78,9 +84,11 @@ export function SceneScreen({
   onTalk,
   onOpenPuzzle,
   onPickup,
+  onExamine,
   onGoTo,
   frozen = false,
 }: Props) {
+  const t = useText();
   /** これから開くもの。入っているあいだ画面を暗くする。 */
   const [pending, setPending] = useState<Pending | null>(null);
   /** 入ってきた直後の明るくなる演出 */
@@ -89,6 +97,8 @@ export function SceneScreen({
   const [moveMode, setMoveMode] = useState(false);
   /** いま押されている見わたしのキー */
   const heldKeys = useRef(new Set<string>());
+  /** 調べているところ。開いているあいだポップアップを出す。 */
+  const [examining, setExamining] = useState<SceneProp | null>(null);
 
   /** 見わたすシーンかどうか。ここから下の分かれ道はすべてこれで決まる。 */
   const walkable = scene.kind === 'street';
@@ -145,8 +155,8 @@ export function SceneScreen({
       if (!walkable) return null;
       const npc = npcs.find((v) => Math.abs(v.x - c) < FOCUS_RANGE);
       if (npc) {
-        const name = getCharacter(npc.characterId)?.name ?? '相手';
-        return { kind: 'talk', scenarioId: npc.scenarioId, label: `${name}に話しかける` };
+        const who = tr(getCharacter(npc.characterId)?.name) || tr(UI.someoneThere);
+        return { kind: 'talk', scenarioId: npc.scenarioId, label: `${who}${tr(UI.talkTo)}` };
       }
       const spot = scene.puzzles.find((v) => Math.abs(v.x - c) < FOCUS_RANGE);
       if (spot) {
@@ -154,8 +164,8 @@ export function SceneScreen({
           kind: 'puzzle',
           puzzleId: spot.puzzleId,
           label: state.solvedPuzzles.includes(spot.puzzleId)
-            ? '解いたナゾを見直す'
-            : 'ナゾに挑戦する',
+            ? tr(UI.puzzleSolvedTag)
+            : tr(UI.puzzleHere),
         };
       }
       return null;
@@ -189,6 +199,14 @@ export function SceneScreen({
     if (pending || dragged.current || frozen) return;
     playSe('coin');
     onPickup(itemId);
+  };
+
+  /** 棚や飾りを調べた。画面は移らず、ポップアップを重ねるだけ。 */
+  const examine = (prop: SceneProp) => {
+    if (pending || dragged.current || frozen || examining) return;
+    playSe(prop.gives && !state.examined.includes(prop.id) ? 'coin' : 'click');
+    onExamine(prop);
+    setExamining(prop);
   };
 
   /**
@@ -262,11 +280,10 @@ export function SceneScreen({
 
   /**
    * 画面のまんなかに来ているもの。
-   * 人は姿と名札で押せると分かるので、下のバーには出さない。
-   * 物体のほうは見ただけでは押せると分かりにくいので、ボタンを出す。
+   * 人もナゾも、そのものをクリックすれば入れるので、下のバーにボタンは出さない。
+   * まんなかの目じるしだけを灯して、`Space` / `Enter` でも入れることを示す。
    */
   const focus = focusAt(cam.center);
-  const action = focus?.kind === 'puzzle' ? focus : null;
 
   /** 背景の上に並べるもの。street でも view でも中身は同じ。 */
   const actors = (
@@ -293,7 +310,7 @@ export function SceneScreen({
           <PuzzleMarker
             key={spot.id}
             spot={spot}
-            title={(found && getPuzzle(spot.puzzleId)?.title) || 'ナゾ'}
+            title={(found && getPuzzle(spot.puzzleId)?.title) || UI.puzzleNoLabel}
             solved={state.solvedPuzzles.includes(spot.puzzleId)}
             fixedY={walkable ? undefined : spot.y}
             onClick={() => open({ kind: 'puzzle', puzzleId: spot.puzzleId })}
@@ -316,6 +333,11 @@ export function SceneScreen({
 
       {sparkles.map((sp) => (
         <SparkleMarker key={sp.id} x={sp.x} y={sp.y} onClick={() => pickUp(sp.itemId)} />
+      ))}
+
+      {/* 棚や飾りなど、押すと文が出るところ */}
+      {(scene.props ?? []).map((prop) => (
+        <PropSpot key={prop.id} prop={prop} onClick={() => examine(prop)} />
       ))}
     </>
   );
@@ -354,7 +376,7 @@ export function SceneScreen({
       {/* 画面のまんなかをさす目じるし。下のボタンと連動させる。 */}
       {walkable && (
         <div
-          className={`scene__sight${action ? ' scene__sight--on' : ''}`}
+          className={`scene__sight${focus ? ' scene__sight--on' : ''}`}
           aria-hidden="true"
         />
       )}
@@ -366,7 +388,7 @@ export function SceneScreen({
             <button
               type="button"
               className="scene__walk"
-              aria-label="左を見る"
+              aria-label={t(UI.lookLeft)}
               {...cam.hold(-1)}
             >
               ◀
@@ -374,7 +396,7 @@ export function SceneScreen({
             <button
               type="button"
               className="scene__walk"
-              aria-label="右を見る"
+              aria-label={t(UI.lookRight)}
               {...cam.hold(1)}
             >
               ▶
@@ -384,24 +406,27 @@ export function SceneScreen({
 
         {!walkable ? (
           <p className="scene__tip scene__tip--move">
-            {scene.name}。矢印を押すと、もとの場所へもどる。
+            {t(scene.name)}。{t(UI.backTip)}
           </p>
         ) : moveMode ? (
           <p className="scene__tip scene__tip--move">
-            三角の矢印を押すと、その方向の場所へ移る。
+            {t(UI.moveTip)}
           </p>
-        ) : action ? (
-          <button type="button" className="scene__talk" onClick={() => open(action)}>
-            {action.label}
-          </button>
         ) : (
-          <p className="scene__tip">
-            ◀ ▶ かドラッグで道を見わたす。人やナゾをクリックすると中に入れる。
-          </p>
+          <p className="scene__tip">{t(UI.sceneTip)}</p>
         )}
 
         {walkable && <ShoeButton on={moveMode} onClick={toggleMoveMode} />}
       </div>
+
+      {/* 調べたときのポップアップ */}
+      {examining && (
+        <ExamineModal
+          prop={examining}
+          gained={examining.gives ? getItem(examining.gives) : undefined}
+          onClose={() => setExamining(null)}
+        />
+      )}
 
       {/* 出入りのフェード */}
       <div

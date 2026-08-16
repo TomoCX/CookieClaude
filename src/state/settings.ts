@@ -14,6 +14,7 @@ function prefersReducedMotion(): boolean {
 /** はじめての起動で使う設定 */
 export function defaultSettings(): Settings {
   return {
+    language: 'ja',
     screenSize: 'medium',
     bgmOn: true,
     bgmVolume: 45,

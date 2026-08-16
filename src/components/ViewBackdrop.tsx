@@ -27,6 +27,7 @@ export function ViewBackdrop({ backdrop, kind, children }: Props) {
       >
         {backdrop === 'manhole' && <Manhole />}
         {backdrop === 'noticeboard' && <Noticeboard />}
+        {backdrop === 'room' && <Room />}
       </svg>
 
       {/* closeup は、まわりを落として真ん中に目を寄せる */}
@@ -69,6 +70,72 @@ function Manhole() {
       <rect x="325" y="188" width="26" height="12" rx="3" fill="#5a5360" />
       {/* 見あげたふちの影 */}
       <path d="M0 0 L400 0 L400 22 Q200 46 0 22 Z" fill="#15131a" opacity="0.8" />
+    </g>
+  );
+}
+
+/** まんげつ亭の帳場。棚と飾りの並ぶ部屋の中。 */
+function Room() {
+  return (
+    <g>
+      {/* 壁と床 */}
+      <rect x="0" y="0" width="400" height="300" fill="#6b543c" />
+      <rect x="0" y="0" width="400" height="196" fill="#7d6446" />
+      {Array.from({ length: 14 }, (_, i) => (
+        <rect key={i} x={i * 29} y="0" width="2" height="196" fill="#6d573c" opacity="0.5" />
+      ))}
+      <rect x="0" y="190" width="400" height="10" fill="#5a462f" />
+      {/* 床板 */}
+      {Array.from({ length: 7 }, (_, i) => (
+        <rect key={`f-${i}`} x="0" y={200 + i * 15} width="400" height="13" fill={i % 2 ? '#59422b' : '#624a31'} />
+      ))}
+
+      {/* 左の棚 */}
+      <rect x="16" y="52" width="122" height="140" rx="3" fill="#4e3a26" />
+      <rect x="22" y="58" width="110" height="128" fill="#654c33" />
+      {[0, 1, 2].map((r) => (
+        <rect key={`s-${r}`} x="22" y={94 + r * 32} width="110" height="5" fill="#4e3a26" />
+      ))}
+      {/* 棚の中の小物 */}
+      {[0, 1, 2].map((r) =>
+        [0, 1, 2, 3].map((c) => (
+          <rect
+            key={`b-${r}-${c}`}
+            x={30 + c * 25}
+            y={70 + r * 32}
+            width={9 + ((r + c) % 3) * 3}
+            height="22"
+            rx="1.5"
+            fill={['#a8543c', '#5f7f5a', '#c2a05a', '#7a6ea8'][(r * 4 + c) % 4]}
+          />
+        )),
+      )}
+
+      {/* 右の飾り棚と壺 */}
+      <rect x="262" y="96" width="118" height="8" fill="#4e3a26" />
+      <ellipse cx="296" cy="86" rx="16" ry="12" fill="#8a9a6d" />
+      <path d="M282 86 Q284 62 296 58 Q308 62 310 86 Z" fill="#9aab7b" />
+      <rect x="332" y="62" width="30" height="34" rx="2" fill="#c8b58a" />
+      <path d="M332 62 L362 62 L347 50 Z" fill="#a8925f" />
+
+      {/* 壁の絵 */}
+      <rect x="168" y="46" width="76" height="58" rx="2" fill="#3f3020" />
+      <rect x="174" y="52" width="64" height="46" fill="#cfd8c2" />
+      <path d="M174 84 Q192 66 210 82 Q226 96 238 84 L238 98 L174 98 Z" fill="#8aa17a" />
+      <circle cx="220" cy="64" r="7" fill="#e8d18a" />
+
+      {/* 帳場の机 */}
+      <rect x="150" y="196" width="132" height="12" rx="2" fill="#4e3a26" />
+      <rect x="158" y="208" width="12" height="44" fill="#43301f" />
+      <rect x="262" y="208" width="12" height="44" fill="#43301f" />
+      <rect x="182" y="182" width="42" height="16" rx="2" fill="#efe3c4" />
+      <rect x="186" y="186" width="34" height="2" fill="#b7a179" />
+      <rect x="186" y="191" width="26" height="2" fill="#b7a179" />
+
+      {/* 灯り */}
+      <circle cx="200" cy="18" r="26" fill="#f0c86a" opacity="0.24" />
+      <rect x="196" y="0" width="8" height="14" fill="#4e3a26" />
+      <path d="M182 14 L218 14 L212 30 L188 30 Z" fill="#e8c98a" />
     </g>
   );
 }

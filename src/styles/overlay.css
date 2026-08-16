@@ -166,3 +166,77 @@
   font-size: 0.6rem;
   color: #b9ad97;
 }
+
+/* ---- 調べたときのポップアップ ---- */
+
+.overlay--examine {
+  z-index: 40;
+}
+
+.examine {
+  width: min(84%, 460px);
+  padding: 18px 20px 16px;
+  border: 3px solid var(--wood);
+  border-radius: 16px;
+  background: var(--cream);
+  box-shadow: var(--shadow-panel);
+  animation: examine-in 0.18s ease;
+}
+
+@keyframes examine-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.examine__head {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--orange-deep);
+}
+
+.examine__title {
+  margin: 2px 0 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.examine__text {
+  margin: 0 0 14px;
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.examine__gain {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: var(--cream-dim);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+}
+
+.examine__art {
+  width: 38px;
+  height: 38px;
+}
+
+.examine__gain-head {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.examine__gain-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+}

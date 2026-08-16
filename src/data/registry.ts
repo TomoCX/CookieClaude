@@ -5,6 +5,7 @@ import { PUZZLES } from './puzzles';
 import { SCENARIOS } from './scenarios';
 import { SCENES } from './scenes';
 import { CAST, STORY_BEATS } from './story';
+import { text } from '../i18n/text';
 
 /**
  * 中身（エリア・シーン・人物・会話・ナゾ・アイテム）のつながりを検査する。
@@ -54,7 +55,7 @@ const checkIds: Check = ({ dup }) => {
 const checkAreas: Check = ({ say }, known) => {
   for (const area of AREAS) {
     if (!known.scenes.has(area.entrySceneId)) {
-      say(`エリア「${area.name}」: 入口のシーン ${area.entrySceneId} が無い`);
+      say(`エリア「${text(area.name)}」: 入口のシーン ${area.entrySceneId} が無い`);
     }
     const entry = SCENES.find((sc) => sc.id === area.entrySceneId);
     if (entry && entry.areaId !== area.id) {
@@ -63,10 +64,10 @@ const checkAreas: Check = ({ say }, known) => {
       );
     }
     if (!known.scenarios.has(area.mainScenarioId)) {
-      say(`エリア「${area.name}」: 本筋の会話 ${area.mainScenarioId} が無い`);
+      say(`エリア「${text(area.name)}」: 本筋の会話 ${area.mainScenarioId} が無い`);
     }
     if (SCENES.every((sc) => sc.areaId !== area.id)) {
-      say(`エリア「${area.name}」: 属するシーンが一つも無い`);
+      say(`エリア「${text(area.name)}」: 属するシーンが一つも無い`);
     }
   }
 };
@@ -88,13 +89,13 @@ function checkScenes(r: Report, known: Known): Used {
   const used: Used = { scenarios: new Set(), puzzles: new Set(), items: new Set() };
 
   for (const scene of SCENES) {
-    const where = `${scene.id}（${scene.name}）`;
+    const where = `${scene.id}（${text(scene.name)}）`;
 
     if (!known.areas.has(scene.areaId)) say(`シーン ${where}: エリア ${scene.areaId} が無い`);
     if (!scene.name) say(`シーン ${scene.id}: 名前が空`);
     // 同じエリアの中で名前が重なると、現在地の表示で見分けられなくなる
     const twin = SCENES.find(
-      (o) => o !== scene && o.areaId === scene.areaId && o.name === scene.name,
+      (o) => o !== scene && o.areaId === scene.areaId && text(o.name) === text(scene.name),
     );
     if (twin) say(`シーン ${where}: 同じエリアの ${twin.id} と名前が同じ`);
 
@@ -135,6 +136,23 @@ function checkScenes(r: Report, known: Known): Used {
       if (used.puzzles.has(sp.puzzleId)) say(`ナゾ ${sp.puzzleId} が二か所に置かれている`);
       used.puzzles.add(sp.puzzleId);
     }
+
+    for (const prop of scene.props ?? []) {
+      if (!prop.name) say(`${scene.id}/${prop.id}: 名前が空`);
+      if (!prop.text) say(`${scene.id}/${prop.id}: 本文が空`);
+      if (prop.x < 0 || prop.x > 1) say(`${scene.id}/${prop.id}: x が 0〜1 の外`);
+      if (prop.y < 0 || prop.y > 1) say(`${scene.id}/${prop.id}: y が 0〜1 の外`);
+      if (prop.gives) {
+        if (!known.items.has(prop.gives)) {
+          say(`${scene.id}/${prop.id}: アイテム ${prop.gives} が無い`);
+        }
+        if (used.items.has(prop.gives)) {
+          say(`アイテム ${prop.gives} が二か所で手に入る`);
+        }
+        used.items.add(prop.gives);
+      }
+    }
+    dup(`シーン ${scene.id} の調べどころ`, (scene.props ?? []).map((p) => p.id));
 
     for (const sk of scene.sparkles) {
       if (!known.items.has(sk.itemId)) say(`${scene.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
@@ -189,7 +207,7 @@ const checkReachable: Check = ({ say }) => {
   }
   for (const scene of SCENES) {
     if (!reachable.has(scene.id)) {
-      say(`シーン ${scene.id}（${scene.name}）へは、出口をたどって行き着けない`);
+      say(`シーン ${scene.id}（${text(scene.name)}）へは、出口をたどって行き着けない`);
     }
   }
 };
@@ -204,17 +222,17 @@ const checkUnlocks: Check = ({ say }) => {
   const unlockedBy = new Map<string, string[]>();
   for (const sc of SCENARIOS) {
     for (const id of sc.unlocks ?? []) {
-      unlockedBy.set(id, [...(unlockedBy.get(id) ?? []), sc.title]);
+      unlockedBy.set(id, [...(unlockedBy.get(id) ?? []), text(sc.title)]);
     }
   }
   if (AREAS.every((a) => !a.openFromStart)) say('最初から行けるエリアが一つも無い');
   for (const area of AREAS) {
     const by = unlockedBy.get(area.id);
     if (area.openFromStart && by) {
-      say(`エリア「${area.name}」: 最初から開いているのに、会話「${by[0]}」でも開かれる`);
+      say(`エリア「${text(area.name)}」: 最初から開いているのに、会話「${by[0]}」でも開かれる`);
     }
     if (!area.openFromStart && !by) {
-      say(`エリア「${area.name}」: 最初から開いておらず、開放する会話も無い`);
+      say(`エリア「${text(area.name)}」: 最初から開いておらず、開放する会話も無い`);
     }
   }
 };
@@ -224,29 +242,66 @@ const checkUnlocks: Check = ({ say }) => {
 /** 作ったのにどこにも置いていないものを拾う */
 function checkLeftovers({ say }: Report, used: Used): void {
   for (const p of PUZZLES) {
-    if (!used.puzzles.has(p.id)) say(`ナゾ「${p.title}」がどのシーンにも置かれていない`);
+    if (!used.puzzles.has(p.id)) say(`ナゾ「${text(p.title)}」がどのシーンにも置かれていない`);
   }
   for (const i of ITEMS) {
-    if (!used.items.has(i.id)) say(`アイテム「${i.name}」がどのシーンにも落ちていない`);
+    if (!used.items.has(i.id))
+      say(`アイテム「${text(i.name)}」が、どのシーンにも落ちておらず、調べても手に入らない`);
   }
   for (const s of SCENARIOS) {
-    if (!used.scenarios.has(s.id)) say(`会話「${s.title}」を始める人がいない`);
+    if (!used.scenarios.has(s.id)) say(`会話「${text(s.title)}」を始める人がいない`);
   }
 }
 
 /* ---- 会話の中身 ---- */
 
-const checkScenarios: Check = ({ say }, known) => {
+const checkScenarios: Check = ({ say, dup }, known) => {
   for (const sc of SCENARIOS) {
+    const where = `会話「${text(sc.title)}」`;
     for (const id of sc.unlocks ?? []) {
-      if (!known.areas.has(id)) say(`会話「${sc.title}」: 開放するエリア ${id} が無い`);
+      if (!known.areas.has(id)) say(`${where}: 開放するエリア ${id} が無い`);
     }
     for (const line of sc.lines) {
       if (line.speaker && !CHARACTERS[line.speaker]) {
-        say(`会話「${sc.title}」: 話者 ${line.speaker} が無い`);
+        say(`${where}: 話者 ${line.speaker} が無い`);
       }
     }
-    if (sc.lines.length === 0) say(`会話「${sc.title}」: 中身が空`);
+    if (sc.lines.length === 0) say(`${where}: 中身が空`);
+
+    /* ---- 分かれ道 ---- */
+    const labels = new Set(sc.lines.flatMap((l) => (l.label ? [l.label] : [])));
+    dup(`${where} の節`, sc.lines.flatMap((l) => (l.label ? [l.label] : [])));
+    dup(
+      `${where} の選択肢`,
+      sc.lines.flatMap((l) => (l.choices ?? []).map((c) => c.id)),
+    );
+
+    for (const line of sc.lines) {
+      if (line.goto && !labels.has(line.goto)) {
+        say(`${where}: goto の飛び先 ${line.goto} という節が無い`);
+      }
+      for (const choice of line.choices ?? []) {
+        if (!labels.has(choice.to)) {
+          say(`${where}/${choice.id}: 飛び先 ${choice.to} という節が無い`);
+        }
+        for (const id of choice.gives?.unlocks ?? []) {
+          if (!known.areas.has(id)) say(`${where}/${choice.id}: エリア ${id} が無い`);
+        }
+        for (const id of choice.gives?.items ?? []) {
+          if (!known.items.has(id)) say(`${where}/${choice.id}: アイテム ${id} が無い`);
+        }
+      }
+      // 選択肢を出した行から素通りできてしまうと、分かれ道の意味が無い
+      if (line.choices?.length === 0) say(`${where}: 空の選択肢がある`);
+    }
+
+    // 節を作ったのに、どの選択肢からも goto からも来られない
+    for (const label of labels) {
+      const reached = sc.lines.some(
+        (l) => l.goto === label || (l.choices ?? []).some((c) => c.to === label),
+      );
+      if (!reached) say(`${where}: 節「${label}」へ来る道が無い`);
+    }
   }
 };
 
@@ -254,22 +309,22 @@ const checkScenarios: Check = ({ say }, known) => {
 
 const checkPuzzles: Check = ({ say }) => {
   for (const p of PUZZLES) {
-    if (p.hints.length === 0) say(`ナゾ「${p.title}」: ヒントが無い`);
-    if (!p.explanation) say(`ナゾ「${p.title}」: 解説が無い`);
+    if (p.hints.length === 0) say(`ナゾ「${text(p.title)}」: ヒントが無い`);
+    if (!p.explanation) say(`ナゾ「${text(p.title)}」: 解説が無い`);
     const a = p.answer;
     if (a.kind === 'choice' && (a.correct < 0 || a.correct >= a.options.length)) {
-      say(`ナゾ「${p.title}」: 正解の番号が選択肢の外`);
+      say(`ナゾ「${text(p.title)}」: 正解の番号が選択肢の外`);
     }
     if (a.kind === 'order') {
       const sorted = [...a.correct].sort((x, y) => x - y);
       const ok = a.correct.length === a.items.length && sorted.every((v, i) => v === i);
-      if (!ok) say(`ナゾ「${p.title}」: 並べかえの正解が項目とかみ合わない`);
+      if (!ok) say(`ナゾ「${text(p.title)}」: 並べかえの正解が項目とかみ合わない`);
     }
     if (a.kind === 'text' && a.accept.length === 0) {
-      say(`ナゾ「${p.title}」: 受けつける答えが無い`);
+      say(`ナゾ「${text(p.title)}」: 受けつける答えが無い`);
     }
     if (a.kind === 'grid' && a.rows !== a.cols) {
-      say(`ナゾ「${p.title}」: いまの判定は正方形のます目のみに対応`);
+      say(`ナゾ「${text(p.title)}」: いまの判定は正方形のます目のみに対応`);
     }
   }
 };
