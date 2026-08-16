@@ -13,61 +13,84 @@ import { CAST, STORY_BEATS } from './story';
  * 原因が分かりにくい。そこで起動時に一度だけ通しで見て、
  * おかしなところをコンソールに並べる。
  *
- * 追加のしかたは docs/DEVELOPMENT.md を参照。
+ * 検査は観点ごとに関数へ分けてある。足すときは、いちばん近い観点の
+ * 関数に一行足すか、新しい観点なら関数を作って `CHECKS` に並べる。
+ *
+ * 中身の追加のしかたは docs/DEVELOPMENT.md を参照。
  */
-export function checkContent(): string[] {
-  const problems: string[] = [];
-  const say = (m: string) => problems.push(m);
 
-  /** 同じ id が二度出てこないか */
-  const dup = (label: string, ids: string[]) => {
-    const seen = new Set<string>();
-    for (const id of ids) {
-      if (seen.has(id)) say(`${label}: id が重複している → ${id}`);
-      seen.add(id);
-    }
-  };
+/** 問題を書きとめる先。各検査はこれを受けとって報告する。 */
+interface Report {
+  /** 問題を一件書きとめる */
+  say: (message: string) => void;
+  /** 同じ id が二度出てこないか確かめる */
+  dup: (label: string, ids: string[]) => void;
+}
 
-  const areaIds = new Set(AREAS.map((p) => p.id));
-  const sceneIds = new Set(SCENES.map((s) => s.id));
-  const scenarioIds = new Set(SCENARIOS.map((s) => s.id));
-  const puzzleIds = new Set(PUZZLES.map((p) => p.id));
-  const itemIds = new Set(ITEMS.map((i) => i.id));
+/** 実在する id の一覧。あちこちの検査で引くので、一度だけ作って回す。 */
+interface Known {
+  areas: Set<string>;
+  scenes: Set<string>;
+  scenarios: Set<string>;
+  puzzles: Set<string>;
+  items: Set<string>;
+}
 
+type Check = (r: Report, known: Known) => void;
+
+/* ---- id そのもの ---- */
+
+const checkIds: Check = ({ dup }) => {
   dup('エリア', AREAS.map((a) => a.id));
-  dup('シーン', SCENES.map((sc) => sc.id));
+  dup('シーン', SCENES.map((s) => s.id));
   dup('会話', SCENARIOS.map((s) => s.id));
   dup('ナゾ', PUZZLES.map((p) => p.id));
   dup('アイテム', ITEMS.map((i) => i.id));
   dup('ナゾ番号', PUZZLES.map((p) => String(p.no)));
+};
 
-  /* ---- エリアとシーンの対応 ---- */
+/* ---- エリアとシーンの対応 ---- */
+
+const checkAreas: Check = ({ say }, known) => {
   for (const area of AREAS) {
-    if (!sceneIds.has(area.entrySceneId)) {
+    if (!known.scenes.has(area.entrySceneId)) {
       say(`エリア「${area.name}」: 入口のシーン ${area.entrySceneId} が無い`);
     }
     const entry = SCENES.find((sc) => sc.id === area.entrySceneId);
     if (entry && entry.areaId !== area.id) {
-      say(`エリア「${area.name}」: 入口のシーン ${entry.id} は別のエリア（${entry.areaId}）のもの`);
+      say(
+        `エリア「${area.name}」: 入口のシーン ${entry.id} は別のエリア（${entry.areaId}）のもの`,
+      );
     }
-    if (!scenarioIds.has(area.mainScenarioId)) {
+    if (!known.scenarios.has(area.mainScenarioId)) {
       say(`エリア「${area.name}」: 本筋の会話 ${area.mainScenarioId} が無い`);
     }
     if (SCENES.every((sc) => sc.areaId !== area.id)) {
       say(`エリア「${area.name}」: 属するシーンが一つも無い`);
     }
   }
+};
 
-  /* ---- シーンの中身 ---- */
-  const usedScenarios = new Set<string>();
-  const usedPuzzles = new Set<string>();
-  const usedItems = new Set<string>();
+/* ---- シーンの中身 ---- */
+
+/**
+ * シーンに置いたものが、実在するものを指しているか。
+ * ここで数えた「使われたもの」は、置き忘れの検査でも使う。
+ */
+interface Used {
+  scenarios: Set<string>;
+  puzzles: Set<string>;
+  items: Set<string>;
+}
+
+function checkScenes(r: Report, known: Known): Used {
+  const { say, dup } = r;
+  const used: Used = { scenarios: new Set(), puzzles: new Set(), items: new Set() };
 
   for (const scene of SCENES) {
     const where = `${scene.id}（${scene.name}）`;
-    if (!areaIds.has(scene.areaId)) {
-      say(`シーン ${where}: エリア ${scene.areaId} が無い`);
-    }
+
+    if (!known.areas.has(scene.areaId)) say(`シーン ${where}: エリア ${scene.areaId} が無い`);
     if (!scene.name) say(`シーン ${scene.id}: 名前が空`);
     // 同じエリアの中で名前が重なると、現在地の表示で見分けられなくなる
     const twin = SCENES.find(
@@ -94,29 +117,41 @@ export function checkContent(): string[] {
       if (!CHARACTERS[npc.characterId]) {
         say(`${scene.id}/${npc.id}: 登場人物 ${npc.characterId} が無い`);
       }
-      if (!scenarioIds.has(npc.scenarioId)) {
+      if (!known.scenarios.has(npc.scenarioId)) {
         say(`${scene.id}/${npc.id}: 会話 ${npc.scenarioId} が無い`);
       }
-      if (npc.requiresScenario && !scenarioIds.has(npc.requiresScenario)) {
+      if (npc.requiresScenario && !known.scenarios.has(npc.requiresScenario)) {
         say(`${scene.id}/${npc.id}: 条件の会話 ${npc.requiresScenario} が無い`);
       }
       if (npc.x < 0 || npc.x > 1) say(`${scene.id}/${npc.id}: x が 0〜1 の外`);
       if (needsY && npc.y == null) say(`${scene.id}/${npc.id}: ${scene.kind} では y も要る`);
-      usedScenarios.add(npc.scenarioId);
+      used.scenarios.add(npc.scenarioId);
     }
 
     for (const sp of scene.puzzles) {
-      if (!puzzleIds.has(sp.puzzleId)) {
-        say(`${scene.id}/${sp.id}: ナゾ ${sp.puzzleId} が無い`);
-      }
+      if (!known.puzzles.has(sp.puzzleId)) say(`${scene.id}/${sp.id}: ナゾ ${sp.puzzleId} が無い`);
       if (sp.x < 0 || sp.x > 1) say(`${scene.id}/${sp.id}: x が 0〜1 の外`);
       if (needsY && sp.y == null) say(`${scene.id}/${sp.id}: ${scene.kind} では y も要る`);
-      if (usedPuzzles.has(sp.puzzleId)) {
-        say(`ナゾ ${sp.puzzleId} が二か所に置かれている`);
-      }
-      usedPuzzles.add(sp.puzzleId);
+      if (used.puzzles.has(sp.puzzleId)) say(`ナゾ ${sp.puzzleId} が二か所に置かれている`);
+      used.puzzles.add(sp.puzzleId);
     }
 
+    for (const sk of scene.sparkles) {
+      if (!known.items.has(sk.itemId)) say(`${scene.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
+      if (sk.x < 0 || sk.x > 1) say(`${scene.id}/${sk.id}: x が 0〜1 の外`);
+      if (sk.y < 0 || sk.y > 1) say(`${scene.id}/${sk.id}: y が 0〜1 の外`);
+      if (used.items.has(sk.itemId)) say(`アイテム ${sk.itemId} が二か所に落ちている`);
+      used.items.add(sk.itemId);
+    }
+  }
+
+  return used;
+}
+
+/* ---- 出口のつながり ---- */
+
+const checkExits: Check = ({ say }) => {
+  for (const scene of SCENES) {
     for (const ex of scene.exits) {
       const dest = SCENES.find((t) => t.id === ex.to);
       if (!dest) {
@@ -131,28 +166,15 @@ export function checkContent(): string[] {
         say(`${scene.id} → ${ex.to} の戻り道が無い`);
       }
       // 覗きこんだ先は同じエリアの中。別エリアへ潜ると現在地が飛んで分かりにくい。
-      if (ex.dir === 'into' && dest.areaId !== scene.areaId) {
-        say(`${scene.id}/${ex.id}: into の行き先は同じエリアのシーンにする`);
+      if ((ex.dir === 'into' || ex.dir === 'back') && dest.areaId !== scene.areaId) {
+        say(`${scene.id}/${ex.id}: ${ex.dir} の行き先は同じエリアのシーンにする`);
       }
-      if (ex.dir === 'back' && dest.areaId !== scene.areaId) {
-        say(`${scene.id}/${ex.id}: back の行き先は同じエリアのシーンにする`);
-      }
-    }
-
-    for (const sk of scene.sparkles) {
-      if (!itemIds.has(sk.itemId)) {
-        say(`${scene.id}/${sk.id}: アイテム ${sk.itemId} が無い`);
-      }
-      if (sk.x < 0 || sk.x > 1) say(`${scene.id}/${sk.id}: x が 0〜1 の外`);
-      if (sk.y < 0 || sk.y > 1) say(`${scene.id}/${sk.id}: y が 0〜1 の外`);
-      if (usedItems.has(sk.itemId)) {
-        say(`アイテム ${sk.itemId} が二か所に落ちている`);
-      }
-      usedItems.add(sk.itemId);
     }
   }
+};
 
-  /* ---- どこからも行けないシーンが無いか ---- */
+/** どこからも行き着けないシーンが無いか、出口をたどって確かめる */
+const checkReachable: Check = ({ say }) => {
   const reachable = new Set<string>();
   const start = SCENES[0];
   if (start) {
@@ -170,10 +192,15 @@ export function checkContent(): string[] {
       say(`シーン ${scene.id}（${scene.name}）へは、出口をたどって行き着けない`);
     }
   }
+};
 
-  /* ---- エリアの開きかた ---- */
-  // 会話で開くエリアを最初から開けてしまうと、幕開けを飛ばして先へ行けてしまう。
-  // 逆に、どこからも開かれないエリアは永久に行けない。
+/* ---- エリアの開きかた ---- */
+
+/**
+ * 会話で開くエリアを最初から開けてしまうと、幕開けを飛ばして先へ行けてしまう。
+ * 逆に、どこからも開かれないエリアは永久に行けない。
+ */
+const checkUnlocks: Check = ({ say }) => {
   const unlockedBy = new Map<string, string[]>();
   for (const sc of SCENARIOS) {
     for (const id of sc.unlocks ?? []) {
@@ -190,22 +217,29 @@ export function checkContent(): string[] {
       say(`エリア「${area.name}」: 最初から開いておらず、開放する会話も無い`);
     }
   }
+};
 
-  /* ---- 置き忘れ ---- */
+/* ---- 置き忘れ ---- */
+
+/** 作ったのにどこにも置いていないものを拾う */
+function checkLeftovers({ say }: Report, used: Used): void {
   for (const p of PUZZLES) {
-    if (!usedPuzzles.has(p.id)) say(`ナゾ「${p.title}」がどのシーンにも置かれていない`);
+    if (!used.puzzles.has(p.id)) say(`ナゾ「${p.title}」がどのシーンにも置かれていない`);
   }
   for (const i of ITEMS) {
-    if (!usedItems.has(i.id)) say(`アイテム「${i.name}」がどのシーンにも落ちていない`);
+    if (!used.items.has(i.id)) say(`アイテム「${i.name}」がどのシーンにも落ちていない`);
   }
   for (const s of SCENARIOS) {
-    if (!usedScenarios.has(s.id)) say(`会話「${s.title}」を始める人がいない`);
+    if (!used.scenarios.has(s.id)) say(`会話「${s.title}」を始める人がいない`);
   }
+}
 
-  /* ---- 会話の中身 ---- */
+/* ---- 会話の中身 ---- */
+
+const checkScenarios: Check = ({ say }, known) => {
   for (const sc of SCENARIOS) {
     for (const id of sc.unlocks ?? []) {
-      if (!areaIds.has(id)) say(`会話「${sc.title}」: 開放するエリア ${id} が無い`);
+      if (!known.areas.has(id)) say(`会話「${sc.title}」: 開放するエリア ${id} が無い`);
     }
     for (const line of sc.lines) {
       if (line.speaker && !CHARACTERS[line.speaker]) {
@@ -214,8 +248,11 @@ export function checkContent(): string[] {
     }
     if (sc.lines.length === 0) say(`会話「${sc.title}」: 中身が空`);
   }
+};
 
-  /* ---- ナゾの中身 ---- */
+/* ---- ナゾの中身 ---- */
+
+const checkPuzzles: Check = ({ say }) => {
   for (const p of PUZZLES) {
     if (p.hints.length === 0) say(`ナゾ「${p.title}」: ヒントが無い`);
     if (!p.explanation) say(`ナゾ「${p.title}」: 解説が無い`);
@@ -225,9 +262,7 @@ export function checkContent(): string[] {
     }
     if (a.kind === 'order') {
       const sorted = [...a.correct].sort((x, y) => x - y);
-      const ok =
-        a.correct.length === a.items.length &&
-        sorted.every((v, i) => v === i);
+      const ok = a.correct.length === a.items.length && sorted.every((v, i) => v === i);
       if (!ok) say(`ナゾ「${p.title}」: 並べかえの正解が項目とかみ合わない`);
     }
     if (a.kind === 'text' && a.accept.length === 0) {
@@ -237,17 +272,61 @@ export function checkContent(): string[] {
       say(`ナゾ「${p.title}」: いまの判定は正方形のます目のみに対応`);
     }
   }
+};
 
-  /* ---- 物語まわり ---- */
+/* ---- 物語まわり ---- */
+
+const checkStory: Check = ({ say }, known) => {
   for (const b of STORY_BEATS) {
-    if (!scenarioIds.has(b.afterScenario)) {
+    if (!known.scenarios.has(b.afterScenario)) {
       say(`判明していること「${b.heading}」: 会話 ${b.afterScenario} が無い`);
     }
   }
   for (const c of CAST) {
     if (!CHARACTERS[c.id]) say(`関係者「${c.name}」: 登場人物 ${c.id} が無い`);
-    if (!scenarioIds.has(c.from)) say(`関係者「${c.name}」: 会話 ${c.from} が無い`);
+    if (!known.scenarios.has(c.from)) say(`関係者「${c.name}」: 会話 ${c.from} が無い`);
   }
+};
+
+/** 置いたものを数える必要がない検査は、ここに並べておけば順に走る */
+const CHECKS: Check[] = [
+  checkIds,
+  checkAreas,
+  checkExits,
+  checkReachable,
+  checkUnlocks,
+  checkScenarios,
+  checkPuzzles,
+  checkStory,
+];
+
+/** 中身をひととおり検査して、見つかった問題を並べて返す */
+export function checkContent(): string[] {
+  const problems: string[] = [];
+  const report: Report = {
+    say: (m) => problems.push(m),
+    dup: (label, ids) => {
+      const seen = new Set<string>();
+      for (const id of ids) {
+        if (seen.has(id)) problems.push(`${label}: id が重複している → ${id}`);
+        seen.add(id);
+      }
+    },
+  };
+
+  const known: Known = {
+    areas: new Set(AREAS.map((a) => a.id)),
+    scenes: new Set(SCENES.map((s) => s.id)),
+    scenarios: new Set(SCENARIOS.map((s) => s.id)),
+    puzzles: new Set(PUZZLES.map((p) => p.id)),
+    items: new Set(ITEMS.map((i) => i.id)),
+  };
+
+  for (const check of CHECKS) check(report, known);
+
+  // シーンの検査だけは「何を使ったか」を返すので、置き忘れの検査と組にする
+  const used = checkScenes(report, known);
+  checkLeftovers(report, used);
 
   return problems;
 }

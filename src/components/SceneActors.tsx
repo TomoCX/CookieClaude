@@ -115,7 +115,11 @@ const ARROW_LABEL: Record<ExitDir, string> = {
   back: 'もどる',
 };
 
-/** 隣の街並みへの矢印。靴のアイコンを押しているあいだだけ出す。 */
+/**
+ * 隣のシーンへの矢印。
+ * street シーンでは靴のアイコンを押しているあいだだけ、
+ * view・closeup シーンでは常に出す。
+ */
 export function ExitArrow({
   dir,
   x,

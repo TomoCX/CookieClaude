@@ -8,7 +8,15 @@
 /*
  * 画面（.device）の中ではなく、窓のすみに置く。
  * 遊びの画面を覆ってしまうと、置き場所を見ながら書けないため。
+ *
+ * それでも窓が狭いと重なるので、引き出しを開けているあいだは
+ * ゲーム画面のほうを左へ寄せて、場所を空ける。
  */
+body:has(.dev--open .dev__drawer) .app {
+  padding-right: min(460px, 42vw);
+  transition: padding-right 0.15s ease;
+}
+
 .dev {
   position: fixed;
   right: 0;
@@ -385,7 +393,7 @@
   color: #6f7c60;
 }
 
-/* ---- 街並みに重ねる置き場所どうぐ ---- */
+/* ---- シーンに重ねる置き場所どうぐ ---- */
 
 .probe {
   position: absolute;

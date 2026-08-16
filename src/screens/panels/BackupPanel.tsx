@@ -4,7 +4,7 @@ import { buildBackupFile, decodeSave, encodeSave } from '../../state/saveCode';
 import { playSe } from '../../audio/audio';
 
 interface Props {
-  /** セーブ用に、いまいる街並みも含めた状態を組み立てる */
+  /** セーブ用に、いまいるシーンも含めた状態を組み立てる */
   buildSave: () => GameState;
   /** 読みこんだ状態を反映する */
   onRestore: (state: GameState) => void;

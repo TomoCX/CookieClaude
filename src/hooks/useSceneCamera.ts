@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent } from 'react';
 
 /**
@@ -49,15 +49,18 @@ export interface SceneCamera {
   surface: HTMLAttributes<HTMLDivElement>;
   /** ◀ ▶ ボタン用の handler */
   hold: (dir: 1 | -1) => HTMLAttributes<HTMLButtonElement>;
-  /** キーボードから見わたす向きを指示する（0 で停止） */
+  /** 見わたす向きを指示する（0 で停止） */
   setHeld: (dir: 1 | 0 | -1) => void;
-  /** その向きで見わたしている最中なら止める（キーを離したとき用） */
-  releaseHeld: (dir: 1 | -1) => void;
   /** その位置へなめらかに寄せる。null で取りやめ。 */
   glideTo: (x: number | null) => void;
 }
 
 interface Options {
+  /**
+   * 見わたすシーンか。false のときは動かす先が無いので、
+   * 毎コマのループも指のドラッグも受けつけない。
+   */
+  enabled: boolean;
   /** 入ってきたときのカメラ位置 */
   initialX: number;
   /** カメラが動くたびに知らせる */
@@ -69,6 +72,7 @@ interface Options {
 }
 
 export function useSceneCamera({
+  enabled,
   initialX,
   onMove,
   frozen,
@@ -99,6 +103,7 @@ export function useSceneCamera({
 
   /** 見わたしのループ。押しっぱなしと自動寄せの両方をここで進める。 */
   useEffect(() => {
+    if (!enabled) return;
     let raf = 0;
     let prev = performance.now();
     const tick = (now: number) => {
@@ -123,11 +128,11 @@ export function useSceneCamera({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [enabled]);
 
   const surface: HTMLAttributes<HTMLDivElement> = {
     onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (e.button !== 0 || locked || frozen) return;
+      if (!enabled || e.button !== 0 || locked || frozen) return;
       // ここでは まだ setPointerCapture しない。
       // 押した時点で捕まえると click の宛先を奪ってしまい、
       // 人やナゾのボタンが押せなくなる。
@@ -162,14 +167,16 @@ export function useSceneCamera({
     },
   };
 
-  return {
-    center,
-    cameraT: (center - MIN_C) / (MAX_C - MIN_C),
-    centerRef,
-    grabbing,
-    dragged,
-    surface,
-    hold: (dir) => ({
+  // ref しか触らないので、作りなおす必要がない。
+  // 毎コマ同一性が変わると、これを依存に持つ useEffect が貼りなおしになる。
+  const setHeld = useCallback((dir: 1 | 0 | -1) => {
+    held.current = dir;
+  }, []);
+  const glideTo = useCallback((x: number | null) => {
+    glide.current = x;
+  }, []);
+  const hold = useCallback(
+    (dir: 1 | -1): HTMLAttributes<HTMLButtonElement> => ({
       onPointerDown: () => {
         held.current = dir;
       },
@@ -180,15 +187,21 @@ export function useSceneCamera({
         held.current = 0;
       },
     }),
-    setHeld: (dir) => {
-      held.current = dir;
-    },
-    releaseHeld: (dir) => {
-      // 左右を同時に押して片方だけ離したとき、残った側を止めてしまわないように
-      if (held.current === dir) held.current = 0;
-    },
-    glideTo: (x) => {
-      glide.current = x;
-    },
-  };
+    [],
+  );
+
+  return useMemo(
+    () => ({
+      center,
+      cameraT: (center - MIN_C) / (MAX_C - MIN_C),
+      centerRef,
+      grabbing,
+      dragged,
+      surface,
+      hold,
+      setHeld,
+      glideTo,
+    }),
+    [center, grabbing, surface, hold, setHeld, glideTo],
+  );
 }

@@ -4,7 +4,7 @@ import { useSyncExternalStore } from 'react';
  * 開発者モードの入り切り。
  *
  * 遊ぶ人には見えないところに置いておきたいので、React の状態ではなく
- * ここで持つ。街並み画面のように、開発者モードとは直接つながっていない
+ * ここで持つ。シーン画面のように、開発者モードとは直接つながっていない
  * 場所からも読めるようにするため。
  *
  * 入りかたは二つ。
@@ -17,7 +17,7 @@ const KEY = 'cookieclaude.dev.v1';
 export interface DevFlags {
   /** 開発者モードそのもの */
   on: boolean;
-  /** 街並みをクリックすると座標を読みとる */
+  /** シーンをクリックすると座標を読みとる */
   probe: boolean;
   /** 人・ナゾ・キラキラ・出口の置き場所を見えるようにする */
   guides: boolean;
@@ -75,7 +75,7 @@ export function useDevFlags(): DevFlags {
 /* ---- 座標ひろい ---- */
 
 /**
- * 街並みで最後にクリックした場所（道の 0〜1 と、画面の高さの 0〜1）。
+ * シーンで最後にクリックした場所（シーンの中の 0〜1）。
  * 「配置」の欄に、そのまま貼れるひな型として出す。
  */
 let picked: { x: number; y: number } | null = null;

@@ -48,8 +48,3 @@ export const EFFECT_SLOTS: { id: EffectSlot; label: string }[] = [
   { id: 'menu.back', label: 'メインメニュー・奥' },
   { id: 'boot.front', label: '表紙・手前' },
 ];
-
-/** id からエフェクトを取得する */
-export function getEffect(id: string): Effect | undefined {
-  return EFFECTS.find((e) => e.id === id);
-}

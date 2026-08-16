@@ -5,7 +5,7 @@ interface Props {
   solved: boolean;
 }
 
-/** 街並みに置かれた、ナゾのしるしになる「時計のような物体」。 */
+/** シーンに置かれた、ナゾのしるしになる「時計のような物体」。 */
 export function PuzzleObject({ look, solved }: Props) {
   const face = solved ? '#e0d5bd' : '#f8efdb';
   const frame = solved ? '#7d7466' : '#6f5a41';

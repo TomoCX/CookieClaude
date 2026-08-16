@@ -230,14 +230,14 @@
   border-radius: 10px;
 }
 
-/* 地図などがかぶさっている間は、街並みの操作を隠す */
+/* 地図などがかぶさっている間は、シーンの操作を隠す */
 .scene--frozen .scene__controls,
 .scene--frozen .scene__sight {
   opacity: 0;
   pointer-events: none;
 }
 
-/* 街並みに置かれた ナゾ */
+/* シーンに置かれた ナゾ */
 .streetpuzzle {
   position: absolute;
   bottom: 17%;
@@ -412,7 +412,7 @@
   pointer-events: none;
 }
 
-/* ---- 隣の街並みへの出口（靴のアイコンで出る三角の矢印） ---- */
+/* ---- 隣のシーンへの出口（三角の矢印） ---- */
 .exit {
   position: absolute;
   z-index: 5;
@@ -493,7 +493,8 @@
   }
 }
 
-.exit--near .exit__arrow {
+.exit--near .exit__arrow,
+.exit--into .exit__arrow {
   animation-name: exit-bob-near;
 }
 

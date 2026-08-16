@@ -14,7 +14,7 @@ interface Props {
   onUseHint: () => void;
   /** 正解した */
   onSolved: () => void;
-  /** 街並みへ戻る */
+  /** シーンへ戻る */
   onQuit: () => void;
 }
 
@@ -32,7 +32,7 @@ interface Draft {
 
 const EMPTY: Draft = { text: '', picked: null, order: [], cells: [] };
 
-/** 街並みに置かれた時計を押すと開く、独立したナゾ解き画面。 */
+/** シーンに置かれた時計を押すと開く、独立したナゾ解き画面。 */
 export function PuzzleScreen({
   puzzle,
   state,

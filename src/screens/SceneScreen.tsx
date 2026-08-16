@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameState, Scene } from '../types';
 import { getCharacter } from '../data/characters';
 import { getArea } from '../data/areas';
@@ -21,6 +21,14 @@ import { playSe } from '../audio/audio';
 
 /** 画面のまんなか近くとみなす距離（street のみ） */
 const FOCUS_RANGE = 0.075;
+
+/** 見わたしに使うキーと、その向き */
+const PAN_KEYS: Record<string, 1 | -1> = {
+  ArrowLeft: -1,
+  a: -1,
+  ArrowRight: 1,
+  d: 1,
+};
 /** フェードにかける時間（ミリ秒）。CSS の scene__fade とそろえる。 */
 const FADE_MS = 380;
 
@@ -79,11 +87,14 @@ export function SceneScreen({
   const [entering, setEntering] = useState(true);
   /** 靴のアイコンで出す、行き先の矢印を表示しているか（street のみ） */
   const [moveMode, setMoveMode] = useState(false);
+  /** いま押されている見わたしのキー */
+  const heldKeys = useRef(new Set<string>());
 
   /** 見わたすシーンかどうか。ここから下の分かれ道はすべてこれで決まる。 */
   const walkable = scene.kind === 'street';
 
   const cam = useSceneCamera({
+    enabled: walkable,
     initialX,
     onMove,
     frozen,
@@ -152,12 +163,16 @@ export function SceneScreen({
     [walkable, npcs, scene.puzzles, state.solvedPuzzles],
   );
 
+  // カメラのうち、描きなおしても変わらない部分だけを取りだす。
+  // これを依存に使うと、毎コマ handler を作りなおさずに済む。
+  const { setHeld, dragged, centerRef } = cam;
+
   /** クリックしたらフェードしてから画面を切りかえる */
   const open = useCallback(
     (next: Pending) => {
       // ドラッグの終わりに出る click は無視する
-      if (pending || cam.dragged.current || frozen) return;
-      cam.setHeld(0);
+      if (pending || dragged.current || frozen) return;
+      setHeld(0);
       playSe('fade');
       setPending(next);
       setTimeout(() => {
@@ -166,40 +181,59 @@ export function SceneScreen({
         else onGoTo(next.sceneId);
       }, FADE_MS);
     },
-    [pending, cam, onTalk, onOpenPuzzle, onGoTo, frozen],
+    [pending, dragged, setHeld, onTalk, onOpenPuzzle, onGoTo, frozen],
   );
 
   /** キラキラを押した。ドラッグの流れで押されたものは無視する。 */
   const pickUp = (itemId: string) => {
-    if (pending || cam.dragged.current || frozen) return;
+    if (pending || dragged.current || frozen) return;
     playSe('coin');
     onPickup(itemId);
   };
 
-  /** キーボード操作（見わたすシーンだけ） */
+  /**
+   * キーボード操作（見わたすシーンだけ）。
+   *
+   * 向きは「いま押されているキー」から毎回引き直す。
+   * 押した順に上書きするだけだと、右を押しっぱなしで左を叩いて離したときに
+   * 右まで止まってしまう。左右を同時に押しているあいだは、打ち消しあって止まる。
+   */
   useEffect(() => {
     if (!walkable) return;
+    const keys = heldKeys.current;
+    const apply = () => {
+      let dir = 0;
+      for (const key of keys) dir += PAN_KEYS[key] ?? 0;
+      setHeld(Math.sign(dir) as 1 | 0 | -1);
+    };
     const down = (e: KeyboardEvent) => {
       if (frozen) return;
-      if (e.key === 'ArrowLeft' || e.key === 'a') cam.setHeld(-1);
-      else if (e.key === 'ArrowRight' || e.key === 'd') cam.setHeld(1);
-      else if (e.key === ' ' || e.key === 'Enter') {
+      if (e.key in PAN_KEYS) {
+        keys.add(e.key);
+        apply();
+      } else if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        const target = focusAt(cam.centerRef.current);
+        const target = focusAt(centerRef.current);
         if (target) open(target);
       }
     };
     const up = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') cam.releaseHeld(-1);
-      else if (e.key === 'ArrowRight' || e.key === 'd') cam.releaseHeld(1);
+      if (keys.delete(e.key)) apply();
+    };
+    /** 窓から離れているあいだの keyup は届かないので、押しっぱなしを解いておく */
+    const release = () => {
+      keys.clear();
+      apply();
     };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
+    window.addEventListener('blur', release);
     return () => {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', release);
     };
-  }, [walkable, cam, focusAt, open, frozen]);
+  }, [walkable, setHeld, centerRef, focusAt, open, frozen]);
 
   /**
    * 靴を押したときに寄せる先。
@@ -207,7 +241,7 @@ export function SceneScreen({
    * いちばん近い出口が画面に入る位置を返す。
    */
   const nearestExitCenter = (): number | null => {
-    const here = cam.centerRef.current;
+    const here = centerRef.current;
     if (exits.length === 0) return null;
     const gap = (x: number) => Math.abs(x - here);
     // ぎりぎり端に写っているものを「見えている」と数えると寄せそこねるので、少し狭くみる
@@ -306,7 +340,11 @@ export function SceneScreen({
       <EffectLayer slot="scene.front" cameraT={cam.cameraT} sceneKind={scene.kind} />
 
       {/* 開発者モードの置き場所どうぐ（ふだんは何も描かない） */}
-      <DevProbe scene={scene} center={cam.center} view={walkable ? VIEW : 1} />
+      <DevProbe
+        scene={scene}
+        center={walkable ? cam.center : 0.5}
+        view={walkable ? VIEW : 1}
+      />
 
       {/* 画面のまんなかをさす目じるし */}
       {walkable && (

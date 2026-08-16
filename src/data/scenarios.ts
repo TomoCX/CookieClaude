@@ -2,7 +2,7 @@ import type { Scenario } from '../types';
 
 /**
  * 会話イベント。
- * 街並みに立っている人をクリックすると、その人に結びついたシナリオが始まる。
+ * シーンに立っている人をクリックすると、その人に結びついたシナリオが始まる。
  * kind: 'main' が本筋、'flavor' は町の人とのちょっとした立ち話。
  */
 export const SCENARIOS: Scenario[] = [

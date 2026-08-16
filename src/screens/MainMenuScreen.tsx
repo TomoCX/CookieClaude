@@ -31,7 +31,7 @@ type Panel =
 interface Props {
   state: GameState;
   settings: Settings;
-  /** セーブ用に、いまいる街並みも含めた状態を組み立てる */
+  /** セーブ用に、いまいるシーンも含めた状態を組み立てる */
   buildSave: () => GameState;
   /** 設定が変わったとき */
   onChangeSettings: (next: Settings) => void;

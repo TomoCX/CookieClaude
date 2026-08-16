@@ -88,36 +88,65 @@ const TEMPLATES: Template[] = [
 },`,
   },
   {
-    id: 'place',
-    label: '場所（ステージ）',
-    where: 'src/data/places.ts と src/data/streets.ts',
-    body: `// 1) src/data/places.ts の PLACES へ
+    id: 'scene',
+    label: 'シーン',
+    where: 'src/data/scenes.ts の SCENES',
+    body: `// 見わたすシーン（道・広場・室内）
+{
+  id: 'scn_???_???',      // scn_<エリア>_<場所>
+  name: '???',            // そのエリアの中で重ならない固有名。現在地に出る
+  areaId: '???',
+  kind: 'street',
+  bg: 'plaza',            // highway / gate / plaza / clocktower / inn / alley / night
+  startX: 0.06,           // 入ってきたときのカメラ位置
+  npcs: [],               // 道の上に立つので x のみ
+  puzzles: [],
+  sparkles: [],
+  exits: [
+    // 行きと帰りの両方を書く。つなぎ元のシーンにも出口を足すこと。
+    { id: 'ex_???_???', to: 'scn_???', dir: 'far', x: 0.5, y: 0.5 },
+  ],
+},
+
+// 一枚絵のシーン（覗きこんだ図・拡大図）
+{
+  id: 'scn_???_???',
+  name: '???',
+  areaId: '???',
+  kind: 'view',           // 拡大図なら 'closeup'（人は置かない）
+  backdrop: 'manhole',    // manhole / noticeboard
+  npcs: [],               // 見わたさないので x と y の両方が要る
+  puzzles: [],
+  sparkles: [{ id: 'skl_???_1', itemId: '???', x: 0.5, y: 0.6 }],
+  exits: [
+    // 覗きこんだ先からは、必ず同じエリアへ戻れるようにする
+    { id: 'ex_???_???', to: 'scn_???', dir: 'back', x: 0.5, y: 0.12 },
+  ],
+},`,
+  },
+  {
+    id: 'area',
+    label: 'エリア',
+    where: 'src/data/areas.ts と src/data/scenes.ts',
+    body: `// 1) src/data/areas.ts の AREAS へ
 {
   id: '???',
   name: '???',
   ruby: '???',
   x: 50,                  // 地図上の位置（％）
   y: 50,
-  streetId: 'st_???',
+  entrySceneId: 'scn_???', // 地図から入ったとき最初に立つシーン
   mainScenarioId: 'sc_???',
-  // 最初から行ける場所は openFromStart: true。
+  // 最初から行けるエリアは openFromStart: true。
   // それ以外は、どこかの会話の unlocks に id を入れて開けること。
+  // 両方に書くと幕開けを飛ばせてしまうので、どちらか一方だけ。
 },
 
-// 2) src/data/streets.ts の STREETS へ
-{
-  id: 'st_???',
-  placeId: '???',
-  bg: 'plaza',
-  startX: 0.06,           // 入ってきたときのカメラ位置
-  npcs: [],
-  puzzles: [],
-  sparkles: [],
-  exits: [
-    // 行きと帰りの両方を書く。隣の街並みにも戻り道を足すこと。
-    { id: 'ex_???', to: 'st_???', dir: 'far', x: 0.5, y: 0.5 },
-  ],
-},`,
+// 2) src/data/scenes.ts に、そのエリアのシーンを 1 枚以上足す
+//    （areaId をこのエリアの id に合わせる。「シーン」のひな型を参照）
+
+// 3) 隣のエリアのシーンと出口でつなぐ。行き先が別エリアなら、
+//    それだけでエリアをまたいだことになる。`,
   },
   {
     id: 'effect',
