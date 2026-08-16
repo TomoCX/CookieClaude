@@ -10,6 +10,8 @@ import {
 } from '../data/story';
 import { SettingsPanel } from './SettingsPanel';
 import { ProgressPanel } from './ProgressPanel';
+import { CollectionPanel } from './CollectionPanel';
+import { BackupPanel } from './BackupPanel';
 import { playSe } from '../audio/audio';
 import {
   TOTAL_PICARAT,
@@ -29,6 +31,8 @@ type Panel =
   | 'memo'
   | 'charms'
   | 'settings'
+  | 'collection'
+  | 'backup'
   | null;
 
 interface Props {
@@ -38,6 +42,8 @@ interface Props {
   buildSave: () => GameState;
   /** 設定が変わったとき */
   onChangeSettings: (next: Settings) => void;
+  /** バックアップから復元した */
+  onRestore: (next: GameState) => void;
   /** 自由記入メモが変わったとき */
   onChangeMemo: (memo: string) => void;
   /** 閉じる（前の画面に戻る） */
@@ -49,6 +55,7 @@ export function MainMenuScreen({
   state,
   settings,
   buildSave,
+  onRestore,
   onChangeSettings,
   onChangeMemo,
   onClose,
@@ -107,12 +114,21 @@ export function MainMenuScreen({
 
             <div className="trunk__row">
               <TrunkItem
+                icon="🧺"
+                label="コレクション"
+                badge={state.collected.length}
+                onClick={() => setPanel('collection')}
+              />
+              <TrunkItem
+                icon="💾"
+                label="バックアップ"
+                onClick={() => setPanel('backup')}
+              />
+              <TrunkItem
                 icon="⚙"
                 label="設定"
                 onClick={() => setPanel('settings')}
               />
-              <TrunkItem icon="？" label="？？？" locked />
-              <TrunkItem icon="？" label="？？？" locked />
               <TrunkItem icon="？" label="？？？" locked />
             </div>
           </>
@@ -123,6 +139,10 @@ export function MainMenuScreen({
             {panel === 'story' && <StoryPanel state={state} />}
             {panel === 'index' && <IndexPanel state={state} />}
             {panel === 'charms' && <CharmsPanel state={state} />}
+            {panel === 'collection' && <CollectionPanel state={state} />}
+            {panel === 'backup' && (
+              <BackupPanel buildSave={buildSave} onRestore={onRestore} />
+            )}
             {panel === 'settings' && (
               <SettingsPanel settings={settings} onChange={onChangeSettings} />
             )}

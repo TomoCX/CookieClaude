@@ -353,3 +353,61 @@
     transition-duration: 120ms;
   }
 }
+
+/* ---- 落ちている収集アイテム（キラキラ） ---- */
+
+/* ボタンの箱は動かさない。動かすと当たり判定がぶれて押しにくくなる。 */
+.sparkle {
+  position: absolute;
+  width: 3.2%;
+  aspect-ratio: 1;
+  min-width: 22px;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.sparkle::after {
+  /* 見た目より広い当たり判定をつける */
+  content: '';
+  position: absolute;
+  inset: -40%;
+}
+
+.sparkle__glow {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(255, 236, 168, 0.95));
+  transform-origin: center;
+  animation: sparkle-twinkle 1.9s ease-in-out infinite;
+}
+
+.sparkle:hover .sparkle__glow {
+  scale: 1.25;
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    rotate: 0deg;
+  }
+  50% {
+    opacity: 1;
+    rotate: 22deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle__glow {
+    animation: none;
+    opacity: 0.95;
+  }
+}
+
+.street--frozen .sparkle {
+  pointer-events: none;
+}

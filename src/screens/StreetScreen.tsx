@@ -38,6 +38,8 @@ interface Props {
   onTalk: (scenarioId: string) => void;
   /** ナゾを開いた */
   onOpenPuzzle: (puzzleId: string) => void;
+  /** キラキラを押してアイテムを拾った */
+  onPickup: (itemId: string) => void;
   /** 地図などがかぶさっている間は操作を受けつけない */
   frozen?: boolean;
 }
@@ -54,6 +56,7 @@ export function StreetScreen({
   onMove,
   onTalk,
   onOpenPuzzle,
+  onPickup,
   frozen = false,
 }: Props) {
   const [center, setCenter] = useState(() =>
@@ -89,6 +92,19 @@ export function StreetScreen({
       ),
     [street.npcs, state.clearedScenarios],
   );
+
+  /** まだ拾っていないキラキラだけを出す */
+  const sparkles = useMemo(
+    () => street.sparkles.filter((sp) => !state.collected.some((c) => c.itemId === sp.itemId)),
+    [street.sparkles, state.collected],
+  );
+
+  /** キラキラを押した。ドラッグの流れで押されたものは無視する。 */
+  const pickUp = (itemId: string) => {
+    if (pending || dragged.current || frozen) return;
+    playSe('coin');
+    onPickup(itemId);
+  };
 
   /** クリックしたらフェードしてから画面を切りかえる */
   const open = useCallback(
@@ -302,6 +318,29 @@ export function StreetScreen({
             </button>
           );
         })}
+        {/* 落ちているキラキラ */}
+        {sparkles.map((sp) => (
+          <button
+            key={sp.id}
+            type="button"
+            className="sparkle"
+            style={{ left: `${sp.x * 100}%`, top: `${sp.y * 100}%` }}
+            aria-label="光るものを拾う"
+            title="何か落ちている"
+            onClick={() => pickUp(sp.itemId)}
+          >
+            <svg viewBox="0 0 24 24" className="sparkle__glow" aria-hidden="true">
+              <path
+                d="M12 1 L14 9 L22 12 L14 15 L12 23 L10 15 L2 12 L10 9 Z"
+                fill="#fff3c4"
+              />
+              <path
+                d="M12 5 L13.1 10.9 L19 12 L13.1 13.1 L12 19 L10.9 13.1 L5 12 L10.9 10.9 Z"
+                fill="#f7d774"
+              />
+            </svg>
+          </button>
+        ))}
       </StreetScene>
 
       {/* 画面のまんなかをさす目じるし */}

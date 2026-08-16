@@ -23,6 +23,7 @@ export function createInitialState(): GameState {
     hints: {},
     notes: [],
     charms: [],
+    collected: [],
     memo: '',
   };
 }
@@ -86,7 +87,23 @@ export function applyScenarioClear(state: GameState, sc: Scenario): GameState {
   };
 }
 
-/** ナゾを開いた（みつけた）ことを記録する */
+/** アイテムを拾ったことを記録する */
+export function applyPickup(
+  state: GameState,
+  itemId: string,
+  placeId: string,
+): GameState {
+  if (state.collected.some((c) => c.itemId === itemId)) return state;
+  return {
+    ...state,
+    collected: [
+      ...state.collected,
+      { itemId, placeId, atSeconds: state.playSeconds },
+    ],
+  };
+}
+
+/** ナゾを開いた（発見した）ことを記録する */
 export function applyPuzzleFound(state: GameState, puzzleId: string): GameState {
   if (state.foundPuzzles.includes(puzzleId)) return state;
   return { ...state, foundPuzzles: [...state.foundPuzzles, puzzleId] };
@@ -124,6 +141,45 @@ export function applyPuzzleSolved(state: GameState, puzzle: Puzzle): GameState {
 
 /* ---- セーブ ---- */
 
+/**
+ * 読みこんだ進行状況のつじつまを合わせる。
+ * 古い形式や、手で書きかえたバックアップにも耐えられるようにするため、
+ * localStorage からの読みこみとバックアップの読みこみの両方から呼ぶ。
+ */
+export function healSave(state: GameState): GameState {
+  const healed: GameState = { ...state };
+
+  // 街並みを持たない古い保存や、現在地と食い違う保存は、現在地から引き直す。
+  // （そのままだと「現在地は大門広場なのに、いるのは馬車止め」になってしまう）
+  const street = getStreet(healed.streetId);
+  if (!street || street.placeId !== healed.placeId) {
+    const fromPlace = getPlace(healed.placeId)?.streetId;
+    healed.streetId = fromPlace ?? createInitialState().streetId;
+    healed.streetX = getStreet(healed.streetId)?.startX ?? 0.06;
+  }
+  // 見渡していた位置がおかしい保存も直す
+  if (!Number.isFinite(healed.streetX) || healed.streetX < 0 || healed.streetX > 1) {
+    healed.streetX = getStreet(healed.streetId)?.startX ?? 0.06;
+  }
+  // 配列であるべき項目が壊れていたら空にしておく
+  const lists = [
+    'openPlaces',
+    'clearedScenarios',
+    'foundPuzzles',
+    'solvedPuzzles',
+    'notes',
+    'charms',
+    'collected',
+  ] as const;
+  for (const key of lists) {
+    if (!Array.isArray(healed[key])) {
+      (healed[key] as unknown) = [];
+    }
+  }
+  if (typeof healed.memo !== 'string') healed.memo = '';
+  return healed;
+}
+
 /** localStorage へ保存する。成功したら true */
 export function saveGame(state: GameState): boolean {
   try {
@@ -141,21 +197,7 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<GameState>;
     // 保存データが古い / 壊れている場合に備えて初期値で埋める
-    const merged: GameState = { ...createInitialState(), ...parsed };
-
-    // 街並みを持たない古い保存や、現在地と食い違う保存は、現在地から引き直す。
-    // （そのままだと「現在地は大門広場なのに、いるのは馬車止め」になってしまう）
-    const street = getStreet(merged.streetId);
-    if (!street || street.placeId !== merged.placeId) {
-      const fromPlace = getPlace(merged.placeId)?.streetId;
-      merged.streetId = fromPlace ?? createInitialState().streetId;
-      merged.streetX = getStreet(merged.streetId)?.startX ?? 0.06;
-    }
-    // 見渡していた位置がおかしい保存も直す
-    if (!Number.isFinite(merged.streetX) || merged.streetX < 0 || merged.streetX > 1) {
-      merged.streetX = getStreet(merged.streetId)?.startX ?? 0.06;
-    }
-    return merged;
+    return healSave({ ...createInitialState(), ...parsed });
   } catch {
     return null;
   }

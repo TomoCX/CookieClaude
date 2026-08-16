@@ -2,7 +2,8 @@ import type { Street } from '../types';
 
 /**
  * 街並み。マップから場所に入ると、この画面で道を見わたせる。
- * npcs・puzzles の x は 0（道の左はし）〜 1（右はし）。
+ * npcs・puzzles・sparkles の x は 0（道の左はし）〜 1（右はし）。
+ * sparkles の y は画面の高さに対する位置（0 が上、1 が下）。
  * ナゾはマップではなく、人に話しかけるのと同じこの画面に置く。
  */
 export const STREETS: Street[] = [
@@ -16,6 +17,10 @@ export const STREETS: Street[] = [
     ],
     puzzles: [
       { id: 'sp_coach_1', puzzleId: 'pz_riddle', x: 0.62, look: 'sundial' },
+    ],
+    sparkles: [
+      { id: 'sp_coach_a', itemId: 'it_ticket', x: 0.13, y: 0.74 },
+      { id: 'sp_coach_b', itemId: 'it_berry', x: 0.83, y: 0.62 },
     ],
   },
   {
@@ -37,6 +42,10 @@ export const STREETS: Street[] = [
       { id: 'sp_gate_1', puzzleId: 'pz_strike', x: 0.5, look: 'clock' },
       { id: 'sp_gate_2', puzzleId: 'pz_lamps', x: 0.93, look: 'pocketwatch' },
     ],
+    sparkles: [
+      { id: 'sp_gate_a', itemId: 'it_stone', x: 0.38, y: 0.78 },
+      { id: 'sp_gate_b', itemId: 'it_key', x: 0.68, y: 0.46 },
+    ],
   },
   {
     id: 'st_plaza',
@@ -50,6 +59,10 @@ export const STREETS: Street[] = [
     puzzles: [
       { id: 'sp_plaza_1', puzzleId: 'pz_interval', x: 0.5, look: 'clock' },
       { id: 'sp_plaza_2', puzzleId: 'pz_mirror', x: 0.93, look: 'pocketwatch' },
+    ],
+    sparkles: [
+      { id: 'sp_plaza_a', itemId: 'it_flower', x: 0.16, y: 0.7 },
+      { id: 'sp_plaza_b', itemId: 'it_tile', x: 0.62, y: 0.79 },
     ],
   },
   {
@@ -70,6 +83,10 @@ export const STREETS: Street[] = [
       { id: 'sp_inn_1', puzzleId: 'pz_stopped', x: 0.55, look: 'pocketwatch' },
       { id: 'sp_inn_2', puzzleId: 'pz_soup', x: 0.94, look: 'clock' },
     ],
+    sparkles: [
+      { id: 'sp_inn_a', itemId: 'it_paper', x: 0.2, y: 0.44 },
+      { id: 'sp_inn_b', itemId: 'it_coaster', x: 0.7, y: 0.76 },
+    ],
   },
   {
     id: 'st_clocktower',
@@ -89,6 +106,10 @@ export const STREETS: Street[] = [
       { id: 'sp_tower_1', puzzleId: 'pz_gears', x: 0.52, look: 'sundial' },
       { id: 'sp_tower_2', puzzleId: 'pz_order', x: 0.94, look: 'clock' },
     ],
+    sparkles: [
+      { id: 'sp_tower_a', itemId: 'it_screw', x: 0.14, y: 0.72 },
+      { id: 'sp_tower_b', itemId: 'it_shard', x: 0.72, y: 0.4 },
+    ],
   },
   {
     id: 'st_alley',
@@ -101,6 +122,10 @@ export const STREETS: Street[] = [
     ],
     puzzles: [
       { id: 'sp_alley_1', puzzleId: 'pz_overlap', x: 0.54, look: 'clock' },
+    ],
+    sparkles: [
+      { id: 'sp_alley_a', itemId: 'it_glove', x: 0.44, y: 0.75 },
+      { id: 'sp_alley_b', itemId: 'it_letter', x: 0.9, y: 0.55 },
     ],
   },
 ];

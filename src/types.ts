@@ -103,6 +103,51 @@ export interface Npc {
   requiresScenario?: string;
 }
 
+/* ---- 収集アイテム ---- */
+
+/** アイテムの絵の種類 */
+export type ItemIcon =
+  | 'ticket'
+  | 'berry'
+  | 'stone'
+  | 'key'
+  | 'flower'
+  | 'tile'
+  | 'paper'
+  | 'coaster'
+  | 'screw'
+  | 'shard'
+  | 'glove'
+  | 'letter';
+
+/** 街に散らばっている収集アイテム */
+export interface Item {
+  id: string;
+  name: string;
+  /** ひとこと添える説明 */
+  flavor: string;
+  icon: ItemIcon;
+}
+
+/** 拾ったアイテムの記録 */
+export interface CollectedItem {
+  itemId: string;
+  /** どの場所で拾ったか（Place.id） */
+  placeId: string;
+  /** 拾ったときのプレイ時間（秒）。並び順にも使う。 */
+  atSeconds: number;
+}
+
+/** 街並みに落ちているキラキラ。押すとアイテムを拾える。 */
+export interface StreetSparkle {
+  id: string;
+  itemId: string;
+  /** 街並みの中での位置（0〜1） */
+  x: number;
+  /** 画面の高さに対する位置（0 が上、1 が下） */
+  y: number;
+}
+
 /** 街並みに置かれた「時計のような物体」。押すとナゾが始まる。 */
 export interface StreetPuzzle {
   id: string;
@@ -124,6 +169,8 @@ export interface Street {
   npcs: Npc[];
   /** 置かれているナゾ */
   puzzles: StreetPuzzle[];
+  /** 落ちている収集アイテム */
+  sparkles: StreetSparkle[];
   /** 入ってきたときのカメラの位置（0〜1） */
   startX: number;
 }
@@ -250,6 +297,8 @@ export interface GameState {
   notes: Note[];
   /** 集めたチャーム */
   charms: Charm[];
+  /** 拾った収集アイテム */
+  collected: CollectedItem[];
   /** 自由記入メモ */
   memo: string;
 }

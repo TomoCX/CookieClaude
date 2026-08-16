@@ -10,10 +10,12 @@ import { ScenarioScreen } from './screens/ScenarioScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
 import { MainMenuScreen } from './screens/MainMenuScreen';
 import { Hud } from './components/Hud';
+import { PickupToast } from './screens/CollectionPanel';
 import { loadSettings, saveSettings } from './state/settings';
 import { playSe, setBgm, setSe, unlock } from './audio/audio';
 import {
   applyHintUse,
+  applyPickup,
   applyPuzzleFound,
   applyPuzzleMiss,
   applyPuzzleSolved,
@@ -46,6 +48,8 @@ export function App() {
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  /** アイテムを拾った直後に出す知らせ */
+  const [pickup, setPickup] = useState<{ itemId: string; placeId: string } | null>(null);
   const [booting, setBooting] = useState(true);
   const [settings, setSettings] = useState<Settings>(loadSettings);
 
@@ -55,6 +59,13 @@ export function App() {
     setBgm(settings.bgmOn, settings.bgmVolume);
     setSe(settings.seOn, settings.seVolume);
   }, [settings]);
+
+  // 拾った知らせは 2.4 秒で消す
+  useEffect(() => {
+    if (!pickup) return;
+    const id = setTimeout(() => setPickup(null), 2400);
+    return () => clearTimeout(id);
+  }, [pickup]);
 
   // プレイ時間を数える
   useEffect(() => {
@@ -103,6 +114,16 @@ export function App() {
     [scenarioId, state.clearedScenarios],
   );
 
+  /** キラキラを押してアイテムを拾った */
+  const pickUpItem = useCallback(
+    (itemId: string) => {
+      const placeId = state.placeId;
+      setState((s) => applyPickup(s, itemId, placeId));
+      setPickup({ itemId, placeId });
+    },
+    [state.placeId],
+  );
+
   /** 街並みでナゾを押した */
   const openPuzzle = useCallback((id: string) => {
     setState((s) => applyPuzzleFound(s, id));
@@ -121,6 +142,16 @@ export function App() {
   const closeMainMenu = useCallback(() => {
     setScreen(returnTo === 'mainMenu' ? 'street' : returnTo);
   }, [returnTo]);
+
+  /** バックアップから復元する */
+  const restoreFromBackup = useCallback((next: GameState) => {
+    setState(next);
+    setStreetId(next.streetId);
+    streetPos.current = { [next.streetId]: next.streetX };
+    setPuzzleId(null);
+    setScenarioId(null);
+    setMapOpen(false);
+  }, []);
 
   /** セーブ用に、いまいる街並みとカメラ位置も含めた状態を組み立てる */
   const buildSave = useCallback(
@@ -155,6 +186,7 @@ export function App() {
             }}
             onTalk={talkTo}
             onOpenPuzzle={openPuzzle}
+            onPickup={pickUpItem}
             frozen={mapOpen}
           />
         )}
@@ -186,6 +218,7 @@ export function App() {
             state={state}
             settings={settings}
             buildSave={buildSave}
+            onRestore={restoreFromBackup}
             onChangeSettings={setSettings}
             onChangeMemo={(memo) => setState((s) => ({ ...s, memo }))}
             onClose={closeMainMenu}
@@ -210,6 +243,8 @@ export function App() {
             placeName={mapOpen ? undefined : place?.name}
           />
         )}
+
+        {pickup && <PickupToast itemId={pickup.itemId} placeId={pickup.placeId} />}
 
         {result && <ResultOverlay result={result} onClose={() => setResult(null)} />}
 

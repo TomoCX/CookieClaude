@@ -1,0 +1,253 @@
+/* ---- コレクション（メインメニュー） ---- */
+
+.collection {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+
+.collection__item {
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collection__item--unknown {
+  background: rgba(0, 0, 0, 0.04);
+  border-style: dashed;
+}
+
+.collection__row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 10px;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+.collection__row:disabled {
+  cursor: default;
+}
+
+.collection__item:not(.collection__item--unknown) .collection__row:hover {
+  background: rgba(226, 112, 28, 0.08);
+}
+
+.collection__icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+
+.collection__art {
+  width: 100%;
+  height: 100%;
+}
+
+.collection__q {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.collection__name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.collection__item--unknown .collection__name {
+  color: var(--ink-soft);
+}
+
+.collection__detail {
+  padding: 8px 11px 10px;
+  border-top: 1.5px dotted var(--line);
+}
+
+.collection__flavor {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.collection__meta {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.collection__meta > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.64rem;
+}
+
+.collection__meta dt {
+  color: var(--ink-soft);
+}
+
+.collection__meta dd {
+  margin: 0;
+  font-weight: 800;
+  color: var(--orange-deep);
+}
+
+/* 拾った直後の知らせ */
+.pickup {
+  position: absolute;
+  left: 50%;
+  bottom: 74px;
+  z-index: 25;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  background: rgba(38, 25, 14, 0.92);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  animation: pickup-in 0.25s ease;
+  pointer-events: none;
+}
+
+@keyframes pickup-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pickup {
+    animation: none;
+  }
+}
+
+.pickup__art {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.pickup__body {
+  display: grid;
+  gap: 1px;
+}
+
+.pickup__head {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.pickup__name {
+  font-size: 0.78rem;
+  color: var(--cream);
+}
+
+.pickup__place {
+  font-size: 0.58rem;
+  color: #bfae91;
+}
+
+/* ---- バックアップ ---- */
+
+.codebox {
+  width: 100%;
+  padding: 9px 10px;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  line-height: 1.55;
+  word-break: break-all;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.codebox:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+}
+
+.codebox--input {
+  background: #fff;
+}
+
+.backup__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.backup__btn {
+  flex: 1 1 auto;
+  min-width: 118px;
+  padding: 8px 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--cream-dim);
+  border: 2px solid var(--wood);
+  border-radius: 9px;
+}
+
+.backup__btn:hover:not(:disabled) {
+  background: #fff8e6;
+}
+
+.backup__btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.backup__btn:disabled {
+  opacity: 0.45;
+}
+
+.backup__btn--go {
+  color: #fff;
+  background: var(--orange);
+  border-color: var(--orange-deep);
+}
+
+.backup__btn--go:hover:not(:disabled) {
+  background: #ef7f26;
+}
+
+.backup__file {
+  display: none;
+}
+
+.backup__msg {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 8px;
+}
+
+.backup__msg--ok {
+  color: #35602a;
+  background: rgba(93, 138, 74, 0.16);
+}
+
+.backup__msg--ng {
+  color: #a33d16;
+  background: rgba(194, 85, 30, 0.14);
+}
